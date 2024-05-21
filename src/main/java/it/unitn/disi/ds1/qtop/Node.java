@@ -12,9 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Node extends AbstractActor {
 
-    public record IdentificationPair(int e, int i){
-        public IdentificationPair(int e, int i){this.e=e;this.i=i;}
-    }
+    public record IdentificationPair(int e, int i){}
 
     // participants (initial group, current and proposed views)
     private List<ActorRef> group;
