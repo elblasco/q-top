@@ -1,19 +1,31 @@
-plugins {
-    id 'java'
-}
+apply plugin: 'java'
+apply plugin: 'application'
 
 group = 'it.unitn.disi.ds1.qtop'
 version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
+
+def versions = [
+        ScalaBinary: "2.13"
+]
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation platform("com.typesafe.akka:akka-bom_${versions.ScalaBinary}:2.6.13")
+    implementation "com.typesafe.akka:akka-actor_${versions.ScalaBinary}"
+    testImplementation "com.typesafe.akka:akka-testkit_${versions.ScalaBinary}"
+
 }
 
-test {
-    useJUnitPlatform()
+compileJava {
+    options.compilerArgs += ["-Xlint:deprecation"]
+}
+
+mainClassName = "it.unitn.ds1.qtop.QTop"
+
+run {
+    standardInput = System.in
 }
