@@ -124,7 +124,7 @@ public class Node extends AbstractActor {
         /*if (hasVoted()) {
             return;
         }*/
-        Vote v = (msg).vote;
+        Vote v = msg.vote();
         if (isCoordinator) {
             voters.put(getSender(), v);
             if (quorumReached()  || voters.size() == N_NODES) {
@@ -148,7 +148,7 @@ public class Node extends AbstractActor {
     public void onDecisionResponse(DecisionResponse msg) { /* Decision Response */
         //if (isCoordinator) {
             // store the decision
-            fixCoordinatorDecision(msg.decision);
+            fixCoordinatorDecision(msg.decision());
         //}
     }
 

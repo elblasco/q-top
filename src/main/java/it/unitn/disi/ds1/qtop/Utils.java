@@ -13,6 +13,7 @@ public class Utils {
 
     public enum Vote {NO, YES}
     public enum Decision {ABORT, WRITEOK}
+
     // Start message that sends the list of participants to everyone
     public record StartMessage(List<ActorRef> group) implements Serializable {
         public StartMessage(List<ActorRef> group) {
@@ -20,22 +21,15 @@ public class Utils {
         }
     }
 
+    public record VoteRequest() implements Serializable {}
 
-    public static class VoteRequest implements Serializable {}
+    public record VoteResponse(Vote vote) implements Serializable {}
 
-    public static class VoteResponse implements Serializable {
-        public final Vote vote;
-        public VoteResponse(Vote v) { vote = v; }
-    }
+    public record DecisionRequest() implements Serializable {}
 
-    public static class DecisionRequest implements Serializable {}
-
-    public static class DecisionResponse implements Serializable {
-        public final Decision decision;
-        public DecisionResponse(Decision d) { decision = d; }
-    }
+    public record DecisionResponse(Decision decision) implements Serializable {}
 
     public static class Timeout implements Serializable {}
 
-    public static class Recovery implements Serializable {}
+    public static class ForwardUpdate implements Serializable {}
 }
