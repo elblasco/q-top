@@ -24,40 +24,42 @@ public class Node extends AbstractActor {
     private int nodeId;
     private boolean isCoordinator;
     private IdentificationPair pair;
-    private Decision decision = null;
+    private Vote nodeVote = null;
+    public int sharedVariable;
+    private Decision generalDecision = null;
 
 
     /*-- Actor constructors --------------------------------------------------- */
-    public Node(int nodeId) {
+    public Node(int nodeId, boolean isCoordinator) {
         super();
         viewId = 0;
         this.nodeId = nodeId;
-        isCoordinator = false;
+        this.isCoordinator = isCoordinator;
     }
 
-    static public Props props(int nodeId) {
-        return Props.create(Node.class,() -> new Node(nodeId));
+    static public Props props(int nodeId, boolean isCoordinator) {
+        return Props.create(Node.class,() -> new Node(nodeId, isCoordinator));
     }
     /*------------------------------------------------------------------------ */
 
     private void setGroup(StartMessage sm) {
         this.group = new ArrayList<>();
-        for (ActorRef node: sm.group()) {
-            if (!node.equals(getSelf())) {
-
-                // copying all participant refs except for self
-                this.group.add(node);
-            }
-        }
+        //if (!node.equals(getSelf())) {
+        // copying all participant refs except for self
+        //}
+        this.group.addAll(sm.group());
         System.out.println(this.nodeId + " starting with " + sm.group().size() + " peer(s)");
     }
 
     public void onStartMessage(StartMessage msg) {                   /* Start */
         setGroup(msg);
-        System.out.println(this.nodeId + " Sending vote request");
-        multicast(new VoteRequest());
-        //multicastAndCrash(new VoteRequest(), 3000);
-        setTimeout(VOTE_TIMEOUT);
+        System.out.println(this.nodeId + " received a start message");
+        if(isCoordinator) {
+            System.out.println(this.nodeId + " Sending vote request");
+            multicast(new VoteRequest());
+            //multicastAndCrash(new VoteRequest(), 3000);
+            //setTimeout(VOTE_TIMEOUT);
+        }
         //crash(5000);
     }
 
@@ -76,7 +78,8 @@ public class Node extends AbstractActor {
             node.tell(m, getSelf());
     }
 
-    private boolean hasDecided() { return decision != null; } // has the node decided?
+    private boolean hasVoted() { return nodeVote != null; } // has the node decided?
+    private boolean coordinatorHasDecided() { return generalDecision != null; }
 
     private Vote vote(){
         List<Vote> VALUES = List.of(Vote.values());
@@ -86,24 +89,32 @@ public class Node extends AbstractActor {
     }
 
     // fix the final decision of the current node
-    void fixDecision(Decision d) {
-        if (!hasDecided()) {
-            this.decision = d;
+    private void fixVote(Vote v) {
+        if (!hasVoted()) {
+            this.nodeVote = v;
+            //System.out.println(this.nodeId + " voted " + v);
+        }
+    }
+
+    private void fixCoordinatorDecision(Decision d){
+        if (!coordinatorHasDecided()) {
+            this.generalDecision = d;
             System.out.println(this.nodeId + " decided " + d);
         }
     }
 
     public void onVoteRequest(VoteRequest msg) {
         this.coordinator = getSender();
-        Vote decision = vote();
+        Vote vote = vote();
         //if (id==2) {crash(5000); return;}    // simulate a crash
         //if (id==2) delay(4000);              // simulate a delay
-        if (decision == Vote.NO) {
+        /*if (decision == Vote.NO) {
             fixDecision(Decision.ABORT);
-        }
-        System.out.println(this.nodeId + " sending vote " + decision);
-        this.coordinator.tell(new VoteResponse(decision), getSelf());
-        setTimeout(DECISION_TIMEOUT);
+        }*/
+        fixVote(vote);
+        System.out.println(this.nodeId + " sending vote " + vote);
+        this.coordinator.tell(new VoteResponse(vote), getSelf());
+        //setTimeout(DECISION_TIMEOUT);
     }
 
     private boolean quorumReached() { // returns true if all voted YES
@@ -112,43 +123,39 @@ public class Node extends AbstractActor {
 
 
     public void onVoteResponse(VoteResponse msg) {                    /* Vote */
-        if (hasDecided()) {
+        /*if (hasVoted()) {
             return;
-        }
+        }*/
         Vote v = (msg).vote;
-        if (v == Vote.YES || v == Vote.NO) {
+        if (isCoordinator) {
             voters.put(getSender(), v);
-            if (quorumReached()) {
-                voters = new HashMap<>();
-                fixDecision(Decision.COMMIT);
+            if (quorumReached()  || voters.size() == N_NODES) {
+                fixCoordinatorDecision(quorumReached()? Decision.WRITEOK : Decision.ABORT);
+                System.out.println("on vote response coordinator decided " + this.generalDecision);
                 //if (id==-1) {crash(3000); return;}
-                multicast(new DecisionResponse(decision));
+                multicast(new DecisionResponse(generalDecision));
+                voters = new HashMap<>();
                 //multicastAndCrash(new DecisionResponse(decision), 3000);
             }
-        }
-        if (voters.size() == N_NODES && !quorumReached()) {
-            voters = new HashMap<>();
-            fixDecision(Decision.ABORT);
-            //if (id==-1) {crash(3000); return;}
-            multicast(new DecisionResponse(decision));
         }
     }
 
     public void onDecisionRequest(DecisionRequest msg) {  /* Decision Request */
-        if (hasDecided())
-            getSender().tell(new DecisionResponse(decision), getSelf());
+        if (coordinatorHasDecided())
+            getSender().tell(new DecisionResponse(this.generalDecision), getSelf());
 
         // just ignoring if we don't know the decision
     }
 
     public void onDecisionResponse(DecisionResponse msg) { /* Decision Response */
-
-        // store the decision
-        fixDecision(msg.decision);
+        //if (isCoordinator) {
+            // store the decision
+            fixCoordinatorDecision(msg.decision);
+        //}
     }
 
     public void onTimeout(Timeout msg) {
-        if (!hasDecided()) {
+        if (!coordinatorHasDecided() || !hasVoted()) {
             if(isCoordinator){
                 System.out.println("Timeout");
                 //multicast(Decision.ABORT);
@@ -170,7 +177,7 @@ public class Node extends AbstractActor {
                 .match(VoteResponse.class, this::onVoteResponse)
                 .match(DecisionRequest.class, this::onDecisionRequest)
                 .match(DecisionResponse.class, this::onDecisionResponse)
-                .match(Timeout.class, this::onTimeout)
+                //.match(Timeout.class, this::onTimeout)
                 .build();
     }
 }
