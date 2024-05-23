@@ -31,10 +31,8 @@ public class Receiver extends Node{
      * @param msg request to make a vote
      */
     public void onVoteRequest(VoteRequest msg) {
-        Vote vote = vote();
-        fixVote(vote);
-        System.out.println(this.nodeId + " sending vote " + vote);
-        this.coordinator.tell(new VoteResponse(vote), getSelf());
+        super.onVoteRequest(msg);
+        this.coordinator.tell(new VoteResponse(this.nodeVote), getSelf());
     }
 
     @Override

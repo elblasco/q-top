@@ -53,4 +53,14 @@ abstract public class Node extends AbstractActor {
     protected void onDecisionResponse(DecisionResponse msg) {
         System.out.println(this.nodeId + " decided " + msg.decision());
     }
+
+    /**
+     * Make a vote, fix it and then send it back to the coordinator.
+     * @param msg request to make a vote
+     */
+    protected void onVoteRequest(VoteRequest msg) {
+        Vote vote = vote();
+        fixVote(vote);
+        System.out.println(this.nodeId + " sending vote " + vote);
+    }
 }

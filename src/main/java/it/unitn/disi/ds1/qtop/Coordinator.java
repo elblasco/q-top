@@ -45,7 +45,7 @@ public class Coordinator extends Node {
     /**
      * Register a Node vote.
      * Then, if the quorum is reached or everybody voted, fix the decision and multicast the decision.
-     * @param msg
+     * @param msg request to make a vote
      */
     public void onVoteResponse(VoteResponse msg) {
         Vote v = msg.vote();
@@ -61,11 +61,10 @@ public class Coordinator extends Node {
      * Make a vote, fix it and then send it back to the coordinator.
      * @param msg request to make a vote
      */
+    @Override
     public void onVoteRequest(VoteRequest msg) {
-        Vote vote = vote();
-        fixVote(vote);
-        System.out.println(this.nodeId + " sending vote " + vote);
-        getSelf().tell(new VoteResponse(vote), getSelf());
+        super.onVoteRequest(msg);
+        getSelf().tell(new VoteResponse(this.nodeVote), getSelf());
     }
 
     private boolean hasDecided() {
