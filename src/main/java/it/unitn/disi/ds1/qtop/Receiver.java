@@ -21,8 +21,9 @@ public class Receiver extends Node{
      * Initial set up for a Receiver, should be called whenever an ActorRef becomes a Receiver.
      * @param msg the init message
      */
+    @Override
     public void onStartMessage(StartMessage msg) {
-        setGroup(msg);
+        super.onStartMessage(msg);
         System.out.println(this.nodeId + " received a start message");
     }
 

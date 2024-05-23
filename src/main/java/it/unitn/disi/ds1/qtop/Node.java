@@ -15,12 +15,18 @@ abstract public class Node extends AbstractActor {
     protected Vote nodeVote = null;
     public int sharedVariable;
 
-    abstract public void onStartMessage(StartMessage msg);                  /* Start */
-
     public Node(int nodeId) {
         super();
         viewId = 0;
         this.nodeId = nodeId;
+    }
+
+    /**
+     * Initial set up for a Node.
+     * @param msg the init message
+     */
+    protected void onStartMessage(StartMessage msg) {
+        this.setGroup(msg);
     }
 
     protected void setGroup(StartMessage sm) {

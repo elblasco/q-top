@@ -24,8 +24,9 @@ public class Coordinator extends Node {
      * Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.
      * @param msg the init message
      */
+    @Override
     public void onStartMessage(StartMessage msg) {
-        this.setGroup(msg);
+        super.onStartMessage(msg);
         System.out.println(this.nodeId + " received a start message");
         System.out.println(this.nodeId + " Sending vote request");
         multicast(new VoteRequest());
