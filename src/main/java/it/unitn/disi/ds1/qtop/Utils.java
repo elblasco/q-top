@@ -21,6 +21,8 @@ public class Utils {
         }
     }
 
+    public record IdentificationPair(int e, int i){}
+
     public record VoteRequest() implements Serializable {}
 
     public record VoteResponse(Vote vote) implements Serializable {}
@@ -28,8 +30,6 @@ public class Utils {
     public record DecisionRequest() implements Serializable {}
 
     public record DecisionResponse(Decision decision) implements Serializable {}
-
-    public static class Timeout implements Serializable {}
 
     public static class ForwardUpdate implements Serializable {}
 }
