@@ -67,6 +67,7 @@ public class Coordinator extends Node {
                 this::onDecisionResponse
         ).match(
                 HeartBeat.class,
+                //Special handler for the self sent Heartbeat, the print is just for debug
                 heartBeat -> System.out.println("Coordinator sent an heartbeat message")
         ).build();
     }
@@ -137,8 +138,12 @@ public class Coordinator extends Node {
         return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= QUORUM;
     }
 
+    /**
+     * Assign to every node in the group a Heartbeat scheduled message
+     */
     private void startHeartBeat() {
         System.out.println("Coordinator started heartbeat protocol");
+        // Yes the coordinator sends a Heartbeat to itself
         for (int i = 0; i < N_NODES; ++ i) //node : group
         {
             heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(

@@ -37,6 +37,7 @@ public class Receiver extends Node{
 				this::onDecisionResponse
 		).match(
 				HeartBeat.class,
+				//Reset the countdown
 				heartBeatCountdown -> this.heartBeatCountdown = HEARTBEAT_TIMEOUT
 		).match(
 				CountDown.class,
@@ -65,6 +66,11 @@ public class Receiver extends Node{
         this.coordinator.tell(new VoteResponse(this.nodeVote), getSelf());
     }
 
+	/**
+	 * General purpose handler for the countdown which a Receiver can support
+	 *
+	 * @param msg Genre of countdown
+	 */
 	private void onCountDown(CountDown msg) {
 		switch (msg.reason())
 		{
@@ -73,17 +79,9 @@ public class Receiver extends Node{
 		}
 	}
 
-	private void startHeartBeatCountDown() {
-		this.heartBeatCountdownTimer = getContext().getSystem().scheduler().scheduleAtFixedRate(
-				Duration.ZERO,
-				Duration.ofMillis(HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH),
-				getSelf(),
-				new CountDown(TimeOutAndTickReason.HEARTBEAT),
-				getContext().getSystem().dispatcher(),
-				getSelf()
-		);
-	}
-
+	/**
+	 * Handler for Heartbeat countdown, it can cancel the countdown schedule.
+	 */
 	private void handleHeartBeatCountDown() {
 		if (this.heartBeatCountdown <= 0)
 		{
@@ -95,5 +93,19 @@ public class Receiver extends Node{
 			System.out.println("Node " + this.nodeId + " notified with and heartbeat countdown");
 			this.heartBeatCountdown -= HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH;
 		}
+	}
+
+	/**
+	 * Generate a scheduled message to check update the Heartbeat timeout counter.
+	 */
+	private void startHeartBeatCountDown() {
+		this.heartBeatCountdownTimer = getContext().getSystem().scheduler().scheduleAtFixedRate(
+				Duration.ZERO,
+				Duration.ofMillis(HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH),
+				getSelf(),
+				new CountDown(TimeOutAndTickReason.HEARTBEAT),
+				getContext().getSystem().dispatcher(),
+				getSelf()
+		);
 	}
 }
