@@ -20,13 +20,21 @@ public class Coordinator extends Node {
         return Props.create(Coordinator.class, () -> new Coordinator(nodeId));
     }
 
-    public void onStartMessage(StartMessage msg) {                   /* Start */
+    /**
+     * Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.
+     * @param msg the init message
+     */
+    public void onStartMessage(StartMessage msg) {
         this.setGroup(msg);
         System.out.println(this.nodeId + " received a start message");
         System.out.println(this.nodeId + " Sending vote request");
         multicast(new VoteRequest());
     }
 
+    /**
+     * Fix the Coordinator decision.
+     * @param d decision took by the coordinator
+     */
     private void fixCoordinatorDecision(Decision d) {
         if (!hasDecided()) {
             this.generalDecision = d;
@@ -34,7 +42,12 @@ public class Coordinator extends Node {
         }
     }
 
-    public void onVoteResponse(VoteResponse msg) {                    /* Vote */
+    /**
+     * Register a Node vote.
+     * Then, if the quorum is reached or everybody voted, fix the decision and multicast the decision.
+     * @param msg
+     */
+    public void onVoteResponse(VoteResponse msg) {
         Vote v = msg.vote();
         voters.put(getSender(), v);
         if (quorumReached() || voters.size() == N_NODES) {
@@ -44,6 +57,10 @@ public class Coordinator extends Node {
         }
     }
 
+    /**
+     * Make a vote, fix it and then send it back to the coordinator.
+     * @param msg request to make a vote
+     */
     public void onVoteRequest(VoteRequest msg) {
         Vote vote = vote();
         fixVote(vote);
@@ -55,18 +72,26 @@ public class Coordinator extends Node {
         return generalDecision != null;
     }
 
+    /**
+     * Fix the Coordinator decision.
+     * @param msg decision took by the Coordinator
+     */
     @Override
-    protected void onDecisionResponse(DecisionResponse msg) { //* Decision Response *//*
+    protected void onDecisionResponse(DecisionResponse msg) {
         super.onDecisionResponse(msg);
         fixCoordinatorDecision(msg.decision());
     }
 
-    private void onDecisionRequest(DecisionRequest msg) {  /* Decision Request */
+    /**
+     * Send back to the Receiver the decision.
+     * @param msg Receiver request for Coordinator decision
+     */
+    private void onDecisionRequest(DecisionRequest msg) {
         if (hasDecided())
             getSender().tell(new DecisionResponse(this.generalDecision), getSelf());
     }
 
-    private boolean quorumReached() { // returns true if all voted YES
+    private boolean quorumReached() {
         return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= QUORUM;
     }
 

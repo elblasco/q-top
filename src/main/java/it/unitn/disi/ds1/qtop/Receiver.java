@@ -17,11 +17,19 @@ public class Receiver extends Node{
         return Props.create(Receiver.class,() -> new Receiver(nodeId, coordinator));
     }
 
-    public void onStartMessage(Utils.StartMessage msg) {                   /* Start */
+    /**
+     * Initial set up for a Receiver, should be called whenever an ActorRef becomes a Receiver.
+     * @param msg the init message
+     */
+    public void onStartMessage(StartMessage msg) {
         setGroup(msg);
         System.out.println(this.nodeId + " received a start message");
     }
 
+    /**
+     * Make a vote, fix it and then send it back to the coordinator.
+     * @param msg request to make a vote
+     */
     public void onVoteRequest(VoteRequest msg) {
         Vote vote = vote();
         fixVote(vote);
