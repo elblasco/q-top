@@ -1,16 +1,19 @@
 package it.unitn.disi.ds1.qtop;
 
-import static it.unitn.disi.ds1.qtop.Utils.*;
-
 import akka.actor.ActorRef;
+import akka.actor.Cancellable;
 import akka.actor.Props;
 
+import java.time.Duration;
 import java.util.HashMap;
+
+import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Coordinator extends Node {
 
     private HashMap<ActorRef, Vote> voters = new HashMap<>();
     private Decision generalDecision = null;
+    private Cancellable[] heartBeat = new Cancellable[N_NODES];
 
     public Coordinator(int nodeId) {
         super(nodeId);
@@ -21,27 +24,66 @@ public class Coordinator extends Node {
     }
 
     /**
+     * Fix the Coordinator decision.
+     *
+     * @param d decision took by the coordinator
+     */
+    private void fixCoordinatorDecision(Decision d) {
+        if (! hasDecided())
+        {
+            this.generalDecision = d;
+            System.out.println(this.nodeId + " decided " + d);
+            // TODO temporary crash
+            getContext().become(crashed());
+        }
+    }
+
+    // TODO temporary state of crash
+    private Receive crashed() {
+        for (Cancellable heart : heartBeat)
+        {
+            heart.cancel();
+        }
+        return receiveBuilder().matchAny(msg -> {
+        }).build();
+    }
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder().match(
+                StartMessage.class,
+                this::onStartMessage
+        ).match(
+                VoteResponse.class,
+                this::onVoteResponse
+        ).match(
+                VoteRequest.class,
+                this::onVoteRequest
+        ).match(
+                DecisionRequest.class,
+                this::onDecisionRequest
+        ).match(
+                DecisionResponse.class,
+                this::onDecisionResponse
+        ).match(
+                HeartBeat.class,
+                heartBeat -> System.out.println("Coordinator sent an heartbeat message")
+        ).build();
+    }
+
+    /**
      * Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.
      * @param msg the init message
      */
     @Override
     public void onStartMessage(StartMessage msg) {
         super.onStartMessage(msg);
+        this.startHeartBeat();
         System.out.println(this.nodeId + " received a start message");
         System.out.println(this.nodeId + " Sending vote request");
         multicast(new VoteRequest());
     }
 
-    /**
-     * Fix the Coordinator decision.
-     * @param d decision took by the coordinator
-     */
-    private void fixCoordinatorDecision(Decision d) {
-        if (!hasDecided()) {
-            this.generalDecision = d;
-            System.out.println(this.nodeId + " decided " + d);
-        }
-    }
 
     /**
      * Register a Node vote.
@@ -95,14 +137,18 @@ public class Coordinator extends Node {
         return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= QUORUM;
     }
 
-    @Override
-    public Receive createReceive() {
-        return receiveBuilder()
-                .match(StartMessage.class, this::onStartMessage)
-                .match(VoteResponse.class, this::onVoteResponse)
-                .match(VoteRequest.class, this::onVoteRequest)
-                .match(DecisionRequest.class, this::onDecisionRequest)
-                .match(DecisionResponse.class, this::onDecisionResponse)
-                .build();
+    private void startHeartBeat() {
+        System.out.println("Coordinator started heartbeat protocol");
+        for (int i = 0; i < N_NODES; ++ i) //node : group
+        {
+            heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
+                    Duration.ZERO,
+                    Duration.ofMillis(HEARTBEAT_TIMEOUT / 2),
+                    this.group.get(i),
+                    new HeartBeat(),
+                    getContext().getSystem().dispatcher(),
+                    getSelf()
+            );
+        }
     }
 }
