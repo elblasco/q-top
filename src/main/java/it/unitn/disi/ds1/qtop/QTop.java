@@ -18,13 +18,13 @@ public class QTop{
         final ActorSystem system = ActorSystem.create("qtop");
 
         // Create a "virtual synchrony manager"
-        ActorRef coordinator = system.actorOf(Node.props(-1, true), "coordinator");
+        ActorRef coordinator = system.actorOf(Coordinator.props(-1), "coordinator");
 
         // Create nodes and put them to a list
         List<ActorRef> group = new ArrayList<>();
         group.add(coordinator);
         for (int i = 0; i < N_NODES - 1 ; i++) {
-            group.add(system.actorOf(Node.props(i, false), "node" + i));
+            group.add(system.actorOf(Receiver.props(i, coordinator), "node" + i));
         }
 
         // Send start messages to the participants to inform them of the group

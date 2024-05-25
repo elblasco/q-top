@@ -1,18 +1,21 @@
 package it.unitn.disi.ds1.qtop;
 
+import akka.actor.ActorRef;
+
 import java.io.Serializable;
 import java.util.List;
 
-import akka.actor.ActorRef;
-
 public class Utils {
     final static int N_NODES = 5;
+    final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
     final static int VOTE_TIMEOUT = 1000;      // timeout for the votes, ms
     final static int DECISION_TIMEOUT = 2000;  // timeout for the decision, ms
     final static int QUORUM = (N_NODES / 2) + 1;
 
     public enum Vote {NO, YES}
     public enum Decision {ABORT, WRITEOK}
+
+    public enum TimeOutAndTickReason {HEARTBEAT}
 
     // Start message that sends the list of participants to everyone
     public record StartMessage(List<ActorRef> group) implements Serializable {
@@ -21,15 +24,33 @@ public class Utils {
         }
     }
 
-    public record VoteRequest() implements Serializable {}
+    public record IdentificationPair(int e, int i) {
 
-    public record VoteResponse(Vote vote) implements Serializable {}
+    }
 
-    public record DecisionRequest() implements Serializable {}
+    public record VoteRequest() implements Serializable {
 
-    public record DecisionResponse(Decision decision) implements Serializable {}
+    }
 
-    public static class Timeout implements Serializable {}
+    public record VoteResponse(Vote vote) implements Serializable {
 
-    public static class ForwardUpdate implements Serializable {}
+    }
+
+    public record DecisionRequest() implements Serializable {
+
+    }
+
+    public record DecisionResponse(Decision decision) implements Serializable {
+
+    }
+
+    public record CountDown(TimeOutAndTickReason reason) implements Serializable {
+    }
+
+    public record HeartBeat() implements Serializable {
+    }
+
+    public static class ForwardUpdate implements Serializable {
+
+    }
 }
