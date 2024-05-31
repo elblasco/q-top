@@ -15,6 +15,20 @@ public class Utils {
     public enum Vote {NO, YES}
     public enum Decision {ABORT, WRITEOK}
 
+    public enum LogLevel {
+        TRACE(1),
+        DEBUG(2),
+        INFO(3),
+        WARN(4),
+        ERROR(5);
+
+        final int level;
+
+        LogLevel(int level) {
+            this.level = level;
+        }
+    }
+
     public enum TimeOutAndTickReason {HEARTBEAT}
 
     // Start message that sends the list of participants to everyone
