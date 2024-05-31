@@ -16,11 +16,14 @@ public class QTop{
         //Initializes the simulation
         Simulation simulation = new Simulation();
 
-        //Object to handle ui commands
-        Controller controller = new Controller(simulation);
-
         //User interface and client interface
-        UserInterface ui = new UserInterface(controller);
+        UserInterface ui = new UserInterface(null);
+
+        //Object to handle ui commands
+        Controller controller = new Controller(simulation, ui);
+
+        //set the controller to handle callbacks
+        ui.setController(controller);
         ui.start();
     }
 }
