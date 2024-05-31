@@ -7,4 +7,7 @@ public class Controller {
         this.simulation = simulation;
     }
 
+    public void startSimulation(int numberOfNodes, int decisionTimeout, int voteTimeout) {
+
+    }
 }

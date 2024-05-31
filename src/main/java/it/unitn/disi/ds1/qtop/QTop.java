@@ -21,5 +21,6 @@ public class QTop{
 
         //User interface and client interface
         UserInterface ui = new UserInterface(controller);
+        ui.start();
     }
 }
