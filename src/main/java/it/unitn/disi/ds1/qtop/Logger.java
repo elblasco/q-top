@@ -46,7 +46,6 @@ public class Logger {
     public void log(LogLevel level, String message) {
         if (level.ordinal() >= logLevel.ordinal()) {
             String log = String.format("[%s] [%s] %s", level, LocalDateTime.now(), message);
-            System.out.println(log);
             writer.println(log);
             writer.flush();
         }

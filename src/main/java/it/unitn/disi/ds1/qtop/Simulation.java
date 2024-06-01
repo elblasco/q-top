@@ -11,6 +11,8 @@ public class Simulation {
     private final ActorSystem system;
     private List<ActorRef> group;
 
+    private final Logger logger = Logger.getInstance();
+
     public Simulation() {
         group = new ArrayList<>();
         system = ActorSystem.create("qtop");
@@ -33,11 +35,13 @@ public class Simulation {
             peer.tell(start, null);
         }
 
+        logger.log(Utils.LogLevel.INFO, "Simulation started with " + numberOfNodes + " nodes, decision timeout: " + decisionTimeout + "ms, vote timeout: " + voteTimeout + "ms");
 
     }
 
 
     public void exit() {
+        logger.log(Utils.LogLevel.INFO, "Simulation terminated");
         system.terminate();
     }
 }

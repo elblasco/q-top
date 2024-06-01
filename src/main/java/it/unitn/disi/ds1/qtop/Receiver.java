@@ -15,6 +15,8 @@ public class Receiver extends Node{
 	private int heartBeatCountdown = HEARTBEAT_TIMEOUT;
 	private Cancellable heartBeatCountdownTimer;
 
+	private final Logger logger = Logger.getInstance();
+
     public Receiver(int nodeId, ActorRef coordinator) {
         super(nodeId);
         this.coordinator = coordinator;
@@ -54,7 +56,7 @@ public class Receiver extends Node{
 	protected void onStartMessage(StartMessage msg) {
 		super.onStartMessage(msg);
 		this.startHeartBeatCountDown();
-		System.out.println(this.nodeId + " received a start message");
+		logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + this.group.size() + " peer(s)");
 	}
 
     /**
@@ -86,11 +88,11 @@ public class Receiver extends Node{
 		if (this.heartBeatCountdown <= 0)
 		{
 			heartBeatCountdownTimer.cancel();
-			System.out.println("Node " + this.nodeId + " notified with and heartbeat timeout, timer is " + this.heartBeatCountdown);
+			logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"]  notified with and heartbeat timeout, timer is " + this.heartBeatCountdown);
 		}
 		else
 		{
-			System.out.println("Node " + this.nodeId + " notified with and heartbeat countdown");
+			logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] notified with and heartbeat countdown");
 			this.heartBeatCountdown -= HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH;
 		}
 	}

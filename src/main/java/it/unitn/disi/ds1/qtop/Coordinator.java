@@ -15,6 +15,8 @@ public class Coordinator extends Node {
     private Decision generalDecision = null;
     private Cancellable[] heartBeat = new Cancellable[N_NODES];
 
+    private final Logger logger = Logger.getInstance();
+
     public Coordinator(int nodeId) {
         super(nodeId);
     }
@@ -32,7 +34,7 @@ public class Coordinator extends Node {
         if (! hasDecided())
         {
             this.generalDecision = d;
-            System.out.println(this.nodeId + " decided " + d);
+            logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] decided " + d);
             // TODO temporary crash
             getContext().become(crashed());
         }
@@ -68,7 +70,7 @@ public class Coordinator extends Node {
         ).match(
                 HeartBeat.class,
                 //Special handler for the self sent Heartbeat, the print is just for debug
-                heartBeat -> System.out.println("Coordinator sent an heartbeat message")
+                heartBeat -> logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][controller] heartbeat")
         ).build();
     }
 
@@ -80,8 +82,9 @@ public class Coordinator extends Node {
     public void onStartMessage(StartMessage msg) {
         super.onStartMessage(msg);
         this.startHeartBeat();
-        System.out.println(this.nodeId + " received a start message");
-        System.out.println(this.nodeId + " Sending vote request");
+
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting with " + this.group.size() + " peer(s)");
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] Sending vote request");
         multicast(new VoteRequest());
     }
 
@@ -142,7 +145,7 @@ public class Coordinator extends Node {
      * Assign to every node in the group a Heartbeat scheduled message
      */
     private void startHeartBeat() {
-        System.out.println("Coordinator started heartbeat protocol");
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting heartbeat protocol");
         // Yes the coordinator sends a Heartbeat to itself
         for (int i = 0; i < N_NODES; ++ i) //node : group
         {
