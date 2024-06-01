@@ -17,13 +17,14 @@ public class Receiver extends Node{
 
 	private final Logger logger = Logger.getInstance();
 
-    public Receiver(int nodeId, ActorRef coordinator) {
+    public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
         super(nodeId);
         this.coordinator = coordinator;
+
     }
 
-    static public Props props(int nodeId, ActorRef coordinator) {
-        return Props.create(Receiver.class,() -> new Receiver(nodeId, coordinator));
+    static public Props props(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
+        return Props.create(Receiver.class,() -> new Receiver(nodeId, coordinator, decisionTimeout, voteTimeout));
     }
 
 	@Override

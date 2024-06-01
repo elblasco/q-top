@@ -10,19 +10,27 @@ import java.util.HashMap;
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Coordinator extends Node {
-
     private HashMap<ActorRef, Vote> voters = new HashMap<>();
+    private int numberOfNodes;
+    private int quorum;
+    private int voteTimeout;
+    private int decisionTimeout;
     private Decision generalDecision = null;
-    private Cancellable[] heartBeat = new Cancellable[N_NODES];
+    private Cancellable[] heartBeat;
 
     private final Logger logger = Logger.getInstance();
 
-    public Coordinator(int nodeId) {
+    public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
         super(nodeId);
+        this.numberOfNodes = numberOfNodes;
+        this.decisionTimeout = decisionTimeout;
+        this.voteTimeout = voteTimeout;
+        this.quorum = (numberOfNodes / 2) + 1;
+        heartBeat = new Cancellable[numberOfNodes];
     }
 
-    static public Props props(int nodeId) {
-        return Props.create(Coordinator.class, () -> new Coordinator(nodeId));
+    static public Props props(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
+        return Props.create(Coordinator.class, () -> new Coordinator(nodeId, numberOfNodes, decisionTimeout, voteTimeout));
     }
 
     /**
@@ -97,7 +105,7 @@ public class Coordinator extends Node {
     public void onVoteResponse(VoteResponse msg) {
         Vote v = msg.vote();
         voters.put(getSender(), v);
-        if (quorumReached() || voters.size() == N_NODES) {
+        if (quorumReached() || voters.size() == numberOfNodes) {
             fixCoordinatorDecision(quorumReached() ? Decision.WRITEOK : Decision.ABORT);
             multicast(new DecisionResponse(generalDecision));
             voters = new HashMap<>();
@@ -138,7 +146,7 @@ public class Coordinator extends Node {
     }
 
     private boolean quorumReached() {
-        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= QUORUM;
+        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= quorum;
     }
 
     /**
@@ -147,7 +155,7 @@ public class Coordinator extends Node {
     private void startHeartBeat() {
         logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting heartbeat protocol");
         // Yes the coordinator sends a Heartbeat to itself
-        for (int i = 0; i < N_NODES; ++ i) //node : group
+        for (int i = 0; i < numberOfNodes; ++ i) //node : group
         {
             heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
                     Duration.ZERO,

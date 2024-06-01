@@ -15,7 +15,6 @@ public class UserInterface implements SimulationCallback {
         int numberOfNodes = 5;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
-        int crashPoint = 0;
 
         System.out.println("Qtop - DS Project 2023/2024 - Blascovich Alessio, Cereser Lorenzo \n");
 

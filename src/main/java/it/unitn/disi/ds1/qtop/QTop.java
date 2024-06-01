@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unitn.disi.ds1.qtop.Utils.N_NODES;
 
 public class QTop{
 

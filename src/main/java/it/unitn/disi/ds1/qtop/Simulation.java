@@ -21,12 +21,12 @@ public class Simulation {
     public void start(int numberOfNodes, int decisionTimeout, int voteTimeout) {
 
         // Create a "virtual synchrony manager"
-        ActorRef coordinator = system.actorOf(Coordinator.props(0), "coordinator");
+        ActorRef coordinator = system.actorOf(Coordinator.props(0,numberOfNodes,decisionTimeout,voteTimeout), "coordinator");
 
         // Create nodes and put them to a list
         group.add(coordinator);
-        for (int i = 1; i < Utils.N_NODES ; i++) {
-            group.add(system.actorOf(Receiver.props(i, coordinator), "node" + i));
+        for (int i = 1; i < numberOfNodes ; i++) {
+            group.add(system.actorOf(Receiver.props(i, coordinator, decisionTimeout,voteTimeout), "node" + i));
         }
 
         // Send start messages to the participants to inform them of the group
