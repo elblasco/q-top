@@ -44,4 +44,14 @@ public class Simulation {
         logger.log(Utils.LogLevel.INFO, "Simulation terminated");
         system.terminate();
     }
+
+    public void readVariable(int node) {
+
+        logger.log(Utils.LogLevel.INFO, "[CLIENT] Requesting the value of the shared variable from node " + node);
+    }
+
+    public void writeVariable(int node, int value) {
+
+        logger.log(Utils.LogLevel.INFO, "[CLIENT] Requesting to write the value " + value + " to the shared variable from node " + node);
+    }
 }

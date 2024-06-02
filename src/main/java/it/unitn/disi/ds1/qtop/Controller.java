@@ -14,15 +14,17 @@ public class Controller {
         clientMenu();
     }
 
-    public void readVariable(){
-
+    public int readVariable(int node){
+        simulation.readVariable(node);
+        return 0;
     }
 
-    public void writeVariable(){
-
+    public void writeVariable(int node, int value) {
+        simulation.writeVariable(node, value);
     }
 
-    public void crashNode() {
+    public void crashNode(int crashType) {
+        //TODO: implement crashNode
     }
 
 

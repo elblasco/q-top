@@ -71,8 +71,8 @@ public class UserInterface implements SimulationCallback {
         while (input != 4) {
             System.out.println("CLIENT MENU - Please select an option:");
             System.out.println("_________________________________________________________________");
-            System.out.println("1. Read the variable through a random node");
-            System.out.println("2. Write the variable through a random node");
+            System.out.println("1. Read the variable through a node");
+            System.out.println("2. Write the variable through a node");
             System.out.println("3. Insert a virtual crash in a random node");
             System.out.println("4. Exit simulation");
             System.out.println("_________________________________________________________________");
@@ -81,16 +81,38 @@ public class UserInterface implements SimulationCallback {
 
             switch (input) {
                 case 1:
-                    System.out.println("Read the variable");
-                    controller.readVariable();
+
+                    System.out.println("Select the node from which you want to read the variable:");
+                    int node = scanner.nextInt();
+                    int var = controller.readVariable(node);
+                    System.out.println("Variable read from node "+node+": "+var);
                     break;
                 case 2:
-                    System.out.println("Write the variable");
-                    controller.writeVariable();
+                    System.out.println("Select the node to which you want to write the variable:");
+                    int nodeWrite = scanner.nextInt();
+                    System.out.println("Insert the value to write:");
+                    int value = scanner.nextInt();
+                    controller.writeVariable(nodeWrite, value);
+                    System.out.println("Variable written to node "+nodeWrite+": "+value);
                     break;
                 case 3:
-                    System.out.println("Crash a node");
-                    controller.crashNode();
+                    System.out.println("Select the position of the virtual crash:");
+
+                    int crashPosition = scanner.nextInt();
+
+                    //TODO: Change this
+                    System.out.println("1. NODE - Before receiving vote request");
+                    System.out.println("2. NODE - Before sending vote response");
+                    System.out.println("3. NODE - Before receiving commit decision");
+                    System.out.println("4. NODE - While waiting for coordinator decision");
+                    System.out.println("5. COORDINATOR - On start");
+                    System.out.println("6. COORDINATOR - While waiting receiving node responses");
+                    System.out.println("7. COORDINATOR - After local decision");
+
+                    int crashType = scanner.nextInt();
+
+
+                    controller.crashNode(crashType);
                     break;
                 case 4:
                     System.out.println("Exiting simulation");

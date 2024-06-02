@@ -50,6 +50,7 @@ public class Coordinator extends Node {
 
     // TODO temporary state of crash
     private Receive crashed() {
+
         for (Cancellable heart : heartBeat)
         {
             heart.cancel();
