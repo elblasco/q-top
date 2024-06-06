@@ -48,15 +48,13 @@ public class Coordinator extends Node {
         }
     }
 
-    // TODO temporary state of crash
-    private Receive crashed() {
+    Receive crashed() {
 
         for (Cancellable heart : heartBeat)
         {
             heart.cancel();
         }
-        return receiveBuilder().matchAny(msg -> {
-        }).build();
+        return crash();
     }
 
     @Override
