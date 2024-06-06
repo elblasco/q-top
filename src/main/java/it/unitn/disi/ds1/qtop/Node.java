@@ -1,10 +1,14 @@
 package it.unitn.disi.ds1.qtop;
 
-import akka.actor.*;
-import static it.unitn.disi.ds1.qtop.Utils.*;
+import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static it.unitn.disi.ds1.qtop.Utils.*;
 
 abstract public class Node extends AbstractActor {
 
@@ -14,6 +18,8 @@ abstract public class Node extends AbstractActor {
     protected IdentificationPair pair;
     protected Vote nodeVote = null;
     public int sharedVariable;
+    public Utils.CrashType crashType = CrashType.NO_CRASH;
+    public boolean crashed = false;
 
     private final Logger logger = Logger.getInstance();
 
@@ -70,5 +76,15 @@ abstract public class Node extends AbstractActor {
         Vote vote = vote();
         fixVote(vote);
         logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] sending vote " + vote);
+    }
+
+    protected void onCrashRequest(CrashRequest msg) {
+        this.crashType = msg.crashType();
+    }
+
+    Receive crash() {
+        this.crashed = true;
+        return receiveBuilder().matchAny(msg -> {
+        }).build();
     }
 }
