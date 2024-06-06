@@ -6,14 +6,23 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Utils {
-    final static int N_NODES = 5;
     final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
-    final static int VOTE_TIMEOUT = 1000;      // timeout for the votes, ms
-    final static int DECISION_TIMEOUT = 2000;  // timeout for the decision, ms
-    final static int QUORUM = (N_NODES / 2) + 1;
-
     public enum Vote {NO, YES}
     public enum Decision {ABORT, WRITEOK}
+
+    public enum LogLevel {
+        TRACE(1),
+        DEBUG(2),
+        INFO(3),
+        WARN(4),
+        ERROR(5);
+
+        final int level;
+
+        LogLevel(int level) {
+            this.level = level;
+        }
+    }
 
     public enum TimeOutAndTickReason {HEARTBEAT}
 

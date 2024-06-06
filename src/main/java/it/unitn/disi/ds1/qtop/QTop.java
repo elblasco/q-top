@@ -8,37 +8,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unitn.disi.ds1.qtop.Utils.N_NODES;
 
 public class QTop{
 
     public static void main(String[] args) {
+        //Initializes the simulation
+        Simulation simulation = new Simulation();
 
-        // Create the actor system
-        final ActorSystem system = ActorSystem.create("qtop");
+        //User interface and client interface
+        UserInterface ui = new UserInterface(null);
 
-        // Create a "virtual synchrony manager"
-        ActorRef coordinator = system.actorOf(Coordinator.props(-1), "coordinator");
+        //Object to handle ui commands
+        Controller controller = new Controller(simulation, ui);
 
-        // Create nodes and put them to a list
-        List<ActorRef> group = new ArrayList<>();
-        group.add(coordinator);
-        for (int i = 0; i < N_NODES - 1 ; i++) {
-            group.add(system.actorOf(Receiver.props(i, coordinator), "node" + i));
-        }
-
-        // Send start messages to the participants to inform them of the group
-        StartMessage start = new StartMessage(group);
-        for (ActorRef peer: group) {
-            peer.tell(start, null);
-        }
-
-        try {
-            System.out.println(">>> Press ENTER to exit <<<");
-            System.in.read();
-        }
-        catch (IOException ignored) {}
-        system.terminate();
-
+        //set the controller to handle callbacks
+        ui.setController(controller);
+        ui.start();
     }
 }

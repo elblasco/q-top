@@ -10,17 +10,27 @@ import java.util.HashMap;
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Coordinator extends Node {
-
     private HashMap<ActorRef, Vote> voters = new HashMap<>();
+    private int numberOfNodes;
+    private int quorum;
+    private int voteTimeout;
+    private int decisionTimeout;
     private Decision generalDecision = null;
-    private Cancellable[] heartBeat = new Cancellable[N_NODES];
+    private Cancellable[] heartBeat;
 
-    public Coordinator(int nodeId) {
+    private final Logger logger = Logger.getInstance();
+
+    public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
         super(nodeId);
+        this.numberOfNodes = numberOfNodes;
+        this.decisionTimeout = decisionTimeout;
+        this.voteTimeout = voteTimeout;
+        this.quorum = (numberOfNodes / 2) + 1;
+        heartBeat = new Cancellable[numberOfNodes];
     }
 
-    static public Props props(int nodeId) {
-        return Props.create(Coordinator.class, () -> new Coordinator(nodeId));
+    static public Props props(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
+        return Props.create(Coordinator.class, () -> new Coordinator(nodeId, numberOfNodes, decisionTimeout, voteTimeout));
     }
 
     /**
@@ -32,7 +42,7 @@ public class Coordinator extends Node {
         if (! hasDecided())
         {
             this.generalDecision = d;
-            System.out.println(this.nodeId + " decided " + d);
+            logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] decided " + d);
             // TODO temporary crash
             getContext().become(crashed());
         }
@@ -40,6 +50,7 @@ public class Coordinator extends Node {
 
     // TODO temporary state of crash
     private Receive crashed() {
+
         for (Cancellable heart : heartBeat)
         {
             heart.cancel();
@@ -68,7 +79,7 @@ public class Coordinator extends Node {
         ).match(
                 HeartBeat.class,
                 //Special handler for the self sent Heartbeat, the print is just for debug
-                heartBeat -> System.out.println("Coordinator sent an heartbeat message")
+                heartBeat -> logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][controller] heartbeat")
         ).build();
     }
 
@@ -80,8 +91,9 @@ public class Coordinator extends Node {
     public void onStartMessage(StartMessage msg) {
         super.onStartMessage(msg);
         this.startHeartBeat();
-        System.out.println(this.nodeId + " received a start message");
-        System.out.println(this.nodeId + " Sending vote request");
+
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting with " + this.group.size() + " peer(s)");
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] Sending vote request");
         multicast(new VoteRequest());
     }
 
@@ -94,7 +106,7 @@ public class Coordinator extends Node {
     public void onVoteResponse(VoteResponse msg) {
         Vote v = msg.vote();
         voters.put(getSender(), v);
-        if (quorumReached() || voters.size() == N_NODES) {
+        if (quorumReached() || voters.size() == numberOfNodes) {
             fixCoordinatorDecision(quorumReached() ? Decision.WRITEOK : Decision.ABORT);
             multicast(new DecisionResponse(generalDecision));
             voters = new HashMap<>();
@@ -135,16 +147,16 @@ public class Coordinator extends Node {
     }
 
     private boolean quorumReached() {
-        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= QUORUM;
+        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= quorum;
     }
 
     /**
      * Assign to every node in the group a Heartbeat scheduled message
      */
     private void startHeartBeat() {
-        System.out.println("Coordinator started heartbeat protocol");
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting heartbeat protocol");
         // Yes the coordinator sends a Heartbeat to itself
-        for (int i = 0; i < N_NODES; ++ i) //node : group
+        for (int i = 0; i < numberOfNodes; ++ i) //node : group
         {
             heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
                     Duration.ZERO,

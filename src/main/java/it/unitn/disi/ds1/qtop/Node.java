@@ -15,6 +15,8 @@ abstract public class Node extends AbstractActor {
     protected Vote nodeVote = null;
     public int sharedVariable;
 
+    private final Logger logger = Logger.getInstance();
+
     public Node(int nodeId) {
         super();
         viewId = 0;
@@ -32,7 +34,7 @@ abstract public class Node extends AbstractActor {
     protected void setGroup(StartMessage sm) {
         this.group = new ArrayList<>();
         this.group.addAll(sm.group());
-        System.out.println(this.nodeId + " starting with " + sm.group().size() + " peer(s)");
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + sm.group().size() + " peer(s)");
     }
 
     protected void multicast(Serializable m) {
@@ -57,7 +59,7 @@ abstract public class Node extends AbstractActor {
     }
 
     protected void onDecisionResponse(DecisionResponse msg) {
-        System.out.println(this.nodeId + " decided " + msg.decision());
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] decided " + msg.decision());
     }
 
     /**
@@ -67,6 +69,6 @@ abstract public class Node extends AbstractActor {
     protected void onVoteRequest(VoteRequest msg) {
         Vote vote = vote();
         fixVote(vote);
-        System.out.println(this.nodeId + " sending vote " + vote);
+        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] sending vote " + vote);
     }
 }
