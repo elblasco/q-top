@@ -3,13 +3,15 @@ package it.unitn.disi.ds1.qtop;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Simulation {
     private final ActorSystem system;
     private List<ActorRef> group;
+    private int numberOfNodes;
+    private HashSet<Integer> crashedNodes = new HashSet<Integer>();
 
     private final Logger logger = Logger.getInstance();
 
@@ -19,6 +21,8 @@ public class Simulation {
     }
 
     public void start(int numberOfNodes, int decisionTimeout, int voteTimeout) {
+        // Set initial number of nodes
+        this.numberOfNodes = numberOfNodes;
 
         // Create a "virtual synchrony manager"
         ActorRef coordinator = system.actorOf(Coordinator.props(0,numberOfNodes,decisionTimeout,voteTimeout), "coordinator");
@@ -39,6 +43,33 @@ public class Simulation {
 
     }
 
+    public int getNumberOfNodes() {
+        return this.numberOfNodes;
+    }
+
+    public boolean isNodeCrashed(int nodeId) {
+        return this.crashedNodes.contains(nodeId);
+    }
+
+    public void addCrashNode(int nodeId, int crashType) {
+        Utils.CrashType crashReason = switch (crashType)
+        {
+            case 1 -> Utils.CrashType.NODE_BEFORE_WRITE_REQUEST;
+            case 2 -> Utils.CrashType.NODE_AFTER_WRITE_REQUEST;
+            case 3 -> Utils.CrashType.NODE_AFTER_VOTE_REQUEST;
+            case 4 -> Utils.CrashType.NODE_BEFORE_VOTE_CAST;
+            case 5 -> Utils.CrashType.COORDINATOR_BEFORE_RW_REQUEST;
+            case 6 -> Utils.CrashType.COORDINATOR_AFTER_RW_REQUEST;
+            case 7 -> Utils.CrashType.COORDINATOR_NO_QUORUM;
+            case 8 -> Utils.CrashType.COORDINATOR_QUORUM;
+            default -> Utils.CrashType.NO_CRASH;
+        };
+        this.group.get(nodeId).tell(
+                new Utils.CrashRequest(crashReason),
+                null
+        );
+        this.crashedNodes.add(nodeId);
+    }
 
     public void exit() {
         logger.log(Utils.LogLevel.INFO, "Simulation terminated");
