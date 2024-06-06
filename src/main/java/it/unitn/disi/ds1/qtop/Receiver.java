@@ -45,6 +45,9 @@ public class Receiver extends Node{
 		).match(
 				CountDown.class,
 				this::onCountDown
+		).match(
+				Utils.CrashRequest.class,
+				super::onCrashRequest
 		).build();
 	}
 
@@ -65,8 +68,20 @@ public class Receiver extends Node{
      * @param msg request to make a vote
      */
     protected void onVoteRequest(VoteRequest msg) {
+	    if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
+	    {
+		    this.crash();
+	    }
         super.onVoteRequest(msg);
-        this.coordinator.tell(new VoteResponse(this.nodeVote), getSelf());
+	    this.tell(
+			    this.coordinator,
+			    new VoteResponse(this.nodeVote),
+			    getSelf()
+	    );
+	    if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
+	    {
+		    this.crash();
+	    }
     }
 
 	/**
@@ -89,11 +104,13 @@ public class Receiver extends Node{
 		if (this.heartBeatCountdown <= 0)
 		{
 			heartBeatCountdownTimer.cancel();
-			logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"]  notified with and heartbeat timeout, timer is " + this.heartBeatCountdown);
+			logger.log(LogLevel.DEBUG,
+					"[NODE-" + this.nodeId + "]  notified with and heartbeat timeout, timer is " + this.heartBeatCountdown);
 		}
 		else
 		{
-			logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] notified with and heartbeat countdown");
+			logger.log(LogLevel.DEBUG,
+					"[NODE-" + this.nodeId + "] notified with and heartbeat countdown");
 			this.heartBeatCountdown -= HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH;
 		}
 	}

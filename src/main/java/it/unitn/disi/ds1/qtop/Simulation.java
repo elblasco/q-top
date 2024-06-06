@@ -57,13 +57,14 @@ public class Simulation {
             case 1 -> Utils.CrashType.NODE_BEFORE_WRITE_REQUEST;
             case 2 -> Utils.CrashType.NODE_AFTER_WRITE_REQUEST;
             case 3 -> Utils.CrashType.NODE_AFTER_VOTE_REQUEST;
-            case 4 -> Utils.CrashType.NODE_BEFORE_VOTE_CAST;
+            case 4 -> Utils.CrashType.NODE_AFTER_VOTE_CAST;
             case 5 -> Utils.CrashType.COORDINATOR_BEFORE_RW_REQUEST;
             case 6 -> Utils.CrashType.COORDINATOR_AFTER_RW_REQUEST;
             case 7 -> Utils.CrashType.COORDINATOR_NO_QUORUM;
             case 8 -> Utils.CrashType.COORDINATOR_QUORUM;
             default -> Utils.CrashType.NO_CRASH;
         };
+        // Crash messages are instantaneous
         this.group.get(nodeId).tell(
                 new Utils.CrashRequest(crashReason),
                 null
