@@ -107,12 +107,17 @@ public class UserInterface implements SimulationCallback {
                     System.out.println("8. COORDINATOR - During votes reception, quorum reached");
 
                     int crashType = scanner.nextInt();
-                    System.out.println("Insert the index of the node to crash");
-                    int crashIndex = scanner.nextInt();
-                    controller.crashNode(
-                            crashIndex,
-                            crashType
-                    );
+					if (crashType >= 1 && crashType <= 4){
+						System.out.println("Insert the index of the node to crash");
+						int crashIndex = scanner.nextInt();
+						controller.crashNode(
+											 crashIndex,
+											 crashType
+											 );
+					}
+					else{
+						controller.crashNode(-1,crashType);
+					}
                     break;
                 case 4:
                     System.out.println("Exiting simulation");

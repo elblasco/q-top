@@ -12,6 +12,7 @@ public class Simulation {
     private List<ActorRef> group;
     private int numberOfNodes;
     private HashSet<Integer> crashedNodes = new HashSet<Integer>();
+	private ActorRef currentCoordinator;
 
     private final Logger logger = Logger.getInstance();
 
@@ -26,6 +27,7 @@ public class Simulation {
 
         // Create a "virtual synchrony manager"
         ActorRef coordinator = system.actorOf(Coordinator.props(0,numberOfNodes,decisionTimeout,voteTimeout), "coordinator");
+		this.currentCoordinator = coordinator;
 
         // Create nodes and put them to a list
         group.add(coordinator);
@@ -64,12 +66,25 @@ public class Simulation {
             case 8 -> Utils.CrashType.COORDINATOR_QUORUM;
             default -> Utils.CrashType.NO_CRASH;
         };
-        // Crash messages are instantaneous
-        this.group.get(nodeId).tell(
-                new Utils.CrashRequest(crashReason),
-                null
-        );
-        this.crashedNodes.add(nodeId);
+		if (nodeId == -1)
+		{
+			// Crash messages are instantaneous
+			this.currentCoordinator.tell(
+										new Utils.CrashRequest(crashReason),
+										null
+										);
+			//TODO implement the insert of coordinator in the set of crashed nodes
+			//this.crashedNodes.add(this.currentCoordinator);
+		}
+		else
+		{
+			// Crash messages are instantaneous
+			this.group.get(nodeId).tell(
+										new Utils.CrashRequest(crashReason),
+										null
+										);
+			this.crashedNodes.add(nodeId);
+		}
     }
 
     public void exit() {
