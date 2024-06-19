@@ -42,7 +42,7 @@ public class Utils {
 
     }
 
-    public record VoteRequest() implements Serializable {
+    public record VoteRequest(int newValue) implements Serializable {
 
     }
 
@@ -67,6 +67,15 @@ public class Utils {
     public record CrashRequest(CrashType crashType) implements Serializable {
     }
 
-    public static class ForwardUpdate implements Serializable {
+    public record MakeRequest(boolean kindOfRequest, int indexTarget) implements Serializable {
+    }
+
+    public record ReadRequest() implements Serializable {
+    }
+
+    public record WriteRequest(int newValue) implements Serializable {
+    }
+
+    public record ReadValue(int value) implements Serializable {
     }
 }
