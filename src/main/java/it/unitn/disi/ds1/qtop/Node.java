@@ -1,10 +1,14 @@
 package it.unitn.disi.ds1.qtop;
 
-import akka.actor.*;
-import static it.unitn.disi.ds1.qtop.Utils.*;
+import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static it.unitn.disi.ds1.qtop.Utils.*;
 
 abstract public class Node extends AbstractActor {
 
@@ -14,6 +18,9 @@ abstract public class Node extends AbstractActor {
     protected IdentificationPair pair;
     protected Vote nodeVote = null;
     public int sharedVariable;
+    public Utils.CrashType crashType = CrashType.NO_CRASH;
+    public boolean crashed = false;
+    public static Random rand = new Random();
 
     private final Logger logger = Logger.getInstance();
 
@@ -34,12 +41,31 @@ abstract public class Node extends AbstractActor {
     protected void setGroup(StartMessage sm) {
         this.group = new ArrayList<>();
         this.group.addAll(sm.group());
-        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + sm.group().size() + " peer(s)");
     }
 
     protected void multicast(Serializable m) {
-        for (ActorRef node: group)
-            node.tell(m, getSelf());
+        for (ActorRef node : group)
+        {
+            this.tell(
+                    node,
+                    m,
+                    getSelf()
+            );
+        }
+    }
+
+    public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
+        dest.tell(
+                msg,
+                sender
+        );
+        try
+        {
+            Thread.sleep(rand.nextInt(1000));
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private boolean hasVoted() { return nodeVote != null; } // has the node decided?
@@ -47,8 +73,7 @@ abstract public class Node extends AbstractActor {
     protected Vote vote(){
         List<Vote> VALUES = List.of(Vote.values());
         int SIZE = VALUES.size();
-        Random RANDOM = new Random();
-        return VALUES.get(RANDOM.nextInt(SIZE));
+        return VALUES.get(rand.nextInt(SIZE));
     }
 
     // fix the final decision of the current node
@@ -70,5 +95,16 @@ abstract public class Node extends AbstractActor {
         Vote vote = vote();
         fixVote(vote);
         logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] sending vote " + vote);
+    }
+
+    protected void onCrashRequest(CrashRequest msg) {
+        this.crashType = msg.crashType();
+		logger.log(LogLevel.INFO, "[NODE-" + this.nodeId+ "] crashed because " + this.crashType);
+    }
+
+    Receive crash() {
+        this.crashed = true;
+        return receiveBuilder().matchAny(msg -> {
+        }).build();
     }
 }

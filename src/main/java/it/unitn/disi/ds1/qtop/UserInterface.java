@@ -97,22 +97,27 @@ public class UserInterface implements SimulationCallback {
                     break;
                 case 3:
                     System.out.println("Select the position of the virtual crash:");
-
-                    int crashPosition = scanner.nextInt();
-
-                    //TODO: Change this
-                    System.out.println("1. NODE - Before receiving vote request");
-                    System.out.println("2. NODE - Before sending vote response");
-                    System.out.println("3. NODE - Before receiving commit decision");
-                    System.out.println("4. NODE - While waiting for coordinator decision");
-                    System.out.println("5. COORDINATOR - On start");
-                    System.out.println("6. COORDINATOR - While waiting receiving node responses");
-                    System.out.println("7. COORDINATOR - After local decision");
+                    System.out.println("1. NODE - Before write request");
+                    System.out.println("2. NODE - After write request");
+                    System.out.println("3. NODE - After vote request received");
+                    System.out.println("4. NODE - After vote casted");
+                    System.out.println("5. COORDINATOR - Before R/W request");
+                    System.out.println("6. COORDINATOR - After R/W request");
+                    System.out.println("7. COORDINATOR - During votes reception, NO quorum reached");
+                    System.out.println("8. COORDINATOR - During votes reception, quorum reached");
 
                     int crashType = scanner.nextInt();
-
-
-                    controller.crashNode(crashType);
+					if (crashType >= 1 && crashType <= 4){
+						System.out.println("Insert the index of the node to crash");
+						int crashIndex = scanner.nextInt();
+						controller.crashNode(
+											 crashIndex,
+											 crashType
+											 );
+					}
+					else{
+						controller.crashNode(-1,crashType);
+					}
                     break;
                 case 4:
                     System.out.println("Exiting simulation");

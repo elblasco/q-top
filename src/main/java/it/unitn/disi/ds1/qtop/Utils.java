@@ -26,6 +26,11 @@ public class Utils {
 
     public enum TimeOutAndTickReason {HEARTBEAT}
 
+    public enum CrashType {
+        NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
+        , COORDINATOR_BEFORE_RW_REQUEST, COORDINATOR_AFTER_RW_REQUEST, COORDINATOR_NO_QUORUM, COORDINATOR_QUORUM,
+    }
+
     // Start message that sends the list of participants to everyone
     public record StartMessage(List<ActorRef> group) implements Serializable {
         public StartMessage(List<ActorRef> group) {
@@ -59,7 +64,9 @@ public class Utils {
     public record HeartBeat() implements Serializable {
     }
 
-    public static class ForwardUpdate implements Serializable {
+    public record CrashRequest(CrashType crashType) implements Serializable {
+    }
 
+    public static class ForwardUpdate implements Serializable {
     }
 }

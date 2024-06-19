@@ -43,20 +43,16 @@ public class Coordinator extends Node {
         {
             this.generalDecision = d;
             logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] decided " + d);
-            // TODO temporary crash
-            getContext().become(crashed());
         }
     }
 
-    // TODO temporary state of crash
-    private Receive crashed() {
+    Receive crashed() {
 
         for (Cancellable heart : heartBeat)
         {
             heart.cancel();
         }
-        return receiveBuilder().matchAny(msg -> {
-        }).build();
+        return crash();
     }
 
     @Override
@@ -79,8 +75,15 @@ public class Coordinator extends Node {
         ).match(
                 HeartBeat.class,
                 //Special handler for the self sent Heartbeat, the print is just for debug
-                heartBeat -> logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][controller] heartbeat")
-        ).build();
+                heartBeat -> logger.log(
+                        LogLevel.DEBUG,
+                        "[NODE-" + this.nodeId + "][Coordinator] heartbeat"
+                )
+        ).match(
+                Utils.CrashRequest.class,
+                super::onCrashRequest
+				)
+		   .build();
     }
 
     /**
@@ -93,8 +96,9 @@ public class Coordinator extends Node {
         this.startHeartBeat();
 
         logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting with " + this.group.size() + " peer(s)");
-        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] Sending vote request");
         multicast(new VoteRequest());
+        logger.log(LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
     }
 
 
@@ -107,20 +111,33 @@ public class Coordinator extends Node {
         Vote v = msg.vote();
         voters.put(getSender(), v);
         if (quorumReached() || voters.size() == numberOfNodes) {
+            if (this.crashType == CrashType.COORDINATOR_QUORUM)
+            {
+                crash();
+            }
             fixCoordinatorDecision(quorumReached() ? Decision.WRITEOK : Decision.ABORT);
             multicast(new DecisionResponse(generalDecision));
             voters = new HashMap<>();
         }
+        else if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
+        {
+            crash();
+        }
     }
 
     /**
-     * Make a vote, fix it and then send it back to the coordinator.
-     * @param msg request to make a vote
+     * Send back to the Receiver the decision.
+     * @param msg Receiver request for Coordinator decision
      */
-    @Override
-    public void onVoteRequest(VoteRequest msg) {
-        super.onVoteRequest(msg);
-        getSelf().tell(new VoteResponse(this.nodeVote), getSelf());
+    private void onDecisionRequest(DecisionRequest msg) {
+        if (hasDecided())
+        {
+            this.tell(
+                    getSender(),
+                    new DecisionResponse(this.generalDecision),
+                    getSelf()
+            );
+        }
     }
 
     private boolean hasDecided() {
@@ -138,23 +155,13 @@ public class Coordinator extends Node {
     }
 
     /**
-     * Send back to the Receiver the decision.
-     * @param msg Receiver request for Coordinator decision
-     */
-    private void onDecisionRequest(DecisionRequest msg) {
-        if (hasDecided())
-            getSender().tell(new DecisionResponse(this.generalDecision), getSelf());
-    }
-
-    private boolean quorumReached() {
-        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= quorum;
-    }
-
-    /**
      * Assign to every node in the group a Heartbeat scheduled message
      */
     private void startHeartBeat() {
-        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting heartbeat protocol");
+        logger.log(
+                LogLevel.DEBUG,
+                "[NODE-" + this.nodeId + "][Coordinator] starting heartbeat protocol"
+        );
         // Yes the coordinator sends a Heartbeat to itself
         for (int i = 0; i < numberOfNodes; ++ i) //node : group
         {
@@ -167,5 +174,23 @@ public class Coordinator extends Node {
                     getSelf()
             );
         }
+    }
+
+    private boolean quorumReached() {
+        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= quorum;
+    }
+
+    /**
+     * Make a vote, fix it and then send it back to the coordinator.
+     * @param msg request to make a vote
+     */
+    @Override
+    public void onVoteRequest(VoteRequest msg) {
+        super.onVoteRequest(msg);
+        this.tell(
+                getSelf(),
+                new VoteResponse(this.nodeVote),
+                getSelf()
+        );
     }
 }
