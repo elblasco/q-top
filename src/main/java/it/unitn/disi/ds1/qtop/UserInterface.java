@@ -13,6 +13,7 @@ public class UserInterface implements SimulationCallback {
 
         //default values
         int numberOfNodes = 5;
+        int numberOfClients = 3;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
 
@@ -35,13 +36,19 @@ public class UserInterface implements SimulationCallback {
             System.out.println("2. Set the number of nodes [current: "+numberOfNodes+"]");
             System.out.println("3. Set the decision timeout in ms, [current: "+decisionTimeout+"ms]");
             System.out.println("4. Set the vote timeout in ms, [current: "+voteTimeout+"ms]");
+            System.out.println("5. Set the number of clients [current: " + numberOfClients + "]");
             System.out.println("_________________________________________________________________");
 
             input = scanner.nextInt();
 
             switch (input) {
                 case 1:
-                    controller.startSimulation(numberOfNodes, decisionTimeout, voteTimeout);
+                    controller.startSimulation(
+                            numberOfNodes,
+                            numberOfClients,
+                            decisionTimeout,
+                            voteTimeout
+                    );
                     break;
                 case 2:
                     System.out.println("Insert the number of nodes:");
@@ -54,6 +61,10 @@ public class UserInterface implements SimulationCallback {
                 case 4:
                     System.out.println("Insert the vote timeout in ms:");
                     voteTimeout = scanner.nextInt();
+                    break;
+                case 5:
+                    System.out.println("Insert the number of clients:");
+                    numberOfClients = scanner.nextInt();
                     break;
                 default:
                     System.out.println("Invalid option, please try again");

@@ -11,7 +11,7 @@ public class Simulation {
     private final ActorSystem system;
     private List<ActorRef> group;
     private int numberOfNodes;
-    private HashSet<Integer> crashedNodes = new HashSet<Integer>();
+	private HashSet<Integer> crashedNodes = new HashSet<>();
 	private ActorRef currentCoordinator;
 
     private final Logger logger = Logger.getInstance();
@@ -21,7 +21,7 @@ public class Simulation {
         system = ActorSystem.create("qtop");
     }
 
-    public void start(int numberOfNodes, int decisionTimeout, int voteTimeout) {
+	public void start(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout) {
         // Set initial number of nodes
         this.numberOfNodes = numberOfNodes;
 
@@ -32,10 +32,28 @@ public class Simulation {
         // Create nodes and put them to a list
         group.add(coordinator);
         for (int i = 1; i < numberOfNodes ; i++) {
-            group.add(system.actorOf(Receiver.props(i, coordinator, decisionTimeout,voteTimeout), "node" + i));
+	        group.add(system.actorOf(
+			        Receiver.props(
+					        i,
+					        coordinator,
+					        decisionTimeout,
+					        voteTimeout
+			        ),
+			        "node" + i
+	        ));
         }
-
-        // Send start messages to the participants to inform them of the group
+		for (int i = 0; i < numberOfClients; i++)
+		{
+			group.add(system.actorOf(
+					Client.props(
+							numberOfNodes + i,
+							group,
+							numberOfNodes
+					),
+					"client" + numberOfNodes + i
+			));
+		}
+		// Send start messages to the participants to inform them of the group
         Utils.StartMessage start = new Utils.StartMessage(group);
         for (ActorRef peer: group) {
             peer.tell(start, null);
@@ -73,7 +91,7 @@ public class Simulation {
 										new Utils.CrashRequest(crashReason),
 										null
 										);
-			//TODO implement the inserton of coordinator in the set of crashed nodes
+			//TODO implement the insertion of coordinator in the set of crashed nodes
 			//this.crashedNodes.add(this.currentCoordinator);
 		}
 		else
@@ -92,9 +110,12 @@ public class Simulation {
         system.terminate();
     }
 
-    public void readVariable(int node) {
-
-        logger.log(Utils.LogLevel.INFO, "[CLIENT] Requesting the value of the shared variable from node " + node);
+	public int readVariable(int node) {
+		logger.log(
+				Utils.LogLevel.INFO,
+				"[CLIENT] Requesting the value of the shared variable from node " + node
+		);
+		return 0;
     }
 
     public void writeVariable(int node, int value) {
