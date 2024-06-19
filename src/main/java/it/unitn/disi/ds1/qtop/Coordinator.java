@@ -43,8 +43,6 @@ public class Coordinator extends Node {
         {
             this.generalDecision = d;
             logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] decided " + d);
-            // TODO temporary crash
-            getContext().become(crashed());
         }
     }
 
@@ -84,7 +82,8 @@ public class Coordinator extends Node {
         ).match(
                 Utils.CrashRequest.class,
                 super::onCrashRequest
-        ).build();
+				)
+		   .build();
     }
 
     /**

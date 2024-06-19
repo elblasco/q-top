@@ -99,6 +99,7 @@ abstract public class Node extends AbstractActor {
 
     protected void onCrashRequest(CrashRequest msg) {
         this.crashType = msg.crashType();
+		logger.log(LogLevel.INFO, "[NODE-" + this.nodeId+ "] crashed because " + this.crashType);
     }
 
     Receive crash() {

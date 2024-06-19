@@ -73,7 +73,7 @@ public class Simulation {
 										new Utils.CrashRequest(crashReason),
 										null
 										);
-			//TODO implement the insert of coordinator in the set of crashed nodes
+			//TODO implement the inserton of coordinator in the set of crashed nodes
 			//this.crashedNodes.add(this.currentCoordinator);
 		}
 		else

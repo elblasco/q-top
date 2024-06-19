@@ -32,10 +32,6 @@ public class Controller {
 	 * @param crashType   Number corresponding to the crash type
 	 */
     public void crashNode(int crashIndex, int crashType) {
-		this.simulation.addCrashNode(
-									 crashIndex,
-									 crashType
-									 );
 		if (crashIndex == -1)
 		{
             logger.log(
@@ -57,6 +53,10 @@ public class Controller {
                     "[SYSTEM] node " + crashIndex + " can not crash"
             );
         }
+		this.simulation.addCrashNode(
+									 crashIndex,
+									 crashType
+									 );
     }
 
     public void exitSimulation() {
