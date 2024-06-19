@@ -13,18 +13,18 @@ public class Coordinator extends Node {
     private HashMap<ActorRef, Vote> voters = new HashMap<>();
     private int numberOfNodes;
     private int quorum;
-    private int voteTimeout;
-    private int decisionTimeout;
     private Decision generalDecision = null;
     private Cancellable[] heartBeat;
 
     private final Logger logger = Logger.getInstance();
 
     public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
-        super(nodeId);
+        super(
+                nodeId,
+                decisionTimeout,
+                voteTimeout
+        );
         this.numberOfNodes = numberOfNodes;
-        this.decisionTimeout = decisionTimeout;
-        this.voteTimeout = voteTimeout;
         this.quorum = (numberOfNodes / 2) + 1;
         heartBeat = new Cancellable[numberOfNodes];
     }
@@ -70,6 +70,9 @@ public class Coordinator extends Node {
                 DecisionRequest.class,
                 this::onDecisionRequest
         ).match(
+                        ReadRequest.class,
+                        this::onReadRequest
+                ).match(
                 DecisionResponse.class,
                 this::onDecisionResponse
         ).match(
@@ -79,10 +82,13 @@ public class Coordinator extends Node {
                         LogLevel.DEBUG,
                         "[NODE-" + this.nodeId + "][Coordinator] heartbeat"
                 )
-        ).match(
-                Utils.CrashRequest.class,
-                super::onCrashRequest
-				)
+                ).match(
+                        Utils.CrashRequest.class,
+                        super::onCrashRequest
+                ).match(
+                        WriteRequest.class,
+                        this::onWriteRequest
+                )
 		   .build();
     }
 
@@ -96,9 +102,9 @@ public class Coordinator extends Node {
         this.startHeartBeat();
 
         logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting with " + this.group.size() + " peer(s)");
-        multicast(new VoteRequest());
-        logger.log(LogLevel.INFO,
-                "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
+        //multicast(new VoteRequest());
+        //logger.log(LogLevel.INFO,
+        //        "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
     }
 
 
@@ -118,6 +124,11 @@ public class Coordinator extends Node {
             fixCoordinatorDecision(quorumReached() ? Decision.WRITEOK : Decision.ABORT);
             multicast(new DecisionResponse(generalDecision));
             voters = new HashMap<>();
+            if (this.generalDecision == Decision.WRITEOK)
+            {
+                this.sharedVariable = this.possibleNewSharedVaribale;
+            }
+            this.possibleNewSharedVaribale = 0;
         }
         else if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
         {
@@ -191,6 +202,21 @@ public class Coordinator extends Node {
                 getSelf(),
                 new VoteResponse(this.nodeVote),
                 getSelf()
+        );
+    }
+
+    private void onReadRequest(ReadRequest msg) {
+        getSender().tell(
+                new ReadValue(this.sharedVariable),
+                this.getSelf()
+        );
+    }
+
+    private void onWriteRequest(WriteRequest msg) {
+        multicast(new VoteRequest(msg.newValue()));
+        logger.log(
+                LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] Sent vote request to write " + msg.newValue()
         );
     }
 }

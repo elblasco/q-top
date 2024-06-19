@@ -17,17 +17,22 @@ abstract public class Node extends AbstractActor {
     protected final int nodeId;
     protected IdentificationPair pair;
     protected Vote nodeVote = null;
-    public int sharedVariable;
+    private final int decisionTimeout;
     public Utils.CrashType crashType = CrashType.NO_CRASH;
     public boolean crashed = false;
+    private final int voteTimeout;
+    public int sharedVariable = 0;
+    protected int possibleNewSharedVaribale = 0;
     public static Random rand = new Random();
 
     private final Logger logger = Logger.getInstance();
 
-    public Node(int nodeId) {
+    public Node(int nodeId, int decisionTimeout, int voteTimeout) {
         super();
         viewId = 0;
         this.nodeId = nodeId;
+        this.decisionTimeout = decisionTimeout;
+        this.voteTimeout = voteTimeout;
     }
 
     /**
@@ -61,7 +66,7 @@ abstract public class Node extends AbstractActor {
         );
         try
         {
-            Thread.sleep(rand.nextInt(1000));
+            Thread.sleep(rand.nextInt(100));
         } catch (InterruptedException e)
         {
             e.printStackTrace();

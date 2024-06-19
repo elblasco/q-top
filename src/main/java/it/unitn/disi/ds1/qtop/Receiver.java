@@ -18,7 +18,11 @@ public class Receiver extends Node{
 	private final Logger logger = Logger.getInstance();
 
     public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
-        super(nodeId);
+	    super(
+			    nodeId,
+			    decisionTimeout,
+			    voteTimeout
+	    );
         this.coordinator = coordinator;
 
     }
@@ -46,8 +50,14 @@ public class Receiver extends Node{
 				CountDown.class,
 				this::onCountDown
 		).match(
-				Utils.CrashRequest.class,
+				CrashRequest.class,
 				super::onCrashRequest
+		).match(
+				ReadRequest.class,
+				this::onReadRequest
+		).match(
+				WriteRequest.class,
+				this::onWriteRequest
 		).build();
 	}
 
@@ -63,26 +73,19 @@ public class Receiver extends Node{
 		logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + this.group.size() + " peer(s)");
 	}
 
-    /**
-     * Make a vote, fix it and then send it back to the coordinator.
-     * @param msg request to make a vote
-     */
-    protected void onVoteRequest(VoteRequest msg) {
-	    if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
-	    {
-		    this.crash();
-	    }
-        super.onVoteRequest(msg);
-	    this.tell(
-			    this.coordinator,
-			    new VoteResponse(this.nodeVote),
-			    getSelf()
-	    );
-	    if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
-	    {
-		    this.crash();
-	    }
-    }
+	@Override
+	protected void onDecisionResponse(DecisionResponse msg) {
+		super.onDecisionResponse(msg);
+		if (msg.decision() == Decision.WRITEOK)
+		{
+			this.sharedVariable = this.possibleNewSharedVaribale;
+			logger.log(
+					LogLevel.INFO,
+					"[NODE-" + this.nodeId + "] committed shared variable " + this.sharedVariable
+			);
+		}
+		this.possibleNewSharedVaribale = 0;
+	}
 
 	/**
 	 * General purpose handler for the countdown which a Receiver can support
@@ -116,6 +119,29 @@ public class Receiver extends Node{
 	}
 
 	/**
+	 * Make a vote, fix it and then send it back to the coordinator.
+	 *
+	 * @param msg request to make a vote
+	 */
+	protected void onVoteRequest(VoteRequest msg) {
+		this.possibleNewSharedVaribale = msg.newValue();
+		if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
+		{
+			this.crash();
+		}
+		super.onVoteRequest(msg);
+		this.tell(
+				this.coordinator,
+				new VoteResponse(this.nodeVote),
+				getSelf()
+		);
+		if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
+		{
+			this.crash();
+		}
+	}
+
+	/**
 	 * Generate a scheduled message to check update the Heartbeat timeout counter.
 	 */
 	private void startHeartBeatCountDown() {
@@ -126,6 +152,20 @@ public class Receiver extends Node{
 				new CountDown(TimeOutAndTickReason.HEARTBEAT),
 				getContext().getSystem().dispatcher(),
 				getSelf()
+		);
+	}
+
+	private void onReadRequest(ReadRequest msg) {
+		getSender().tell(
+				new ReadValue(this.sharedVariable),
+				this.getSelf()
+		);
+	}
+
+	private void onWriteRequest(WriteRequest msg) {
+		this.coordinator.tell(
+				msg,
+				this.getSelf()
 		);
 	}
 }
