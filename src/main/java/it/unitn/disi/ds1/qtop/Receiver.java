@@ -18,7 +18,11 @@ public class Receiver extends Node{
 	private final Logger logger = Logger.getInstance();
 
     public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
-        super(nodeId);
+	    super(
+			    nodeId,
+			    decisionTimeout,
+			    voteTimeout
+	    );
         this.coordinator = coordinator;
 
     }
@@ -46,8 +50,14 @@ public class Receiver extends Node{
 				CountDown.class,
 				this::onCountDown
 		).match(
-				Utils.CrashRequest.class,
+				CrashRequest.class,
 				super::onCrashRequest
+		).match(
+				ReadRequest.class,
+				this::onReadRequest
+		).match(
+				WriteRequest.class,
+				this::onWriteRequest
 		).build();
 	}
 
@@ -62,27 +72,6 @@ public class Receiver extends Node{
 		this.startHeartBeatCountDown();
 		logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + this.group.size() + " peer(s)");
 	}
-
-    /**
-     * Make a vote, fix it and then send it back to the coordinator.
-     * @param msg request to make a vote
-     */
-    protected void onVoteRequest(VoteRequest msg) {
-	    if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
-	    {
-		    this.crash();
-	    }
-        super.onVoteRequest(msg);
-	    this.tell(
-			    this.coordinator,
-			    new VoteResponse(this.nodeVote),
-			    getSelf()
-	    );
-	    if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
-	    {
-		    this.crash();
-	    }
-    }
 
 	/**
 	 * General purpose handler for the countdown which a Receiver can support
@@ -126,6 +115,13 @@ public class Receiver extends Node{
 				new CountDown(TimeOutAndTickReason.HEARTBEAT),
 				getContext().getSystem().dispatcher(),
 				getSelf()
+		);
+	}
+
+	private void onWriteRequest(WriteRequest msg) {
+		this.coordinator.tell(
+				msg,
+				this.getSelf()
 		);
 	}
 }

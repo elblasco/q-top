@@ -10,14 +10,13 @@ public class Controller {
         this.ui = ui;
     }
 
-    public void startSimulation(int numberOfNodes, int decisionTimeout, int voteTimeout) {
-        simulation.start(numberOfNodes, decisionTimeout, voteTimeout);
+    public void startSimulation(int numberOfNodes, int numberOfClients ,int decisionTimeout, int voteTimeout) {
+        simulation.start(numberOfNodes, numberOfClients, decisionTimeout, voteTimeout);
         clientMenu();
     }
 
     public int readVariable(int node){
-        simulation.readVariable(node);
-        return 0;
+        return simulation.readVariable(node);
     }
 
     public void writeVariable(int node, int value) {

@@ -3,12 +3,14 @@ package it.unitn.disi.ds1.qtop;
 import akka.actor.ActorRef;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 public class Utils {
     final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
     public enum Vote {NO, YES}
-    public enum Decision {ABORT, WRITEOK}
+
+    public enum Decision {ABORT, WRITEOK, PENDING}
 
     public enum LogLevel {
         TRACE(1),
@@ -38,15 +40,11 @@ public class Utils {
         }
     }
 
-    public record IdentificationPair(int e, int i) {
+    public record VoteRequest(int newValue, EpochPair epoch) implements Serializable {
 
     }
 
-    public record VoteRequest() implements Serializable {
-
-    }
-
-    public record VoteResponse(Vote vote) implements Serializable {
+    public record VoteResponse(Vote vote, EpochPair epoch) implements Serializable {
 
     }
 
@@ -54,7 +52,7 @@ public class Utils {
 
     }
 
-    public record DecisionResponse(Decision decision) implements Serializable {
+    public record DecisionResponse(Decision decision, EpochPair epoch) implements Serializable {
 
     }
 
@@ -67,6 +65,24 @@ public class Utils {
     public record CrashRequest(CrashType crashType) implements Serializable {
     }
 
-    public static class ForwardUpdate implements Serializable {
+    public record MakeRequest(boolean kindOfRequest, int indexTarget) implements Serializable {
+    }
+
+    public record ReadRequest() implements Serializable {
+    }
+
+    public record WriteRequest(int newValue) implements Serializable {
+    }
+
+    public record ReadValue(int value) implements Serializable {
+    }
+
+    public record EpochPair(int e, int i) implements Serializable {
+    }
+
+    public record Pair(int number, boolean toWrite) {
+    }
+
+    public record VotePair(HashMap<ActorRef, Vote> votes, Decision finalDecision) {
     }
 }

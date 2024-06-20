@@ -1,58 +1,34 @@
 package it.unitn.disi.ds1.qtop;
 
-import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
 
 import java.time.Duration;
-import java.util.HashMap;
 
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Coordinator extends Node {
-    private HashMap<ActorRef, Vote> voters = new HashMap<>();
+    private VotersMap voters = new VotersMap();
     private int numberOfNodes;
     private int quorum;
-    private int voteTimeout;
-    private int decisionTimeout;
-    private Decision generalDecision = null;
     private Cancellable[] heartBeat;
+    private EpochPair epochPair;
 
     private final Logger logger = Logger.getInstance();
 
     public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
-        super(nodeId);
+        super(
+                nodeId,
+                decisionTimeout,
+                voteTimeout
+        );
         this.numberOfNodes = numberOfNodes;
-        this.decisionTimeout = decisionTimeout;
-        this.voteTimeout = voteTimeout;
         this.quorum = (numberOfNodes / 2) + 1;
         heartBeat = new Cancellable[numberOfNodes];
     }
 
     static public Props props(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
         return Props.create(Coordinator.class, () -> new Coordinator(nodeId, numberOfNodes, decisionTimeout, voteTimeout));
-    }
-
-    /**
-     * Fix the Coordinator decision.
-     *
-     * @param d decision took by the coordinator
-     */
-    private void fixCoordinatorDecision(Decision d) {
-        if (! hasDecided())
-        {
-            this.generalDecision = d;
-            logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] decided " + d);
-        }
-    }
-
-    Receive crashed() {
-
-        for (Cancellable heart : heartBeat)
-        {
-            heart.cancel();
-        }
-        return crash();
     }
 
     @Override
@@ -67,8 +43,8 @@ public class Coordinator extends Node {
                 VoteRequest.class,
                 this::onVoteRequest
         ).match(
-                DecisionRequest.class,
-                this::onDecisionRequest
+                ReadRequest.class,
+                this::onReadRequest
         ).match(
                 DecisionResponse.class,
                 this::onDecisionResponse
@@ -82,8 +58,10 @@ public class Coordinator extends Node {
         ).match(
                 Utils.CrashRequest.class,
                 super::onCrashRequest
-				)
-		   .build();
+        ).match(
+                WriteRequest.class,
+                this::onWriteRequest
+        ).build();
     }
 
     /**
@@ -94,30 +72,61 @@ public class Coordinator extends Node {
     public void onStartMessage(StartMessage msg) {
         super.onStartMessage(msg);
         this.startHeartBeat();
-
-        logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"][Coordinator] starting with " + this.group.size() + " peer(s)");
-        multicast(new VoteRequest());
-        logger.log(LogLevel.INFO,
-                "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
+        logger.log(
+                LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] starting with " + this.group.size() + " peer(s)"
+        );
+        //multicast(new VoteRequest());
+        //logger.log(LogLevel.INFO,
+        //        "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
     }
-
 
     /**
      * Register a Node vote.
      * Then, if the quorum is reached or everybody voted, fix the decision and multicast the decision.
+     *
      * @param msg request to make a vote
      */
     public void onVoteResponse(VoteResponse msg) {
         Vote v = msg.vote();
-        voters.put(getSender(), v);
-        if (quorumReached() || voters.size() == numberOfNodes) {
+        int e = msg.epoch().e();
+        int i = msg.epoch().i();
+        voters.insert(
+                e,
+                i,
+                this.getSender(),
+                v
+        );
+        boolean isQuorumReached = quorumReached(
+                e,
+                i
+        );
+        System.out.println("<" + e + ", " + i + "> reached the quorum " + isQuorumReached);
+        if ((isQuorumReached || voters.get(e).get(i).votes().size() == numberOfNodes) && this.voters.get(e).get(i)
+                .finalDecision() == Decision.PENDING)
+        {
             if (this.crashType == CrashType.COORDINATOR_QUORUM)
             {
                 crash();
             }
-            fixCoordinatorDecision(quorumReached() ? Decision.WRITEOK : Decision.ABORT);
-            multicast(new DecisionResponse(generalDecision));
-            voters = new HashMap<>();
+            fixCoordinatorDecision(
+                    isQuorumReached ? Decision.WRITEOK : Decision.ABORT,
+                    e,
+                    i
+            );
+            System.out.println("<" + e + ", " + i + "> is about to multicast the vote " + this.voters.get(e).get(i)
+                    .finalDecision());
+            multicast(new DecisionResponse(
+                    this.voters.get(e).get(i).finalDecision(),
+                    msg.epoch()
+            ));
+            if (this.voters.get(e).get(i).finalDecision() == Decision.WRITEOK)
+            {
+                this.getHistory().setStateToTrue(
+                        e,
+                        i
+                );
+            }
         }
         else if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
         {
@@ -125,33 +134,29 @@ public class Coordinator extends Node {
         }
     }
 
-    /**
-     * Send back to the Receiver the decision.
-     * @param msg Receiver request for Coordinator decision
-     */
-    private void onDecisionRequest(DecisionRequest msg) {
-        if (hasDecided())
-        {
-            this.tell(
-                    getSender(),
-                    new DecisionResponse(this.generalDecision),
-                    getSelf()
-            );
-        }
-    }
-
-    private boolean hasDecided() {
-        return generalDecision != null;
-    }
-
-    /**
-     * Fix the Coordinator decision.
-     * @param msg decision took by the Coordinator
-     */
-    @Override
-    protected void onDecisionResponse(DecisionResponse msg) {
-        super.onDecisionResponse(msg);
-        fixCoordinatorDecision(msg.decision());
+    private void onWriteRequest(WriteRequest msg) {
+        int e = this.getHistory().isEmpty() ? 0 : this.getHistory().size() - 1;
+        System.out.println("The e is " + e);
+        int i = this.getHistory().isEmpty() ? 0 : this.getHistory().get(e).size();
+        System.out.println("The i is " + i);
+        this.epochPair = new EpochPair(
+                e,
+                i
+        );
+        this.getHistory().insert(
+                e,
+                i,
+                msg.newValue()
+        );
+        multicast(new VoteRequest(
+                msg.newValue(),
+                epochPair
+        ));
+        logger.log(
+                LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] Sent vote request to write " + msg.newValue() + " for epoch "
+                        + "< " + e + ", " + i + " >"
+        );
     }
 
     /**
@@ -176,21 +181,41 @@ public class Coordinator extends Node {
         }
     }
 
-    private boolean quorumReached() {
-        return voters.entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size() >= quorum;
+    private boolean quorumReached(int e, int i) {
+        System.out.println("The total voters for <" + e + ", " + i + "> has size " + voters.get(e).get(i).votes()
+                .entrySet().stream().toList().size());
+        System.out.println("The positive voters for <" + e + ", " + i + "> has size " + voters.get(e).get(i).votes()
+                .entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size());
+        System.out.println("The quorum to reach is " + this.quorum);
+        return voters.get(e).get(i).votes().entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList()
+                .size() >= quorum;
     }
 
     /**
-     * Make a vote, fix it and then send it back to the coordinator.
-     * @param msg request to make a vote
+     * Fix the Coordinator decision.
+     *
+     * @param d decision took by the coordinator
      */
-    @Override
-    public void onVoteRequest(VoteRequest msg) {
-        super.onVoteRequest(msg);
-        this.tell(
-                getSelf(),
-                new VoteResponse(this.nodeVote),
-                getSelf()
-        );
+    private void fixCoordinatorDecision(Decision d, int e, int i) {
+        if (this.voters.get(e).get(i).finalDecision() == Decision.PENDING)
+        {
+            this.voters.setDecision(
+                    d,
+                    e,
+                    i
+            );
+            logger.log(
+                    LogLevel.INFO,
+                    "[NODE-" + this.nodeId + "][Coordinator] decided " + d + " for epoch < " + e + ", " + i + " >"
+            );
+        }
+    }
+
+    Receive crashed() {
+        for (Cancellable heart : heartBeat)
+        {
+            heart.cancel();
+        }
+        return crash();
     }
 }
