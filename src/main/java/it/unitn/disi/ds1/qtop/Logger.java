@@ -1,8 +1,8 @@
 package it.unitn.disi.ds1.qtop;
 
 import it.unitn.disi.ds1.qtop.Utils.LogLevel;
+
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,11 +45,19 @@ public class Logger {
 
     public void log(LogLevel level, String message) {
         if (level.ordinal() >= logLevel.ordinal()) {
-            String log = String.format("[%s] [%s] %s", level, LocalDateTime.now(), message);
+            String log = String.format(
+                    "[%s] %s",
+                    level,
+                    message
+            );
             writer.println(log);
             writer.flush();
         }
-        logs.add(String.format("[%s] [%s] %s", level, LocalDateTime.now(), message));
+        logs.add(String.format(
+                "[%s] %s",
+                level,
+                message
+        ));
     }
 
 

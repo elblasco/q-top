@@ -13,7 +13,7 @@ public class UserInterface implements SimulationCallback {
 
         //default values
         int numberOfNodes = 5;
-        int numberOfClients = 3;
+        int numberOfClients = 10;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
 

@@ -47,6 +47,10 @@ public class Client extends AbstractActor{
         ).match(
 				Utils.VoteRequest.class,
 				        tmp -> {}
+		        ).match(
+				        Utils.DecisionResponse.class,
+				        tmp -> {
+				        }
 		        )
 		        .build();
     }
@@ -60,7 +64,7 @@ public class Client extends AbstractActor{
 		Random r = new Random();
 	    getContext().getSystem().scheduler().scheduleAtFixedRate(
 			    Duration.ZERO,
-			    Duration.ofMinutes(1),
+			    Duration.ofMillis(1000),
 			    this.getSelf(),
 			    new Utils.MakeRequest(r.nextBoolean(), r.nextInt(this.numberOfNodes)),
 			    getContext().getSystem().dispatcher(),
