@@ -9,9 +9,6 @@ public class PairsHistory extends ArrayList<ArrayList<Utils.Pair>> {
 	}
 
 	public void insert(int e, int i, int element) {
-		//System.out.println("The sizes are " +this.size() + ", ");
-		//System.out.println("The inputs are "+ e + " "+ i);
-		//System.out.println(this);
 		if (this.isEmpty() || this.size() < e)
 		{
 			int initialSize = this.size();
@@ -32,12 +29,9 @@ public class PairsHistory extends ArrayList<ArrayList<Utils.Pair>> {
 				element,
 				false
 		));
-		System.out.println("The inputs are "+ e + " "+ i);
-		System.out.println(this);
 	}
 
 	public void setStateToTrue(int e, int i) {
-		System.out.println("Set "+ e+" "+i+" to true");
 		this.get(e).set(i, new Utils.Pair(this.get(e).get(i).number(), true));
 	}
 

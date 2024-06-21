@@ -26,7 +26,7 @@ public class Utils {
         }
     }
 
-    public enum TimeOutAndTickReason {HEARTBEAT}
+    public enum TimeOutReason {HEARTBEAT, DECISION, VOTE}
 
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
@@ -56,7 +56,7 @@ public class Utils {
 
     }
 
-    public record CountDown(TimeOutAndTickReason reason) implements Serializable {
+    public record CountDown(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
     public record HeartBeat() implements Serializable {

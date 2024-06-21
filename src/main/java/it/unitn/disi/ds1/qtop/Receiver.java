@@ -1,35 +1,35 @@
 package it.unitn.disi.ds1.qtop;
 
 import akka.actor.ActorRef;
-import akka.actor.Cancellable;
 import akka.actor.Props;
-
-import java.time.Duration;
 
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
-public class Receiver extends Node{
-	private static final int HEARTBEAT_COUNTDOWN_REFRESH = 10; // times, within a second, the heartBeatCountdown is
-	// updated
-    private ActorRef coordinator;
-	private int heartBeatCountdown = HEARTBEAT_TIMEOUT;
-	private Cancellable heartBeatCountdownTimer;
+public class Receiver extends Node {
+	private ActorRef coordinator;
 
 	private final Logger logger = Logger.getInstance();
 
-    public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
-	    super(
-			    nodeId,
-			    decisionTimeout,
-			    voteTimeout
-	    );
-        this.coordinator = coordinator;
+	public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
+		super(
+				nodeId,
+				decisionTimeout,
+				voteTimeout
+		);
+		this.coordinator = coordinator;
+	}
 
-    }
-
-    static public Props props(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
-        return Props.create(Receiver.class,() -> new Receiver(nodeId, coordinator, decisionTimeout, voteTimeout));
-    }
+	static public Props props(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout) {
+		return Props.create(
+				Receiver.class,
+				() -> new Receiver(
+						nodeId,
+						coordinator,
+						decisionTimeout,
+						voteTimeout
+				)
+		);
+	}
 
 	@Override
 	public Receive createReceive() {
@@ -38,14 +38,14 @@ public class Receiver extends Node{
 				this::onStartMessage
 		).match(
 				VoteRequest.class,
-				this::onVoteRequest
+				super::onVoteRequest
 		).match(
 				DecisionResponse.class,
-				this::onDecisionResponse
+				super::onDecisionResponse
 		).match(
 				HeartBeat.class,
 				//Reset the countdown
-				heartBeatCountdown -> this.heartBeatCountdown = HEARTBEAT_TIMEOUT
+				heartBeatCountdown -> this.handleHeartBeatCountDown()
 		).match(
 				CountDown.class,
 				this::onCountDown
@@ -54,7 +54,7 @@ public class Receiver extends Node{
 				super::onCrashRequest
 		).match(
 				ReadRequest.class,
-				this::onReadRequest
+				super::onReadRequest
 		).match(
 				WriteRequest.class,
 				this::onWriteRequest
@@ -70,7 +70,10 @@ public class Receiver extends Node{
 	protected void onStartMessage(StartMessage msg) {
 		super.onStartMessage(msg);
 		this.startHeartBeatCountDown();
-		logger.log(LogLevel.INFO,"[NODE-"+this.nodeId+"] starting with " + this.group.size() + " peer(s)");
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] starting with " + this.group.size() + " peer(s)"
+		);
 	}
 
 	/**
@@ -81,41 +84,10 @@ public class Receiver extends Node{
 	private void onCountDown(CountDown msg) {
 		switch (msg.reason())
 		{
-			case HEARTBEAT -> handleHeartBeatCountDown();
+			case HEARTBEAT -> this.handleHeartBeatCountDown();
+			case DECISION -> this.handleDecisionCountDown(msg.epoch().i());
 			default -> System.out.println("CountDown reason not handled by coordinator " + this.nodeId);
 		}
-	}
-
-	/**
-	 * Handler for Heartbeat countdown, it can cancel the countdown schedule.
-	 */
-	private void handleHeartBeatCountDown() {
-		if (this.heartBeatCountdown <= 0)
-		{
-			heartBeatCountdownTimer.cancel();
-			logger.log(LogLevel.DEBUG,
-					"[NODE-" + this.nodeId + "]  notified with and heartbeat timeout, timer is " + this.heartBeatCountdown);
-		}
-		else
-		{
-			logger.log(LogLevel.DEBUG,
-					"[NODE-" + this.nodeId + "] notified with and heartbeat countdown");
-			this.heartBeatCountdown -= HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH;
-		}
-	}
-
-	/**
-	 * Generate a scheduled message to check update the Heartbeat timeout counter.
-	 */
-	private void startHeartBeatCountDown() {
-		this.heartBeatCountdownTimer = getContext().getSystem().scheduler().scheduleAtFixedRate(
-				Duration.ZERO,
-				Duration.ofMillis(HEARTBEAT_TIMEOUT / HEARTBEAT_COUNTDOWN_REFRESH),
-				getSelf(),
-				new CountDown(TimeOutAndTickReason.HEARTBEAT),
-				getContext().getSystem().dispatcher(),
-				getSelf()
-		);
 	}
 
 	private void onWriteRequest(WriteRequest msg) {
