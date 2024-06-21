@@ -76,9 +76,6 @@ public class Coordinator extends Node {
                 LogLevel.INFO,
                 "[NODE-" + this.nodeId + "][Coordinator] starting with " + this.group.size() + " peer(s)"
         );
-        //multicast(new VoteRequest());
-        //logger.log(LogLevel.INFO,
-        //        "[NODE-" + this.nodeId + "][Coordinator] Sent vote request");
     }
 
     /**
@@ -101,21 +98,21 @@ public class Coordinator extends Node {
                 e,
                 i
         );
-        System.out.println("<" + e + ", " + i + "> reached the quorum " + isQuorumReached);
         if ((isQuorumReached || voters.get(e).get(i).votes().size() == numberOfNodes) && this.voters.get(e).get(i)
                 .finalDecision() == Decision.PENDING)
         {
             if (this.crashType == CrashType.COORDINATOR_QUORUM)
             {
-                crash();
+                this.coordinatorCrash(
+                        e,
+                        i
+                );
             }
             fixCoordinatorDecision(
                     isQuorumReached ? Decision.WRITEOK : Decision.ABORT,
                     e,
                     i
             );
-            System.out.println("<" + e + ", " + i + "> is about to multicast the vote " + this.voters.get(e).get(i)
-                    .finalDecision());
             multicast(new DecisionResponse(
                     this.voters.get(e).get(i).finalDecision(),
                     msg.epoch()
@@ -130,15 +127,16 @@ public class Coordinator extends Node {
         }
         else if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
         {
-            crash();
+            this.coordinatorCrash(
+                    e,
+                    i
+            );
         }
     }
 
     private void onWriteRequest(WriteRequest msg) {
         int e = this.getHistory().isEmpty() ? 0 : this.getHistory().size() - 1;
-        System.out.println("The e is " + e);
         int i = this.getHistory().isEmpty() ? 0 : this.getHistory().get(e).size();
-        System.out.println("The i is " + i);
         this.epochPair = new EpochPair(
                 e,
                 i
@@ -182,11 +180,6 @@ public class Coordinator extends Node {
     }
 
     private boolean quorumReached(int e, int i) {
-        System.out.println("The total voters for <" + e + ", " + i + "> has size " + voters.get(e).get(i).votes()
-                .entrySet().stream().toList().size());
-        System.out.println("The positive voters for <" + e + ", " + i + "> has size " + voters.get(e).get(i).votes()
-                .entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList().size());
-        System.out.println("The quorum to reach is " + this.quorum);
         return voters.get(e).get(i).votes().entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList()
                 .size() >= quorum;
     }
@@ -211,11 +204,15 @@ public class Coordinator extends Node {
         }
     }
 
-    Receive crashed() {
+    private void coordinatorCrash(int e, int i) {
+        logger.log(
+                LogLevel.ERROR,
+                "[NODE-" + this.nodeId + "][Coordinator] CRASHED!!! on epoch " + e + " during iteration " + i
+        );
         for (Cancellable heart : heartBeat)
         {
             heart.cancel();
         }
-        return crash();
+        this.getContext().become(this.crash());
     }
 }
