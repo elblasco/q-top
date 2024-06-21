@@ -94,6 +94,9 @@ public class Client extends AbstractActor{
 
 	private void onReadValue(Utils.ReadValue msg) {
 		int value = msg.value();
-		logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read done " + value);
+		logger.log(
+				LogLevel.INFO,
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done " + value
+		);
 	}
 }

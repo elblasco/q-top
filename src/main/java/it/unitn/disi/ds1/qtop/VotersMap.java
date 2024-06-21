@@ -12,9 +12,6 @@ public class VotersMap extends ArrayList<ArrayList<Utils.VotePair>> {
 	}
 
 	public void insert(int e, int i, ActorRef actorRef, Utils.Vote vote) {
-		System.out.println("The voters map sizes are " +this.size() + ", ");
-		System.out.println("The insert voters inputs are "+ e + " "+ i);
-		//System.out.println("Voters: "+ this);
 		if (this.isEmpty() || this.size() < e)
 		{
 			int initialSize = this.size();
