@@ -44,7 +44,7 @@ public class Coordinator extends Node {
                 this::onVoteRequest
         ).match(
                 ReadRequest.class,
-                this::onReadRequest
+                super::onReadRequest
         ).match(
                 DecisionResponse.class,
                 this::onDecisionResponse
@@ -55,6 +55,10 @@ public class Coordinator extends Node {
                         LogLevel.DEBUG,
                         "[NODE-" + this.nodeId + "][Coordinator] heartbeat"
                 )
+        ).match(
+                CountDown.class,
+                //Special handler for the self sent Heartbeat, the print is just for debug
+                this::onCountDown
         ).match(
                 Utils.CrashRequest.class,
                 super::onCrashRequest
@@ -157,26 +161,11 @@ public class Coordinator extends Node {
         );
     }
 
-    /**
-     * Assign to every node in the group a Heartbeat scheduled message
-     */
-    private void startHeartBeat() {
+    private void onCountDown(CountDown msg) {
         logger.log(
-                LogLevel.DEBUG,
-                "[NODE-" + this.nodeId + "][Coordinator] starting heartbeat protocol"
+                LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] countdown of type " + msg.reason()
         );
-        // Yes the coordinator sends a Heartbeat to itself
-        for (int i = 0; i < numberOfNodes; ++ i) //node : group
-        {
-            heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
-                    Duration.ZERO,
-                    Duration.ofMillis(HEARTBEAT_TIMEOUT / 2),
-                    this.group.get(i),
-                    new HeartBeat(),
-                    getContext().getSystem().dispatcher(),
-                    getSelf()
-            );
-        }
     }
 
     private boolean quorumReached(int e, int i) {
@@ -204,6 +193,28 @@ public class Coordinator extends Node {
         }
     }
 
+    /**
+     * Assign to every node in the group a Heartbeat scheduled message
+     */
+    private void startHeartBeat() {
+        logger.log(
+                LogLevel.DEBUG,
+                "[NODE-" + this.nodeId + "][Coordinator] starting heartbeat protocol"
+        );
+        // Yes the coordinator sends a Heartbeat to itself
+        for (int i = 0; i < numberOfNodes; ++ i)
+        {
+            heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
+                    Duration.ZERO,
+                    Duration.ofMillis(HEARTBEAT_TIMEOUT / 2),
+                    this.group.get(i),
+                    new HeartBeat(),
+                    getContext().getSystem().dispatcher(),
+                    getSelf()
+            );
+        }
+    }
+
     private void coordinatorCrash(int e, int i) {
         logger.log(
                 LogLevel.ERROR,
@@ -213,6 +224,6 @@ public class Coordinator extends Node {
         {
             heart.cancel();
         }
-        this.getContext().become(this.crash());
+        super.crash();
     }
 }
