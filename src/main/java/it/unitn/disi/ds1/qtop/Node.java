@@ -134,16 +134,16 @@ abstract public class Node extends AbstractActor {
         );
     }
 
-    protected Receive crash() {
+    protected void crash() {
         this.crashed = true;
-        return receiveBuilder().matchAny(msg -> {
-        }).build();
+        this.getContext().become(receiveBuilder().matchAny(msg -> {
+        }).build());
     }
 
     protected void startDecisionCountDown(int i) {
         this.timeouts.startCountDown(
                 TimeOutReason.DECISION,
-                this.getContext().getSystem().scheduler().scheduleAtFixedRate(
+                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
                         Duration.ZERO,
                         Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
                         getSelf(),
@@ -164,7 +164,12 @@ abstract public class Node extends AbstractActor {
     protected void onDecisionResponse(DecisionResponse msg) {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
-        this.handleDecisionCountDown(i);
+        this.timeouts.resetCountDown(
+                TimeOutReason.DECISION,
+                i,
+                nodeId,
+                logger
+        );
         logger.log(
                 LogLevel.INFO,
                 "[NODE-" + this.nodeId + "] decided " + msg.decision() + " for epoch < " + msg.epoch()
@@ -183,19 +188,10 @@ abstract public class Node extends AbstractActor {
         }
     }
 
-    protected void handleDecisionCountDown(int i) {
-        this.timeouts.handleCountDown(
-                TimeOutReason.DECISION,
-                i,
-                this.nodeId,
-                this.logger
-        );
-    }
-
     protected void startHeartBeatCountDown() {
         this.timeouts.startCountDown(
                 TimeOutReason.HEARTBEAT,
-                this.getContext().getSystem().scheduler().scheduleAtFixedRate(
+                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
                         Duration.ZERO,
                         Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
                         getSelf(),
@@ -207,15 +203,6 @@ abstract public class Node extends AbstractActor {
                         getSelf()
                 ),
                 0
-        );
-    }
-
-    protected void handleHeartBeatCountDown() {
-        this.timeouts.handleCountDown(
-                TimeOutReason.HEARTBEAT,
-                0,
-                this.nodeId,
-                this.logger
         );
     }
 }
