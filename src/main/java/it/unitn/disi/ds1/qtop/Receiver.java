@@ -110,7 +110,8 @@ public class Receiver extends Node {
 	}
 
 	private void onWriteRequest(WriteRequest msg) {
-		this.coordinator.tell(
+		super.tell(
+				this.coordinator,
 				msg,
 				this.getSelf()
 		);
