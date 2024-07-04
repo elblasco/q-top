@@ -45,7 +45,7 @@ public class Receiver extends Node {
 		).match(
 				HeartBeat.class,
 				//Reset the countdown
-				heartBeatCountdown -> this.handleHeartBeatCountDown()
+				this::onHeartBeat
 		).match(
 				CountDown.class,
 				this::onCountDown
@@ -72,7 +72,16 @@ public class Receiver extends Node {
 		this.startHeartBeatCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] starting with " + this.group.size() + " peer(s)"
+				"[NODE-" + super.nodeId + "] starting with " + super.group.size() + " peer(s)"
+		);
+	}
+
+	private void onHeartBeat(HeartBeat msg) {
+		super.timeouts.resetCountDown(
+				TimeOutReason.HEARTBEAT,
+				0,
+				nodeId,
+				this.logger
 		);
 	}
 
@@ -84,8 +93,18 @@ public class Receiver extends Node {
 	private void onCountDown(CountDown msg) {
 		switch (msg.reason())
 		{
-			case HEARTBEAT -> this.handleHeartBeatCountDown();
-			case DECISION -> this.handleDecisionCountDown(msg.epoch().i());
+			case HEARTBEAT -> super.timeouts.handleCountDown(
+					TimeOutReason.HEARTBEAT,
+					0,
+					super.nodeId,
+					this.logger
+			);
+			case DECISION -> super.timeouts.handleCountDown(
+					TimeOutReason.DECISION,
+					msg.epoch().i(),
+					super.nodeId,
+					this.logger
+			);
 			default -> System.out.println("CountDown reason not handled by coordinator " + this.nodeId);
 		}
 	}
