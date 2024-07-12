@@ -5,15 +5,15 @@ import akka.japi.Pair;
 
 import java.util.ArrayList;
 
-public class PairsHistory extends ArrayList<ArrayList<Utils.Pair>> {
+public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 	public PairsHistory() {
 		super();
 	}
 
 	public void setStateToTrue(int e, int i) {
 		this.get(e).set(i,
-				new Utils.Pair(
-						this.get(e).get(i).number(),
+				new Pair<>(
+						this.get(e).get(i).first(),
 						true
 				)
 		);
@@ -28,9 +28,9 @@ public class PairsHistory extends ArrayList<ArrayList<Utils.Pair>> {
 				{
 					for (int y = this.get(x).size() - 1; y >= 0; y--)
 					{
-						if (this.get(x).get(y) != null && this.get(x).get(y).toWrite())
+						if (this.get(x).get(y) != null && this.get(x).get(y).second())
 						{
-							return this.get(x).get(y).number();
+							return this.get(x).get(y).first();
 						}
 					}
 				}
@@ -58,7 +58,7 @@ public class PairsHistory extends ArrayList<ArrayList<Utils.Pair>> {
 		}
 		this.get(e).set(
 				i,
-				new Utils.Pair(
+				new Pair<>(
 				element,
 				false
 		));

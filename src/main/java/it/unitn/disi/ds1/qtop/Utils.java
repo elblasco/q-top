@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Utils {
-    final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
-    final static int ELECTION_TIMEOUT = 1000; // timeout for the heartbeat, ms
+    final static int HEARTBEAT_TIMEOUT = 2000; // timeout for the heartbeat, ms
+    final static int ELECTION_TIMEOUT = 2000; // timeout for the heartbeat, ms
     public enum Vote {NO, YES}
 
     public enum Decision {ABORT, WRITEOK, PENDING}
@@ -93,9 +93,10 @@ public class Utils {
     public record ElectionACK() implements Serializable {
     }
 
-    public record Pair(int number, boolean toWrite) {
-    }
-
     public record VotePair(HashMap<ActorRef, Vote> votes, Decision finalDecision) {
     }
+
+    public record Triple<ID, E, I>(ID first, E second, I third) {
+    }
 }
+
