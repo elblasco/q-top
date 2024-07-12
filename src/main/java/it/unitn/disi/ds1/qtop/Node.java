@@ -20,6 +20,8 @@ abstract public class Node extends AbstractActor {
     protected final int nodeId;
     private final int decisionTimeout;
     public Utils.CrashType crashType = CrashType.NO_CRASH;
+    // TODO useless to be removed, an alternative could be a set of known crashed nodes, the leader can propagate the
+    //  known crashed nodes based on the timeouts given to him
     public boolean crashed = false;
     private final int voteTimeout;
     protected TimeOutManager timeOutManager;
@@ -77,6 +79,7 @@ abstract public class Node extends AbstractActor {
      *
      * @param msg request to make a vote
      */
+    // TODO add vote responses timeout
     protected void onVoteRequest(VoteRequest msg) {
         if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
         {
@@ -161,7 +164,7 @@ abstract public class Node extends AbstractActor {
         );
         try
         {
-            Thread.sleep(rand.nextInt(200));
+            Thread.sleep(rand.nextInt(10));
         } catch (InterruptedException e)
         {
             e.printStackTrace();
@@ -190,7 +193,7 @@ abstract public class Node extends AbstractActor {
             );
             logger.log(
                     LogLevel.INFO,
-                    "[NODE-" + this.nodeId + "] committed shared variable " + this.getHistory().get(e).get(i).number()
+                    "[NODE-" + this.nodeId + "] committed shared variable " + this.getHistory().get(e).get(i).first()
             );
         }
     }
