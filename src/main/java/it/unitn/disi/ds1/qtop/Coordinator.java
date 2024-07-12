@@ -101,6 +101,13 @@ public class Coordinator extends Node {
         Vote v = msg.vote();
         int e = msg.epoch().e();
         int i = msg.epoch().i();
+        if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
+        {
+            this.coordinatorCrash(
+                    e,
+                    i
+            );
+        }
         voters.insert(
                 e,
                 i,
@@ -138,13 +145,6 @@ public class Coordinator extends Node {
                         i
                 );
             }
-        }
-        else if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
-        {
-            this.coordinatorCrash(
-                    e,
-                    i
-            );
         }
     }
     
