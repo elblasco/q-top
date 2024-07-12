@@ -15,23 +15,27 @@ public class Receiver extends Node {
 
 	private final Logger logger = Logger.getInstance();
 
-	public Receiver(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout, int writeTimeout) {
+	public Receiver(int nodeId, ActorRef coordinator, int numberOfNodes, int decisionTimeout, int voteTimeout,
+			int writeTimeout) {
 		super(
 				nodeId,
 				decisionTimeout,
 				voteTimeout,
 				writeTimeout
 		);
+		super.setNumberOfNodes(numberOfNodes);
 		this.coordinator = coordinator;
 	}
 
-	static public Props props(int nodeId, ActorRef coordinator, int decisionTimeout, int voteTimeout,
+	static public Props props(int nodeId, ActorRef coordinator, int numberOfNodes, int decisionTimeout,
+			int voteTimeout,
 			int writeTimeout) {
 		return Props.create(
 				Receiver.class,
 				() -> new Receiver(
 						nodeId,
 						coordinator,
+						numberOfNodes,
 						decisionTimeout,
 						voteTimeout,
 						writeTimeout
@@ -97,7 +101,7 @@ public class Receiver extends Node {
 	}
 
 	private void onHeartBeat(HeartBeat msg) {
-		super.timeouts.deleteCountDown(
+		super.timeOutManager.deleteCountDown(
 				TimeOutReason.HEARTBEAT,
 				0,
 				nodeId,
@@ -114,7 +118,7 @@ public class Receiver extends Node {
 		int countDownIndex =
 				(msg.reason() == TimeOutReason.HEARTBEAT || msg.reason() == TimeOutReason.ELECTION) ? 0 : msg.epoch()
 						.i();
-		super.timeouts.handleCountDown(
+		super.timeOutManager.handleCountDown(
 				msg.reason(),
 				countDownIndex,
 				this,
@@ -140,7 +144,7 @@ public class Receiver extends Node {
 	}
 
 	private void onWriteResponse(WriteResponse msg) {
-		super.timeouts.deleteCountDown(
+		super.timeOutManager.deleteCountDown(
 				TimeOutReason.WRITE,
 				msg.nRequest(),
 				nodeId,
@@ -216,7 +220,7 @@ public class Receiver extends Node {
 	}
 
 	private void onElectionAck(ElectionACK msg) {
-		super.timeouts.deleteCountDown(
+		super.timeOutManager.deleteCountDown(
 				TimeOutReason.ELECTION,
 				0,
 				super.nodeId,
@@ -225,7 +229,7 @@ public class Receiver extends Node {
 	}
 
 	private void startWriteCountDown() {
-		super.timeouts.startCountDown(
+		super.timeOutManager.startCountDown(
 				TimeOutReason.WRITE,
 				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 						Duration.ZERO,
@@ -262,7 +266,7 @@ public class Receiver extends Node {
 	}
 
 	private void startElectionCountDown() {
-		super.timeouts.startCountDown(
+		super.timeOutManager.startCountDown(
 				TimeOutReason.ELECTION,
 				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 						Duration.ZERO,

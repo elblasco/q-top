@@ -149,6 +149,11 @@ public class Coordinator extends Node {
     }
     
     protected void onWriteRequest(WriteRequest msg) {
+        super.tell(
+                this.getSender(),
+                new WriteResponse(msg.nRequest()),
+                this.getSelf()
+        );
         int e = this.getHistory().isEmpty() ? 0 : this.getHistory().size() - 1;
         int i = this.getHistory().isEmpty() ? 0 : this.getHistory().get(e).size();
         this.epochPair = new EpochPair(
@@ -163,11 +168,6 @@ public class Coordinator extends Node {
         logger.log(
                 LogLevel.INFO,
                 "[NODE-" + this.nodeId + "][Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
-        );
-        super.tell(
-                this.getSender(),
-                new WriteResponse(msg.nRequest()),
-                this.getSelf()
         );
         multicast(new VoteRequest(
                 msg.newValue(),

@@ -22,10 +22,10 @@ abstract public class Node extends AbstractActor {
     public Utils.CrashType crashType = CrashType.NO_CRASH;
     public boolean crashed = false;
     private final int voteTimeout;
-    private int numberOfNodes;
+    protected TimeOutManager timeOutManager;
     public static Random rand = new Random();
     private PairsHistory history;
-    protected TimeOutManager timeouts;
+    private int numberOfNodes;
 
     private final Logger logger = Logger.getInstance();
 
@@ -37,7 +37,7 @@ abstract public class Node extends AbstractActor {
         this.decisionTimeout = decisionTimeout;
         this.voteTimeout = voteTimeout;
         this.writeTimeout = writeTimeout;
-        this.timeouts = new TimeOutManager(
+        this.timeOutManager = new TimeOutManager(
                 decisionTimeout,
                 voteTimeout,
                 HEARTBEAT_TIMEOUT,
@@ -112,7 +112,7 @@ abstract public class Node extends AbstractActor {
     }
 
     protected void startDecisionCountDown(int i, int e) {
-        this.timeouts.startCountDown(
+        this.timeOutManager.startCountDown(
                 TimeOutReason.DECISION,
                 this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
                         Duration.ZERO,
@@ -171,7 +171,7 @@ abstract public class Node extends AbstractActor {
     protected void onDecisionResponse(DecisionResponse msg) {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
-        this.timeouts.deleteCountDown(
+        this.timeOutManager.deleteCountDown(
                 TimeOutReason.DECISION,
                 i,
                 nodeId,
@@ -196,7 +196,7 @@ abstract public class Node extends AbstractActor {
     }
 
     protected void startHeartBeatCountDown() {
-        this.timeouts.startCountDown(
+        this.timeOutManager.startCountDown(
                 TimeOutReason.HEARTBEAT,
                 this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
                         Duration.ZERO,

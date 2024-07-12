@@ -45,7 +45,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		if (this.get(reason).isEmpty() || this.get(reason).size() < i)
 		{
 			int initialSize = this.get(reason).size();
-			for (int x = 0; x <= (i - initialSize) + 1; x++)
+			for (int x = 0; x <= (i - initialSize); x++)
 			{
 				// Padding of empty pairs
 				this.get(reason).add(new Pair<>(
@@ -60,13 +60,13 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				action,
 				this.customTimeouts.get(reason)
 		));
+		System.out.println("reason: " + reason + " with index " + i + " in " + this);
 	}
 
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
-		System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this.get(reason));
+		System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this);
 		if (this.get(reason).get(i).second() <= 0)
 		{
-			System.out.println("Deleted timer with index " + i);
 			this.deleteCountDown(
 					reason,
 					i,

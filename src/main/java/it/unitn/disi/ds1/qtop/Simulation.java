@@ -45,6 +45,7 @@ public class Simulation {
 			        Receiver.props(
 					        i,
 					        coordinator,
+					        numberOfNodes,
 					        decisionTimeout,
 					        voteTimeout,
 					        writeTimeout

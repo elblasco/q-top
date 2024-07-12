@@ -70,7 +70,10 @@ public class Client extends AbstractActor{
 			    Duration.ZERO,
 			    Duration.ofMillis(1000),
 			    this.getSelf(),
-			    new Utils.MakeRequest(r.nextBoolean(), r.nextInt(this.numberOfNodes)),
+			    new Utils.MakeRequest(
+					    r.nextBoolean(),
+					    r.nextInt(this.numberOfNodes)
+			    ),
 			    getContext().getSystem().dispatcher(),
 			    this.getSelf()
 	    );
