@@ -31,6 +31,10 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				Utils.TimeOutReason.WRITE,
 				writeTimeout
 		);
+		customTimeouts.put(
+				Utils.TimeOutReason.ELECTION,
+				Utils.ELECTION_TIMEOUT
+		);
 		this.refresh = refresh;
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
 		{
@@ -116,6 +120,20 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				this.get(reason).get(i).first().cancel();
 				break;
 		}
+	}
+
+	public void startElectionState() {
+		for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
+		{
+			for (Pair<Cancellable, Integer> element : entry.getValue())
+			{
+				element.first().cancel();
+			}
+		}
+	}
+
+	public void endElectionState() {
+		// TODO cancel Election ACK and ripristinare all the other timeouts
 	}
 
 	@Override
