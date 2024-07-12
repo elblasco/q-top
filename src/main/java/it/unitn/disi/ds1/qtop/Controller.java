@@ -10,8 +10,15 @@ public class Controller {
         this.ui = ui;
     }
 
-    public void startSimulation(int numberOfNodes, int numberOfClients ,int decisionTimeout, int voteTimeout) {
-        simulation.start(numberOfNodes, numberOfClients, decisionTimeout, voteTimeout);
+	public void startSimulation(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout,
+			int writeTimeout) {
+		simulation.start(
+				numberOfNodes,
+				numberOfClients,
+				decisionTimeout,
+				voteTimeout,
+				writeTimeout
+		);
         clientMenu();
     }
 

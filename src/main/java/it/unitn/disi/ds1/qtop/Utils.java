@@ -8,6 +8,7 @@ import java.util.List;
 
 public class Utils {
     final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
+    final static int ELECTION_TIMEOUT = 1000; // timeout for the heartbeat, ms
     public enum Vote {NO, YES}
 
     public enum Decision {ABORT, WRITEOK, PENDING}
@@ -26,7 +27,7 @@ public class Utils {
         }
     }
 
-    public enum TimeOutReason {HEARTBEAT, DECISION, VOTE}
+    public enum TimeOutReason {HEARTBEAT, DECISION, VOTE, WRITE, ELECTION}
 
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
@@ -59,6 +60,9 @@ public class Utils {
     public record CountDown(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
+    public record TimeOut(TimeOutReason reason) implements Serializable {
+    }
+
     public record HeartBeat() implements Serializable {
     }
 
@@ -71,13 +75,22 @@ public class Utils {
     public record ReadRequest() implements Serializable {
     }
 
-    public record WriteRequest(int newValue) implements Serializable {
+    public record WriteRequest(int newValue, int nRequest) implements Serializable {
+    }
+
+    public record WriteResponse(int nRequest) implements Serializable {
     }
 
     public record ReadValue(int value) implements Serializable {
     }
 
     public record EpochPair(int e, int i) implements Serializable {
+    }
+
+    public record Election(int highestEpoch, int highestIteration, int bestCandidateId) implements Serializable {
+    }
+
+    public record ElectionACK() implements Serializable {
     }
 
     public record Pair(int number, boolean toWrite) {

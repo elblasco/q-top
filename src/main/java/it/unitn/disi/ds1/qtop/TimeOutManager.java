@@ -5,14 +5,14 @@ import akka.japi.Pair;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Map;
 
 public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> {
 	// Phony map to associate a reason with its specific refresh ratio
 	private final EnumMap<Utils.TimeOutReason, Integer> customTimeouts;
 	private final int refresh;
 
-	public TimeOutManager(int decisionTimeout, int voteTimeout,
-			int heartbeatTimeout, int refresh) {
+	public TimeOutManager(int decisionTimeout, int voteTimeout, int heartbeatTimeout, int writeTimeout, int refresh) {
 		super(Utils.TimeOutReason.class);
 		this.customTimeouts = new EnumMap<>(Utils.TimeOutReason.class);
 		customTimeouts.put(
@@ -27,6 +27,10 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				Utils.TimeOutReason.DECISION,
 				decisionTimeout
 		);
+		customTimeouts.put(
+				Utils.TimeOutReason.WRITE,
+				writeTimeout
+		);
 		this.refresh = refresh;
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
 		{
@@ -38,10 +42,11 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	}
 
 	public void startCountDown(Utils.TimeOutReason reason, Cancellable action, int i) {
-		if (this.get(reason).size() < i)
+		if (this.get(reason).isEmpty() || this.get(reason).size() < i)
 		{
 			int initialSize = this.get(reason).size();
-			for (int x = 0; x < (i - initialSize); x++) {
+			for (int x = 0; x <= (i - initialSize) + 1; x++)
+			{
 				// Padding of empty pairs
 				this.get(reason).add(new Pair<>(
 						null,
@@ -49,16 +54,53 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				));
 			}
 		}
-		this.get(reason).add(new Pair<>(
+		this.get(reason).set(
+				i,
+				new Pair<>(
 				action,
 				this.customTimeouts.get(reason)
 		));
 	}
 
-	public void resetCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
+	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
+		System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this.get(reason));
+		if (this.get(reason).get(i).second() <= 0)
+		{
+			System.out.println("Deleted timer with index " + i);
+			this.deleteCountDown(
+					reason,
+					i,
+					node.nodeId,
+					logger
+			);
+			node.tell(
+					node.getSelf(),
+					new Utils.TimeOut(reason),
+					node.getSelf()
+			);
+		}
+		else
+		{
+			System.out.println("Modified timer with index " + i);
+			this.get(reason).set(
+					i,
+					new Pair<>(
+							this.get(reason).get(i).first(),
+							this.get(reason).get(i).second() - (this.customTimeouts.get(reason) / this.refresh)
+					)
+			);
+			logger.log(
+					Utils.LogLevel.DEBUG,
+					"[NODE-" + node.nodeId + "] has not received " + reason + " yet, " + this.get(reason).get(i)
+							.second() + " seconds left"
+			);
+		}
+	}
+
+	public void deleteCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
 		logger.log(
 				Utils.LogLevel.INFO,
-				"[NODE-" + nodeId + "] is reseting " + i + "th countdown for " + reason
+				"[NODE-" + nodeId + "] is resetting " + i + "th countdown for " + reason
 		);
 		switch (reason)
 		{
@@ -70,34 +112,25 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								this.customTimeouts.get(reason)
 						)
 				);
+				break;
 			default: // in all other cases the timeout countdown is cancelled
 				this.get(reason).get(i).first().cancel();
+				break;
 		}
 	}
 
-	public void handleCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger){
-		if (this.get(reason).get(i).second() <= 0)
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
 		{
-			this.get(reason).get(i).first().cancel();
-			logger.log(
-					Utils.LogLevel.INFO,
-					"[NODE-" + nodeId + "] " + reason + " timeout"
-			);
+			sb.append("[ ").append(entry.getKey());
+			for (Pair<Cancellable, Integer> element : entry.getValue())
+			{
+				sb.append(", ").append(element.second());
+			}
+			sb.append(" ]");
 		}
-		else
-		{
-			this.get(reason).set(
-					i,
-					new Pair<>(
-							this.get(reason).get(i).first(),
-							this.get(reason).get(i).second() - (this.customTimeouts.get(reason) / this.refresh)
-					)
-			);
-			logger.log(
-					Utils.LogLevel.DEBUG,
-					"[NODE-" + nodeId + "] has not received " + reason + " yet, " + this.get(reason).get(i)
-							.second() + " seconds left"
-			);
-		}
+		return sb.toString();
 	}
 }

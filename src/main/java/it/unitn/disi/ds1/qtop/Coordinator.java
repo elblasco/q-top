@@ -9,26 +9,35 @@ import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Coordinator extends Node {
     private VotersMap voters = new VotersMap();
-    private int numberOfNodes;
     private int quorum;
     private Cancellable[] heartBeat;
     private EpochPair epochPair;
 
     private final Logger logger = Logger.getInstance();
 
-    public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
+    public Coordinator(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout, int writeTimeout) {
         super(
                 nodeId,
                 decisionTimeout,
-                voteTimeout
+                voteTimeout,
+                writeTimeout
         );
-        this.numberOfNodes = numberOfNodes;
+        super.setNumberOfNodes(numberOfNodes);
         this.quorum = (numberOfNodes / 2) + 1;
-        heartBeat = new Cancellable[numberOfNodes];
+        this.heartBeat = new Cancellable[numberOfNodes];
     }
 
-    static public Props props(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout) {
-        return Props.create(Coordinator.class, () -> new Coordinator(nodeId, numberOfNodes, decisionTimeout, voteTimeout));
+    static public Props props(int nodeId, int numberOfNodes, int decisionTimeout, int voteTimeout, int writeTimeout) {
+        return Props.create(
+                Coordinator.class,
+                () -> new Coordinator(
+                        nodeId,
+                        numberOfNodes,
+                        decisionTimeout,
+                        voteTimeout,
+                        writeTimeout
+                )
+        );
     }
 
     @Override
@@ -60,7 +69,7 @@ public class Coordinator extends Node {
                 //Special handler for the self sent Heartbeat, the print is just for debug
                 this::onCountDown
         ).match(
-                Utils.CrashRequest.class,
+                CrashRequest.class,
                 super::onCrashRequest
         ).match(
                 WriteRequest.class,
@@ -102,7 +111,8 @@ public class Coordinator extends Node {
                 e,
                 i
         );
-        if ((isQuorumReached || voters.get(e).get(i).votes().size() == numberOfNodes) && this.voters.get(e).get(i)
+        if ((isQuorumReached || voters.get(e).get(i).votes().size() == super.getNumberOfNodes()) && this.voters.get(e)
+                .get(i)
                 .finalDecision() == Decision.PENDING)
         {
             if (this.crashType == CrashType.COORDINATOR_QUORUM)
@@ -137,8 +147,8 @@ public class Coordinator extends Node {
             );
         }
     }
-
-    private void onWriteRequest(WriteRequest msg) {
+    
+    protected void onWriteRequest(WriteRequest msg) {
         int e = this.getHistory().isEmpty() ? 0 : this.getHistory().size() - 1;
         int i = this.getHistory().isEmpty() ? 0 : this.getHistory().get(e).size();
         this.epochPair = new EpochPair(
@@ -149,6 +159,15 @@ public class Coordinator extends Node {
                 e,
                 i,
                 msg.newValue()
+        );
+        logger.log(
+                LogLevel.INFO,
+                "[NODE-" + this.nodeId + "][Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
+        );
+        super.tell(
+                this.getSender(),
+                new WriteResponse(msg.nRequest()),
+                this.getSelf()
         );
         multicast(new VoteRequest(
                 msg.newValue(),
@@ -202,7 +221,7 @@ public class Coordinator extends Node {
                 "[NODE-" + this.nodeId + "][Coordinator] starting heartbeat protocol"
         );
         // Yes the coordinator sends a Heartbeat to itself
-        for (int i = 0; i < numberOfNodes; ++ i)
+        for (int i = 0; i < super.getNumberOfNodes(); ++ i)
         {
             heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
                     Duration.ZERO,

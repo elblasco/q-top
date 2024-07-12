@@ -13,7 +13,8 @@ import static it.unitn.disi.ds1.qtop.Utils.*;
 
 abstract public class Node extends AbstractActor {
 
-    private static final int COUNTDOWN_REFRESH = 10;
+    protected static final int COUNTDOWN_REFRESH = 10;
+    protected final int writeTimeout;
     protected List<ActorRef> group;
     protected int viewId;
     protected final int nodeId;
@@ -21,23 +22,26 @@ abstract public class Node extends AbstractActor {
     public Utils.CrashType crashType = CrashType.NO_CRASH;
     public boolean crashed = false;
     private final int voteTimeout;
+    private int numberOfNodes;
     public static Random rand = new Random();
     private PairsHistory history;
     protected TimeOutManager timeouts;
 
     private final Logger logger = Logger.getInstance();
 
-    public Node(int nodeId, int decisionTimeout, int voteTimeout) {
+    public Node(int nodeId, int decisionTimeout, int voteTimeout, int writeTimeout) {
         super();
         this.history = new PairsHistory();
         this.viewId = 0;
         this.nodeId = nodeId;
         this.decisionTimeout = decisionTimeout;
         this.voteTimeout = voteTimeout;
+        this.writeTimeout = writeTimeout;
         this.timeouts = new TimeOutManager(
                 decisionTimeout,
                 voteTimeout,
                 HEARTBEAT_TIMEOUT,
+                writeTimeout,
                 Node.COUNTDOWN_REFRESH
         );
     }
@@ -68,20 +72,6 @@ abstract public class Node extends AbstractActor {
         }
     }
 
-    public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
-        dest.tell(
-                msg,
-                sender
-        );
-        try
-        {
-            Thread.sleep(rand.nextInt(100));
-        } catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Make a vote, fix it and then send it back to the coordinator.
      *
@@ -97,7 +87,10 @@ abstract public class Node extends AbstractActor {
                 msg.epoch().i(),
                 msg.newValue()
         );
-        this.startDecisionCountDown(msg.epoch().i());
+        this.startDecisionCountDown(
+                msg.epoch().i(),
+                msg.epoch().e()
+        );
         Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
         logger.log(
                 LogLevel.INFO,
@@ -116,6 +109,27 @@ abstract public class Node extends AbstractActor {
         {
             this.crash();
         }
+    }
+
+    protected void startDecisionCountDown(int i, int e) {
+        this.timeouts.startCountDown(
+                TimeOutReason.DECISION,
+                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+                        Duration.ZERO,
+                        Duration.ofMillis(this.decisionTimeout / COUNTDOWN_REFRESH),
+                        getSelf(),
+                        new CountDown(
+                                TimeOutReason.DECISION,
+                                new EpochPair(
+                                        e,
+                                        i
+                                )
+                        ),
+                        getContext().getSystem().dispatcher(),
+                        getSelf()
+                ),
+                i
+        );
     }
 
     public PairsHistory getHistory() {
@@ -140,31 +154,24 @@ abstract public class Node extends AbstractActor {
         }).build());
     }
 
-    protected void startDecisionCountDown(int i) {
-        this.timeouts.startCountDown(
-                TimeOutReason.DECISION,
-                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
-                        Duration.ZERO,
-                        Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
-                        getSelf(),
-                        new CountDown(
-                                TimeOutReason.DECISION,
-                                new EpochPair(
-                                        0,
-                                        i
-                                )
-                        ),
-                        getContext().getSystem().dispatcher(),
-                        getSelf()
-                ),
-                i
+    public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
+        dest.tell(
+                msg,
+                sender
         );
+        try
+        {
+            Thread.sleep(rand.nextInt(200));
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     protected void onDecisionResponse(DecisionResponse msg) {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
-        this.timeouts.resetCountDown(
+        this.timeouts.deleteCountDown(
                 TimeOutReason.DECISION,
                 i,
                 nodeId,
@@ -197,12 +204,23 @@ abstract public class Node extends AbstractActor {
                         getSelf(),
                         new CountDown(
                                 TimeOutReason.HEARTBEAT,
-                                null
+                                new EpochPair(
+                                        0,
+                                        0
+                                )
                         ),
                         getContext().getSystem().dispatcher(),
                         getSelf()
                 ),
                 0
         );
+    }
+
+    public int getNumberOfNodes() {
+        return this.numberOfNodes;
+    }
+
+    public void setNumberOfNodes(int numberOfNodes) {
+        this.numberOfNodes = numberOfNodes;
     }
 }

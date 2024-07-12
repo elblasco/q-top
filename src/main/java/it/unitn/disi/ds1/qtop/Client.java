@@ -45,6 +45,10 @@ public class Client extends AbstractActor{
 				Utils.ReadValue.class,
 		        this::onReadValue
         ).match(
+				        Utils.WriteResponse.class,
+				        tmp -> {
+				        }
+		        ).match(
 				Utils.VoteRequest.class,
 				        tmp -> {}
 		        ).match(
@@ -80,9 +84,18 @@ public class Client extends AbstractActor{
 			//WRITE
 			// the new values are from 0 to 100
 			int proposedValue = new Random().nextInt(101);
-			group.get(index).tell(new WriteRequest(proposedValue), this.getSelf());
-			logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] write req to " + index +
-					" of value "+ proposedValue);
+			group.get(index).tell(
+					new WriteRequest(
+							proposedValue,
+							- 1
+					),
+					this.getSelf()
+			);
+			logger.log(
+					LogLevel.INFO,
+					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write req to [NODE-" + index + "] of value "
+							+ proposedValue
+			);
 		}
 		else
 		{
