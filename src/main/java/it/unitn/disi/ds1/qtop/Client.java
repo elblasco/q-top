@@ -35,10 +35,7 @@ public class Client extends AbstractActor{
         return receiveBuilder().match(
                 StartMessage.class,
                 this::onStartMessage
-        ).match(Utils.ReadValue.class,
-		        value ->
-			        logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read done " + value)
-		).match(
+        ).match(
 				Utils.MakeRequest.class,
 		        this::onMakeRequest
         ).match(
@@ -101,7 +98,8 @@ public class Client extends AbstractActor{
 		int value = msg.value();
 		logger.log(
 				LogLevel.INFO,
-				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done " + value
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
+						"value " + value
 		);
 	}
 }

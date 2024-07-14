@@ -99,7 +99,7 @@ public class Utils {
     public record Quadruplet<ID, E, I>(ID destinationId, E highestEpoch, I highestIteration, ID bestCandidateId) {
     }
 
-    public record Synchronisation() implements Serializable {
+    public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
     }
 
 }

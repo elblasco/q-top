@@ -27,28 +27,28 @@ public class Simulation {
 
         // Create a "virtual synchrony manager"
 		ActorRef coordinator = system.actorOf(
-				Coordinator.props(
+				Node.props(
+						null,
 						0,
-						numberOfNodes,
 						decisionTimeout,
 						voteTimeout,
-						writeTimeout
+						writeTimeout,
+						numberOfNodes
 				),
 				"coordinator"
 		);
 		this.currentCoordinator = coordinator;
-
         // Create nodes and put them to a list
         group.add(coordinator);
         for (int i = 1; i < numberOfNodes ; i++) {
 	        group.add(system.actorOf(
-			        Receiver.props(
-					        i,
+			        Node.props(
 					        coordinator,
-					        numberOfNodes,
+					        i,
 					        decisionTimeout,
 					        voteTimeout,
-					        writeTimeout
+					        writeTimeout,
+					        numberOfNodes
 			        ),
 			        "node" + i
 	        ));

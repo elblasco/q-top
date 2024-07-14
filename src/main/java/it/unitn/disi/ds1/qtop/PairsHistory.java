@@ -24,23 +24,22 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 		{
 			for (int x = this.size() - 1; x >= 0; x--)
 			{
-				if (! this.get(x).isEmpty())
+				// If the current epoch is still empty, we have to check the previous epoch, i.e., -2
+				int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
+				for (int y = this.get(x).size() + endOffSet; y >= 0; y--)
 				{
-					for (int y = this.get(x).size() - 1; y >= 0; y--)
+					if (this.get(x).get(y) != null && this.get(x).get(y).second())
 					{
-						if (this.get(x).get(y) != null && this.get(x).get(y).second())
-						{
-							return this.get(x).get(y).first();
-						}
+						return this.get(x).get(y).first();
 					}
 				}
 			}
 		}
-		return - 1;
+		return - 15;
 	}
 
 	public void insert(int e, int i, int element) {
-		if (this.isEmpty() || this.size() < e)
+		if (this.isEmpty() || this.size() <= e)
 		{
 			int initialSize = this.size();
 			for (int j = 0; j <= (e - initialSize); j++)
@@ -71,5 +70,19 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 				latestEpoch,
 				latestIteration
 		);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		for (ArrayList<Pair<Integer, Boolean>> epoch : this)
+		{
+			for (Pair<Integer, Boolean> iteration : epoch)
+			{
+				result.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
+			}
+			result.append("\n");
+		}
+		return result.toString();
 	}
 }

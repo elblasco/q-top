@@ -93,7 +93,8 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 			);
 			logger.log(
 					Utils.LogLevel.DEBUG,
-					"[NODE-" + node.nodeId + "] has not received " + reason + " yet, " + this.get(reason).get(i).second() + " ms left"
+					"[NODE-" + node.getNodeId() + "] has not received " + reason + " yet, " + this.get(reason).get(i)
+							.second() + " ms left"
 			);
 		}
 	}
@@ -156,7 +157,14 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	}
 
 	public void endElectionState() {
-		// TODO cancel Election ACK and ripristinare all the other timeouts
+		this.clear();
+		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
+		{
+			this.put(
+					reason,
+					new ArrayList<>()
+			);
+		}
 	}
 
 	@Override
