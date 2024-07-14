@@ -3,6 +3,7 @@ package it.unitn.disi.ds1.qtop;
 import it.unitn.disi.ds1.qtop.Utils.LogLevel;
 
 import java.io.PrintWriter;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,6 @@ public class Logger {
     private PrintWriter writer;
 
     private Logger() {
-        logLevel = LogLevel.INFO;
         logs = new ArrayList<>();
         try {
             writer = new PrintWriter("simulation.log", "UTF-8");
@@ -46,7 +46,8 @@ public class Logger {
     public void log(LogLevel level, String message) {
         if (level.ordinal() >= logLevel.ordinal()) {
             String log = String.format(
-                    "[%s] %s",
+                    "[%s] [%s] %s",
+                    LocalTime.now(),
                     level,
                     message
             );

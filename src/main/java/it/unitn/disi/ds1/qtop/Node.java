@@ -79,7 +79,6 @@ abstract public class Node extends AbstractActor {
      *
      * @param msg request to make a vote
      */
-    // TODO add vote responses timeout
     protected void onVoteRequest(VoteRequest msg) {
         if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
         {
@@ -89,10 +88,6 @@ abstract public class Node extends AbstractActor {
                 msg.epoch().e(),
                 msg.epoch().i(),
                 msg.newValue()
-        );
-        this.startDecisionCountDown(
-                msg.epoch().i(),
-                msg.epoch().e()
         );
         Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
         logger.log(
@@ -112,27 +107,6 @@ abstract public class Node extends AbstractActor {
         {
             this.crash();
         }
-    }
-
-    protected void startDecisionCountDown(int i, int e) {
-        this.timeOutManager.startCountDown(
-                TimeOutReason.DECISION,
-                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
-                        Duration.ZERO,
-                        Duration.ofMillis(this.decisionTimeout / COUNTDOWN_REFRESH),
-                        getSelf(),
-                        new CountDown(
-                                TimeOutReason.DECISION,
-                                new EpochPair(
-                                        e,
-                                        i
-                                )
-                        ),
-                        getContext().getSystem().dispatcher(),
-                        getSelf()
-                ),
-                i
-        );
     }
 
     public PairsHistory getHistory() {
@@ -165,7 +139,6 @@ abstract public class Node extends AbstractActor {
         try
         {
             Thread.sleep(10);
-            //Thread.sleep(rand.nextInt(10));
         } catch (InterruptedException e)
         {
             e.printStackTrace();
@@ -175,15 +148,9 @@ abstract public class Node extends AbstractActor {
     protected void onDecisionResponse(DecisionResponse msg) {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
-        this.timeOutManager.deleteCountDown(
-                TimeOutReason.DECISION,
-                i,
-                nodeId,
-                logger
-        );
         logger.log(
                 LogLevel.INFO,
-                "[NODE-" + this.nodeId + "] decided " + msg.decision() + " for epoch < " + msg.epoch()
+                "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + msg.epoch()
                         .e() + ", " + msg.epoch().i() + " >"
         );
         if (msg.decision() == Decision.WRITEOK)

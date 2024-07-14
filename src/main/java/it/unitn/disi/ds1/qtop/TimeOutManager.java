@@ -24,10 +24,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				heartbeatTimeout
 		);
 		customTimeouts.put(
-				Utils.TimeOutReason.DECISION,
-				decisionTimeout
-		);
-		customTimeouts.put(
 				Utils.TimeOutReason.WRITE,
 				writeTimeout
 		);
@@ -67,16 +63,19 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		//System.out.println("reason: " + reason + " with index " + i + " in " + this);
 	}
 
+	/**
+	 * Decrease the time left for a specific count down
+	 *
+	 * @param reason
+	 * @param i
+	 * @param node
+	 * @param logger
+	 */
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
-		System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this);
+		//System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this);
 		if (this.get(reason).get(i).second() <= 0)
 		{
-			this.deleteCountDown(
-					reason,
-					i,
-					node.nodeId,
-					logger
-			);
+			this.get(reason).get(i).first().cancel();
 			node.tell(
 					node.getSelf(),
 					new Utils.TimeOut(reason),
@@ -94,21 +93,30 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 			);
 			logger.log(
 					Utils.LogLevel.DEBUG,
-					"[NODE-" + node.nodeId + "] has not received " + reason + " yet, " + this.get(reason).get(i)
-							.second() + " seconds left"
+					"[NODE-" + node.nodeId + "] has not received " + reason + " yet, " + this.get(reason).get(i).second() + " ms left"
 			);
 		}
 	}
 
-	public boolean deleteCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
+	/**
+	 * Reset a specific count down
+	 *
+	 * @param reason
+	 * @param i
+	 * @param nodeId
+	 * @param logger
+	 *
+	 * @return
+	 */
+	public boolean resetCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
 //		logger.log(
 //				Utils.LogLevel.INFO,
 //				"[NODE-" + nodeId + "] is resetting " + i + "th countdown for " + reason
-//		);
-		boolean ret = false;
+		//		);
+		boolean ret;
 		switch (reason)
 		{
-			case HEARTBEAT: // in the HEARTBEAT case the timer is reset to its max
+			case HEARTBEAT: // in the HEARTBEAT case the countdown is reset to its max
 				this.get(reason).set(
 						i,
 						new Pair<>(
@@ -120,21 +128,31 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				break;
 			default: // in all other cases the timeout countdown is cancelled
 				ret = this.get(reason).get(i).first().cancel();
-
 				break;
 		}
-
 		return ret;
 	}
 
 	public void startElectionState() {
+		//System.out.println(this);
 		for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
 		{
-			for (Pair<Cancellable, Integer> element : entry.getValue())
+			if (entry.getKey() != Utils.TimeOutReason.ELECTION)
 			{
-				element.first().cancel();
+				for (Pair<Cancellable, Integer> element : entry.getValue())
+				{
+					element.first().cancel();
+				}
 			}
 		}
+		//System.out.println(this);
+		/*try
+		{
+			Thread.sleep(5000);
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}*/
 	}
 
 	public void endElectionState() {
@@ -149,7 +167,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 			sb.append("[ ").append(entry.getKey());
 			for (Pair<Cancellable, Integer> element : entry.getValue())
 			{
-				sb.append(", ").append(element.second());
+				sb.append(", ").append(element.first().isCancelled()? "cancelled" : "active");
 			}
 			sb.append(" ]");
 		}

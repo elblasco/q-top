@@ -27,7 +27,7 @@ public class Utils {
         }
     }
 
-    public enum TimeOutReason {HEARTBEAT, DECISION, VOTE, WRITE, ELECTION}
+    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION}
 
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
@@ -98,5 +98,9 @@ public class Utils {
 
     public record Quadruplet<ID, E, I>(ID destinationId, E highestEpoch, I highestIteration, ID bestCandidateId) {
     }
+
+    public record Synchronisation() implements Serializable {
+    }
+
 }
 

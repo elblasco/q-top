@@ -44,19 +44,8 @@ public class Client extends AbstractActor{
         ).match(
 				Utils.ReadValue.class,
 		        this::onReadValue
-        ).match(
-				        Utils.WriteResponse.class,
-				        tmp -> {
-				        }
-		        ).match(
-				Utils.VoteRequest.class,
-				        tmp -> {}
-		        ).match(
-				        Utils.DecisionResponse.class,
-				        tmp -> {
-				        }
-		        )
-		        .build();
+        ).matchAny(tmp -> {
+        }).build();
     }
 
     /**

@@ -16,7 +16,7 @@ public class UserInterface implements SimulationCallback {
         int numberOfClients = 10;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
-        int writeTimeout = 1000;
+        int writeTimeout = 20000;
 
         System.out.println("Qtop - DS Project 2023/2024 - Blascovich Alessio, Cereser Lorenzo \n");
 
@@ -37,7 +37,8 @@ public class UserInterface implements SimulationCallback {
             System.out.println("2. Set the number of nodes [current: "+numberOfNodes+"]");
             System.out.println("3. Set the decision timeout in ms, [current: "+decisionTimeout+"ms]");
             System.out.println("4. Set the vote timeout in ms, [current: "+voteTimeout+"ms]");
-            System.out.println("5. Set the number of clients [current: " + numberOfClients + "]");
+            System.out.println("5. Set the write timeout in ms, [current: " + writeTimeout + "ms]");
+            System.out.println("6. Set the number of clients [current: " + numberOfClients + "]");
             System.out.println("_________________________________________________________________");
 
             input = scanner.nextInt();
@@ -65,6 +66,10 @@ public class UserInterface implements SimulationCallback {
                     voteTimeout = scanner.nextInt();
                     break;
                 case 5:
+                    System.out.println("Insert the write timeout in ms:");
+                    writeTimeout = scanner.nextInt();
+                    break;
+                case 6:
                     System.out.println("Insert the number of clients:");
                     numberOfClients = scanner.nextInt();
                     break;

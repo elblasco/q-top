@@ -83,6 +83,14 @@ public class Receiver extends Node {
 		).match(
 				ElectionACK.class,
 				this::onElectionAck
+		).match(
+				Synchronisation.class,
+				msg -> {
+					logger.log(
+							LogLevel.INFO,
+							"[NODE-" + super.nodeId + "] new leader is " + getSender() + " and my timeout map is " + super.timeOutManager
+					);
+				}
 		).build();
 	}
 
@@ -102,7 +110,7 @@ public class Receiver extends Node {
 	}
 
 	private void onHeartBeat(HeartBeat msg) {
-		super.timeOutManager.deleteCountDown(
+		super.timeOutManager.resetCountDown(
 				TimeOutReason.HEARTBEAT,
 				0,
 				nodeId,
@@ -145,7 +153,7 @@ public class Receiver extends Node {
 	}
 
 	private void onWriteResponse(WriteResponse msg) {
-		super.timeOutManager.deleteCountDown(
+		super.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
 				msg.nRequest(),
 				nodeId,
@@ -172,21 +180,61 @@ public class Receiver extends Node {
 		}
 	}
 
-	private void retryElection() {
-		int oldId = this.lastElectionData.destinationId();
-		int newId = (oldId + 1) % super.getNumberOfNodes();
-		this.lastElectionData = new Quadruplet<>(newId, this.lastElectionData.highestEpoch(), this.lastElectionData.highestIteration(), this.lastElectionData.bestCandidateId());
-		this.startElectionCountDown();
-
+	private void onElection(Election msg) {
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + super.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
+						"params: < e :" + msg.highestEpoch() + ", i :" + msg.highestIteration() + ">, best " +
+						"candidate received:" + msg.bestCandidateId()
+		);
 		super.tell(
-				super.group.get(newId),
-				new Election(
-						this.lastElectionData.highestEpoch(),
-						this.lastElectionData.highestIteration(),
-						this.lastElectionData.bestCandidateId()
-				),
+				this.getSender(),
+				new ElectionACK(),
 				this.getSelf()
 		);
+		int idDest = getNextNodeForElection();
+		Pair<Integer, Integer> nodeLatest = super.getHistory().getLatest();
+		if (this.isElection)
+		{
+			if (msg.bestCandidateId() == super.nodeId)
+			{
+				// TODO leader decided (It is me) multicast the SYNCHRONIZATION and upgrade to coordinator
+				//this.lastElectionData = null;
+				//this.isElection = false;
+				logger.log(
+						LogLevel.INFO,
+						"[NODE-" + super.nodeId + "] elected as supreme leader"
+				);
+				super.multicast(new Synchronisation());
+			}
+			else if (msg.highestEpoch() >= nodeLatest.first() && msg.highestIteration() >= nodeLatest.second() && msg.bestCandidateId() < super.nodeId)
+			{
+				this.forwardPreviousElectionMessage(
+						msg,
+						idDest
+				);
+			}
+		}
+		else
+		{
+			super.timeOutManager.startElectionState();
+			this.isElection = true;
+			if (msg.highestEpoch() >= nodeLatest.first() && msg.highestIteration() >= nodeLatest.second() && msg.bestCandidateId() < super.nodeId)
+			{
+				this.forwardPreviousElectionMessage(
+						msg,
+						idDest
+				);
+			}
+			else
+			{
+				this.sendNewElectionMessage(
+						nodeLatest,
+						idDest
+				);
+			}
+		}
+		this.startElectionCountDown();
 	}
 
 	private void startElection() {
@@ -219,9 +267,23 @@ public class Receiver extends Node {
 		}
 	}
 
+	private void onElectionAck(ElectionACK msg) {
+		boolean res = super.timeOutManager.resetCountDown(
+				TimeOutReason.ELECTION,
+				0,
+				super.nodeId,
+				logger
+		);
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + super.nodeId + "] received election ACK from [NODE-" + this.getSender() + "], timer " +
+						"stopped: " + res
+		);
+	}
+
 	private int getNextNodeForElection() {
 		int idDest = (super.nodeId + 1) % super.getNumberOfNodes();
-		while (super.group.get(idDest) == this.coordinator)
+		while (super.group.get(idDest) == this.coordinator && idDest != super.nodeId)
 		{
 			idDest = (idDest + 1) % super.getNumberOfNodes();
 		}
@@ -237,10 +299,7 @@ public class Receiver extends Node {
 						getSelf(),
 						new CountDown(
 								TimeOutReason.ELECTION,
-								new EpochPair(
-										0,
-										0
-								)
+								null
 						),
 						getContext().getSystem().dispatcher(),
 						getSelf()
@@ -249,17 +308,25 @@ public class Receiver extends Node {
 		);
 	}
 
-	private void onElectionAck(ElectionACK msg) {
-		boolean res = super.timeOutManager.deleteCountDown(
-				TimeOutReason.ELECTION,
-				0,
-				super.nodeId,
-				logger
+	private void retryElection() {
+		int oldId = this.lastElectionData.destinationId();
+		int newDestId = (oldId + 1) % super.getNumberOfNodes();
+		this.lastElectionData = new Quadruplet<>(
+				newDestId,
+				this.lastElectionData.highestEpoch(),
+				this.lastElectionData.highestIteration(),
+				this.lastElectionData.bestCandidateId()
 		);
-
-		logger.log(
-				LogLevel.INFO,
-				"[NODE-" + super.nodeId + "] received election ACK from [NODE-" + this.getSender() + "], timer stopped: " + res);
+		this.startElectionCountDown();
+		super.tell(
+				super.group.get(newDestId),
+				new Election(
+						this.lastElectionData.highestEpoch(),
+						this.lastElectionData.highestIteration(),
+						this.lastElectionData.bestCandidateId()
+				),
+				this.getSelf()
+		);
 	}
 
 	private void startWriteCountDown() {
@@ -281,58 +348,6 @@ public class Receiver extends Node {
 				),
 				this.numbersOfWrites
 		);
-	}
-
-	private void onElection(Election msg) {
-		logger.log(
-				LogLevel.INFO,
-				"[NODE-" + super.nodeId + "] received election message from [NODE-" + this.getSender() + "] with params: < e :" + msg.highestEpoch() + ", i :" + msg.highestIteration() + ">, best cand:" + msg.bestCandidateId()
-		);
-		super.tell(
-				this.getSender(),
-				new ElectionACK(),
-				this.getSelf()
-		);
-		int idDest = getNextNodeForElection();
-		Pair<Integer, Integer> nodeLatest = super.getHistory().getLatest();
-		if (this.isElection)
-		{
-			if (msg.bestCandidateId() == super.nodeId)
-			{
-				// TODO leader decided (It is me) multicast the SYNCHRONIZATION and upgrade to coordinator
-				this.lastElectionData = null;
-				logger.log(
-						LogLevel.INFO,
-						"[NODE-" + super.nodeId + "] elected as supreme leader"
-				);
-			}
-			else if (msg.highestIteration() > nodeLatest.second() && msg.highestEpoch() > nodeLatest.first())
-			{
-				this.forwardPreviousElectionMessage(
-						msg,
-						idDest
-				);
-			}
-		}
-		else
-		{
-			this.isElection = true;
-			if (msg.highestIteration() > nodeLatest.second() && msg.highestEpoch() > nodeLatest.first())
-			{
-				this.forwardPreviousElectionMessage(
-						msg,
-						idDest
-				);
-			}
-			else
-			{
-				this.sendNewElectionMessage(
-						nodeLatest,
-						idDest
-				);
-			}
-		}
-		this.startElectionCountDown();
 	}
 
 	private void forwardPreviousElectionMessage(Election msg, int idDest) {
