@@ -12,7 +12,7 @@ public class Receiver extends Node {
 	private ActorRef coordinator;
 	private boolean isElection = false;
 	private int numbersOfWrites = 0;
-	private Utils.Triple<Integer, Integer, Integer> lastElectionData;
+	private Utils.Quadruplet<Integer, Integer, Integer> lastElectionData;
 
 	private final Logger logger = Logger.getInstance();
 
@@ -165,11 +165,28 @@ public class Receiver extends Node {
 				this.startElection();
 				break;
 			case ELECTION:
-				// TODO election timeout handling, new next node computation and message sending
+				this.retryElection();
 				break;
 			default:
 				break;
 		}
+	}
+
+	private void retryElection() {
+		int oldId = this.lastElectionData.destinationId();
+		int newId = (oldId + 1) % super.getNumberOfNodes();
+		this.lastElectionData = new Quadruplet<>(newId, this.lastElectionData.highestEpoch(), this.lastElectionData.highestIteration(), this.lastElectionData.bestCandidateId());
+		this.startElectionCountDown();
+
+		super.tell(
+				super.group.get(newId),
+				new Election(
+						this.lastElectionData.highestEpoch(),
+						this.lastElectionData.highestIteration(),
+						this.lastElectionData.bestCandidateId()
+				),
+				this.getSelf()
+		);
 	}
 
 	private void startElection() {
@@ -177,15 +194,16 @@ public class Receiver extends Node {
 		{
 			logger.log(
 					LogLevel.INFO,
-					"[NODE-" + super.nodeId + "] started the election process"
+					"[NODE-" + super.nodeId + "] started the election process, my history is: < e:" + super.getHistory().getLatest().first() + ", i:" + super.getHistory().getLatest().second() + " >"
 			);
 			this.isElection = true;
 			int idDest = getNextNodeForElection();
 			Pair<Integer, Integer> latest = super.getHistory().getLatest();
-			this.lastElectionData = new Utils.Triple<>(
+			this.lastElectionData = new Utils.Quadruplet<>(
 					idDest,
 					latest.first(),
-					latest.second()
+					latest.second(),
+					super.nodeId
 			);
 			super.timeOutManager.startElectionState();
 			this.startElectionCountDown();
@@ -232,12 +250,16 @@ public class Receiver extends Node {
 	}
 
 	private void onElectionAck(ElectionACK msg) {
-		super.timeOutManager.deleteCountDown(
+		boolean res = super.timeOutManager.deleteCountDown(
 				TimeOutReason.ELECTION,
 				0,
 				super.nodeId,
 				logger
 		);
+
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + super.nodeId + "] received election ACK from [NODE-" + this.getSender() + "], timer stopped: " + res);
 	}
 
 	private void startWriteCountDown() {
@@ -264,7 +286,7 @@ public class Receiver extends Node {
 	private void onElection(Election msg) {
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + super.nodeId + "] received election message from [NODE-" + this.getSender() + "]"
+				"[NODE-" + super.nodeId + "] received election message from [NODE-" + this.getSender() + "] with params: < e :" + msg.highestEpoch() + ", i :" + msg.highestIteration() + ">, best cand:" + msg.bestCandidateId()
 		);
 		super.tell(
 				this.getSender(),
@@ -304,7 +326,7 @@ public class Receiver extends Node {
 			}
 			else
 			{
-				this.ForwardNewElectionMessage(
+				this.sendNewElectionMessage(
 						nodeLatest,
 						idDest
 				);
@@ -314,10 +336,14 @@ public class Receiver extends Node {
 	}
 
 	private void forwardPreviousElectionMessage(Election msg, int idDest) {
-		this.lastElectionData = new Utils.Triple<>(
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + super.nodeId + "] msg received from "+ this.getSender()+" is better, forwarding election message to [NODE-" + idDest + "]");
+		this.lastElectionData = new Utils.Quadruplet<>(
 				idDest,
 				msg.highestEpoch(),
-				msg.highestIteration()
+				msg.highestIteration(),
+				msg.bestCandidateId()
 		);
 		super.tell(
 				super.group.get(idDest),
@@ -326,11 +352,15 @@ public class Receiver extends Node {
 		);
 	}
 
-	private void ForwardNewElectionMessage(Pair<Integer, Integer> highestData, int idDest) {
-		this.lastElectionData = new Utils.Triple<>(
+	private void sendNewElectionMessage(Pair<Integer, Integer> highestData, int idDest) {
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + super.nodeId + "] switched election state, my history is :< e:"+ highestData.first()+","+highestData.second() +">, sending new election message to [NODE-" + idDest + "]");
+		this.lastElectionData = new Utils.Quadruplet<>(
 				idDest,
 				highestData.first(),
-				highestData.second()
+				highestData.second(),
+				super.nodeId
 		);
 		super.tell(
 				super.group.get(idDest),

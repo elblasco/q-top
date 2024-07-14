@@ -96,7 +96,7 @@ public class Utils {
     public record VotePair(HashMap<ActorRef, Vote> votes, Decision finalDecision) {
     }
 
-    public record Triple<ID, E, I>(ID first, E second, I third) {
+    public record Quadruplet<ID, E, I>(ID destinationId, E highestEpoch, I highestIteration, ID bestCandidateId) {
     }
 }
 

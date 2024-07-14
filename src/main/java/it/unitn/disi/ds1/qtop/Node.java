@@ -164,7 +164,8 @@ abstract public class Node extends AbstractActor {
         );
         try
         {
-            Thread.sleep(rand.nextInt(10));
+            Thread.sleep(10);
+            //Thread.sleep(rand.nextInt(10));
         } catch (InterruptedException e)
         {
             e.printStackTrace();

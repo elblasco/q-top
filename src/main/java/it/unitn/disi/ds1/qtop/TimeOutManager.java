@@ -68,7 +68,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	}
 
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
-		//System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this);
+		System.out.println("node: " + node.nodeId + " reason: " + reason + " with index " + i + " in " + this);
 		if (this.get(reason).get(i).second() <= 0)
 		{
 			this.deleteCountDown(
@@ -100,11 +100,12 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		}
 	}
 
-	public void deleteCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
-		logger.log(
-				Utils.LogLevel.INFO,
-				"[NODE-" + nodeId + "] is resetting " + i + "th countdown for " + reason
-		);
+	public boolean deleteCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
+//		logger.log(
+//				Utils.LogLevel.INFO,
+//				"[NODE-" + nodeId + "] is resetting " + i + "th countdown for " + reason
+//		);
+		boolean ret = false;
 		switch (reason)
 		{
 			case HEARTBEAT: // in the HEARTBEAT case the timer is reset to its max
@@ -115,11 +116,15 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								this.customTimeouts.get(reason)
 						)
 				);
+				ret = true;
 				break;
 			default: // in all other cases the timeout countdown is cancelled
-				this.get(reason).get(i).first().cancel();
+				ret = this.get(reason).get(i).first().cancel();
+
 				break;
 		}
+
+		return ret;
 	}
 
 	public void startElectionState() {
