@@ -25,7 +25,6 @@ public class Node extends AbstractActor {
 	//private EpochPair epochPair;
     private final int decisionTimeout;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
-	private boolean crashed = false;
     private final int voteTimeout;
 	private TimeOutManager timeOutManager;
 	private ActorRef coordinator;
@@ -149,7 +148,6 @@ public class Node extends AbstractActor {
     }
 
 	private void crash() {
-        this.crashed = true;
         this.getContext().become(receiveBuilder().matchAny(msg -> {
         }).build());
     }
