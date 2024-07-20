@@ -4,15 +4,13 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 public class Simulation {
     private final ActorSystem system;
     private List<ActorRef> group;
     private int numberOfNodes;
-	private HashSet<Integer> crashedNodes = new HashSet<>();
-	private ActorRef currentCoordinator;
 
     private final Logger logger = Logger.getInstance();
 
@@ -37,7 +35,6 @@ public class Simulation {
 				),
 				"coordinator"
 		);
-		this.currentCoordinator = coordinator;
         // Create nodes and put them to a list
         group.add(coordinator);
         for (int i = 1; i < numberOfNodes ; i++) {
@@ -74,15 +71,8 @@ public class Simulation {
 
     }
 
-    public int getNumberOfNodes() {
-        return this.numberOfNodes;
-    }
-
-    public boolean isNodeCrashed(int nodeId) {
-        return this.crashedNodes.contains(nodeId);
-    }
-
-    public void addCrashNode(int nodeId, int crashType) {
+	public void addCrashNode(int crashType) {
+		int clientId = new Random().nextInt(this.group.size() - this.numberOfNodes) + this.numberOfNodes;
         Utils.CrashType crashReason = switch (crashType)
         {
             case 1 -> Utils.CrashType.NODE_BEFORE_WRITE_REQUEST;
@@ -95,42 +85,30 @@ public class Simulation {
             case 8 -> Utils.CrashType.COORDINATOR_QUORUM;
             default -> Utils.CrashType.NO_CRASH;
         };
-		if (nodeId == -1)
-		{
 			// Crash messages are instantaneous
-			this.currentCoordinator.tell(
-										new Utils.CrashRequest(crashReason),
-										null
-										);
-			//TODO implement the insertion of coordinator in the set of crashed nodes
-			//this.crashedNodes.add(this.currentCoordinator);
-		}
-		else
-		{
-			// Crash messages are instantaneous
-			this.group.get(nodeId).tell(
-										new Utils.CrashRequest(crashReason),
-										null
-										);
-			this.crashedNodes.add(nodeId);
-		}
-    }
+		this.group.get(clientId).tell(
+				new Utils.CrashRequest(crashReason),
+				null
+		);
+	}
 
     public void exit() {
         logger.log(Utils.LogLevel.INFO, "Simulation terminated");
         system.terminate();
     }
 
-	public int readVariable(int node) {
+	public int readVariable() {
 		logger.log(
 				Utils.LogLevel.INFO,
-				"[CLIENT] Requesting the value of the shared variable from node " + node
+				"[CLIENT] Requesting the value of the shared variable"
 		);
 		return 0;
     }
 
-    public void writeVariable(int node, int value) {
-
-        logger.log(Utils.LogLevel.INFO, "[CLIENT] Requesting to write the value " + value + " to the shared variable from node " + node);
+	public void writeVariable(int value) {
+		logger.log(
+				Utils.LogLevel.INFO,
+				"[CLIENT] Requesting to write the value " + value
+		);
     }
 }
