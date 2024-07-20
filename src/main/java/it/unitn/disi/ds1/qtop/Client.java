@@ -35,24 +35,14 @@ public class Client extends AbstractActor{
         return receiveBuilder().match(
                 StartMessage.class,
                 this::onStartMessage
-        ).match(Utils.ReadValue.class,
-		        value ->
-			        logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read done " + value)
-		).match(
+        ).match(
 				Utils.MakeRequest.class,
 		        this::onMakeRequest
         ).match(
 				Utils.ReadValue.class,
 		        this::onReadValue
-        ).match(
-				Utils.VoteRequest.class,
-				        tmp -> {}
-		        ).match(
-				        Utils.DecisionResponse.class,
-				        tmp -> {
-				        }
-		        )
-		        .build();
+        ).matchAny(tmp -> {
+        }).build();
     }
 
     /**
@@ -66,7 +56,10 @@ public class Client extends AbstractActor{
 			    Duration.ZERO,
 			    Duration.ofMillis(1000),
 			    this.getSelf(),
-			    new Utils.MakeRequest(r.nextBoolean(), r.nextInt(this.numberOfNodes)),
+			    new Utils.MakeRequest(
+					    r.nextBoolean(),
+					    r.nextInt(this.numberOfNodes)
+			    ),
 			    getContext().getSystem().dispatcher(),
 			    this.getSelf()
 	    );
@@ -80,9 +73,18 @@ public class Client extends AbstractActor{
 			//WRITE
 			// the new values are from 0 to 100
 			int proposedValue = new Random().nextInt(101);
-			group.get(index).tell(new WriteRequest(proposedValue), this.getSelf());
-			logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] write req to " + index +
-					" of value "+ proposedValue);
+			group.get(index).tell(
+					new WriteRequest(
+							proposedValue,
+							- 1
+					),
+					this.getSelf()
+			);
+			logger.log(
+					LogLevel.INFO,
+					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write req to [NODE-" + index + "] of value "
+							+ proposedValue
+			);
 		}
 		else
 		{
@@ -94,6 +96,10 @@ public class Client extends AbstractActor{
 
 	private void onReadValue(Utils.ReadValue msg) {
 		int value = msg.value();
-		logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read done " + value);
+		logger.log(
+				LogLevel.INFO,
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
+						"value " + value
+		);
 	}
 }

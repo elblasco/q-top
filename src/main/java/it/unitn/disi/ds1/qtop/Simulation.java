@@ -21,23 +21,34 @@ public class Simulation {
         system = ActorSystem.create("qtop");
     }
 
-	public void start(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout) {
+	public void start(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout, int writeTimeout) {
         // Set initial number of nodes
         this.numberOfNodes = numberOfNodes;
 
         // Create a "virtual synchrony manager"
-        ActorRef coordinator = system.actorOf(Coordinator.props(0,numberOfNodes,decisionTimeout,voteTimeout), "coordinator");
+		ActorRef coordinator = system.actorOf(
+				Node.props(
+						null,
+						0,
+						decisionTimeout,
+						voteTimeout,
+						writeTimeout,
+						numberOfNodes
+				),
+				"coordinator"
+		);
 		this.currentCoordinator = coordinator;
-
         // Create nodes and put them to a list
         group.add(coordinator);
         for (int i = 1; i < numberOfNodes ; i++) {
 	        group.add(system.actorOf(
-			        Receiver.props(
-					        i,
+			        Node.props(
 					        coordinator,
+					        i,
 					        decisionTimeout,
-					        voteTimeout
+					        voteTimeout,
+					        writeTimeout,
+					        numberOfNodes
 			        ),
 			        "node" + i
 	        ));
