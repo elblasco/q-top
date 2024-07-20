@@ -4,7 +4,6 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.japi.Pair;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -23,8 +22,7 @@ public class Node extends AbstractActor {
 	private VotersMap voters = new VotersMap();
 	private Cancellable[] heartBeat;
 	private List<ActorRef> group;
-	private int viewId;
-	private EpochPair epochPair;
+	//private EpochPair epochPair;
     private final int decisionTimeout;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
 	private boolean crashed = false;
@@ -43,17 +41,16 @@ public class Node extends AbstractActor {
 			int numberOfNodes) {
         super();
         this.history = new PairsHistory();
-        this.viewId = 0;
         this.nodeId = nodeId;
         this.decisionTimeout = decisionTimeout;
         this.voteTimeout = voteTimeout;
         this.writeTimeout = writeTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
-		this.epochPair = new EpochPair(
+		/*this.epochPair = new EpochPair(
 				0,
 				0
-		);
+		);*/
         this.timeOutManager = new TimeOutManager(
                 decisionTimeout,
                 voteTimeout,
@@ -112,7 +109,7 @@ public class Node extends AbstractActor {
         {
             this.crash();
         }
-        this.history.insert(
+	    this.history.insert(
                 msg.epoch().e(),
                 msg.epoch().i(),
                 msg.newValue()
@@ -187,7 +184,8 @@ public class Node extends AbstractActor {
             );
             logger.log(
                     LogLevel.INFO,
-		            "[NODE-" + this.nodeId + "] committed shared variable " + this.history.get(e).get(i).first()
+		            "[NODE-" + this.nodeId + "] committed shared variable " + this.history.get(e).get(i)
+				            .first() + " now the history is\n" + this.history
             );
         }
     }
@@ -216,18 +214,15 @@ public class Node extends AbstractActor {
 	private void onSynchronisation(Synchronisation msg) {
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received synchronisation message"
+				"[NODE-" + this.nodeId + "] received synchronisation message, the epoch is going to be <" + msg.newEpochPair()
+						.e() + ", " + msg.newEpochPair().i() + ">"
 		);
 		this.coordinator = this.getSender();
 		this.isElection = false;
 		this.lastElectionData = null;
 		this.history = msg.history();
-		this.epochPair = msg.newEpochPair();
+		//this.epochPair = msg.newEpochPair();
 		this.timeOutManager.endElectionState();
-		logger.log(
-				LogLevel.WARN,
-				"[NODE-" + this.nodeId + "] has now countdown manager: " + this.timeOutManager
-		);
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable() + " with " + "history\n" + this.history
@@ -391,7 +386,7 @@ public class Node extends AbstractActor {
 				this.getSelf()
 		);
 		int idDest = getNextNodeForElection();
-		Pair<Integer, Integer> nodeLatest = this.history.getLatest();
+		EpochPair nodeLatest = this.history.getLatest();
 		if (this.isElection)
 		{
 			if (msg.bestCandidateId() == this.nodeId)
@@ -399,20 +394,20 @@ public class Node extends AbstractActor {
 				this.becomeCoordinator();
 				this.isElection = false;
 				this.timeOutManager.endElectionState();
-				this.epochPair = new EpochPair(
+				/*this.epochPair = new EpochPair(
 						this.epochPair.e() + 1,
 						0
-				);
+				);*/
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] elected as supreme leader with countdown manager: " + this.timeOutManager
 				);
 				this.multicast(new Synchronisation(
 						this.history,
-						this.epochPair
+						this.history.getLatest()
 				));
 			}
-			else if (msg.highestEpoch() >= nodeLatest.first() && msg.highestIteration() >= nodeLatest.second() && msg.bestCandidateId() < this.nodeId)
+			else if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
@@ -431,7 +426,7 @@ public class Node extends AbstractActor {
 		{
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
-			if (msg.highestEpoch() >= nodeLatest.first() && msg.highestIteration() >= nodeLatest.second() && msg.bestCandidateId() < this.nodeId)
+			if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
@@ -454,15 +449,15 @@ public class Node extends AbstractActor {
 			logger.log(
 					LogLevel.INFO,
 					"[NODE-" + this.nodeId + "] started the election process, my history is: < e:" + this.history.getLatest()
-							.first() + ", i:" + this.history.getLatest().second() + " >"
+							.e() + ", i:" + this.history.getLatest().i() + " >"
 			);
 			this.isElection = true;
 			int idDest = getNextNodeForElection();
-			Pair<Integer, Integer> latest = this.history.getLatest();
+			EpochPair latest = this.history.getLatest();
 			this.lastElectionData = new Utils.Quadruplet<>(
 					idDest,
-					latest.first(),
-					latest.second(),
+					latest.e(),
+					latest.i(),
 					this.nodeId
 			);
 			this.timeOutManager.startElectionState();
@@ -528,7 +523,7 @@ public class Node extends AbstractActor {
 				this.lastElectionData.bestCandidateId()
 		);
 		this.sendNewElectionMessage(
-				new Pair<>(
+				new EpochPair(
 						this.lastElectionData.highestEpoch(),
 						this.lastElectionData.highestIteration()
 				),
@@ -576,23 +571,23 @@ public class Node extends AbstractActor {
 		);
 	}
 
-	private void sendNewElectionMessage(Pair<Integer, Integer> highestData, int idDest) {
+	private void sendNewElectionMessage(EpochPair highestData, int idDest) {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] switched election state, my history is :< e:" + highestData.first() + "," + highestData.second() + ">, sending new election message to [NODE-" + idDest + "]"
+				"[NODE-" + this.nodeId + "] switched election state, my history is :< e:" + highestData.e() + "," + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
 		);
 		this.lastElectionData = new Utils.Quadruplet<>(
 				idDest,
-				highestData.first(),
-				highestData.second(),
+				highestData.e(),
+				highestData.i(),
 				this.nodeId
 		);
 		this.tell(
 				this.group.get(idDest),
 				new Election(
-						highestData.first(),
-						highestData.second(),
+						highestData.e(),
+						highestData.i(),
 						this.nodeId
 				),
 				this.getSelf()
@@ -719,10 +714,10 @@ public class Node extends AbstractActor {
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
 		int i = this.history.isEmpty() ? 0 : this.history.get(e).size();
-		this.epochPair = new EpochPair(
+		/*this.epochPair = new EpochPair(
 				e,
-				i
-		);
+				i + 1
+		);*/
 		this.history.insert(
 				e,
 				i,
@@ -734,7 +729,8 @@ public class Node extends AbstractActor {
 		);
 		multicast(new VoteRequest(
 				msg.newValue(),
-				epochPair
+				new EpochPair(e,
+						i)
 		));
 		logger.log(
 				LogLevel.INFO,
