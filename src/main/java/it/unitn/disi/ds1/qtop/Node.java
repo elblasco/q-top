@@ -121,7 +121,8 @@ public class Node extends AbstractActor {
         logger.log(
                 LogLevel.INFO,
                 "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + msg.epoch()
-                        .e() + ", " + msg.epoch().i() + " > and variable " + msg.newValue()
+		                .e() + ", " + msg.epoch()
+		                .i() + " > and variable " + msg.newValue() + "\nMy election state is " + this.isElection
         );
         this.tell(
                 this.getSender(),
@@ -224,6 +225,10 @@ public class Node extends AbstractActor {
 		this.epochPair = msg.newEpochPair();
 		this.timeOutManager.endElectionState();
 		logger.log(
+				LogLevel.WARN,
+				"[NODE-" + this.nodeId + "] has now countdown manager: " + this.timeOutManager
+		);
+		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable() + " with " + "history\n" + this.history
 		);
@@ -310,6 +315,13 @@ public class Node extends AbstractActor {
 	 * @param msg Genre of countdown
 	 */
 	private void onCountDown(CountDown msg) {
+		if (msg.reason() == TimeOutReason.ELECTION)
+		{
+			logger.log(
+					LogLevel.WARN,
+					"[NODE-" + this.nodeId + "] received a countdown of type " + msg.reason()
+			);
+		}
 		int countDownIndex =
 				(msg.reason() == TimeOutReason.HEARTBEAT || msg.reason() == TimeOutReason.ELECTION) ? 0 : msg.epoch()
 						.i();
@@ -384,8 +396,8 @@ public class Node extends AbstractActor {
 		{
 			if (msg.bestCandidateId() == this.nodeId)
 			{
-				// TODO leader decided (It is me) multicast the SYNCHRONIZATION and upgrade to coordinator
 				this.becomeCoordinator();
+				this.isElection = false;
 				this.timeOutManager.endElectionState();
 				this.epochPair = new EpochPair(
 						this.epochPair.e() + 1,
@@ -393,7 +405,7 @@ public class Node extends AbstractActor {
 				);
 				logger.log(
 						LogLevel.INFO,
-						"[NODE-" + this.nodeId + "] elected as supreme leader"
+						"[NODE-" + this.nodeId + "] elected as supreme leader with countdown manager: " + this.timeOutManager
 				);
 				this.multicast(new Synchronisation(
 						this.history,
@@ -405,6 +417,13 @@ public class Node extends AbstractActor {
 				this.forwardPreviousElectionMessage(
 						msg,
 						idDest
+				);
+			}
+			else
+			{
+				logger.log(
+						LogLevel.INFO,
+						"[NODE-" + this.nodeId + "] is not going to forward election message from " + this.getSender()
 				);
 			}
 		}
@@ -478,6 +497,10 @@ public class Node extends AbstractActor {
 	}
 
 	private void startElectionCountDown() {
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] starting election countdown"
+		);
 		this.timeOutManager.startCountDown(
 				TimeOutReason.ELECTION,
 				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
@@ -538,7 +561,7 @@ public class Node extends AbstractActor {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] msg received from " + this.getSender() + " is better, forwarding election" + " message to [NODE-" + idDest + "]"
+				"[NODE-" + this.nodeId + "] forwarding election message with best candidate " + msg.bestCandidateId()
 		);
 		this.lastElectionData = new Utils.Quadruplet<>(
 				idDest,
