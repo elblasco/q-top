@@ -63,10 +63,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 		));
 	}
 
-	public Pair<Integer, Integer> getLatest() {
+	public Utils.EpochPair getLatest() {
 		int latestEpoch = (this.isEmpty()) ? 0 : this.size() - 1;
 		int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
-		return new Pair<>(
+		return new Utils.EpochPair(
 				latestEpoch,
 				latestIteration
 		);
@@ -74,15 +74,16 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for (ArrayList<Pair<Integer, Boolean>> epoch : this)
 		{
+			sb.append("[ ");
 			for (Pair<Integer, Boolean> iteration : epoch)
 			{
-				result.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
+				sb.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
 			}
-			result.append("\n");
+			sb.append("]\n");
 		}
-		return result.toString();
+		return sb.toString();
 	}
 }
