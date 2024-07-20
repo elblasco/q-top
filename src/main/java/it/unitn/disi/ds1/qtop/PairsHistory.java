@@ -1,23 +1,23 @@
 package it.unitn.disi.ds1.qtop;
 
-
 import akka.japi.Pair;
 
 import java.util.ArrayList;
 
-public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
+public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decision>>> {
 	public PairsHistory() {
 		super();
 	}
 
-	public void setStateToTrue(int e, int i) {
+	public void setState(int e, int i, Utils.Decision finalState) {
 		this.get(e).set(i,
 				new Pair<>(
 						this.get(e).get(i).first(),
-						true
+						finalState
 				)
 		);
 	}
+
 
 	public int readValidVariable() {
 		if (! this.isEmpty())
@@ -28,7 +28,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 				int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
 				for (int y = this.get(x).size() + endOffSet; y >= 0; y--)
 				{
-					if (this.get(x).get(y) != null && this.get(x).get(y).second())
+					if (this.get(x).get(y) != null && this.get(x).get(y).second() == Utils.Decision.WRITEOK)
 					{
 						return this.get(x).get(y).first();
 					}
@@ -59,7 +59,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 				i,
 				new Pair<>(
 				element,
-				false
+						Utils.Decision.PENDING
 		));
 	}
 
@@ -75,10 +75,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Boolean>>> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (ArrayList<Pair<Integer, Boolean>> epoch : this)
+		for (ArrayList<Pair<Integer, Utils.Decision>> epoch : this)
 		{
 			sb.append("[ ");
-			for (Pair<Integer, Boolean> iteration : epoch)
+			for (Pair<Integer, Utils.Decision> iteration : epoch)
 			{
 				sb.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
 			}
