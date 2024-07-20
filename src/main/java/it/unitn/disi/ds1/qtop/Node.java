@@ -176,19 +176,18 @@ public class Node extends AbstractActor {
                 "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + msg.epoch()
                         .e() + ", " + msg.epoch().i() + " >"
         );
-        if (msg.decision() == Decision.WRITEOK)
-        {
-	        this.history.setStateToTrue(
-                    e,
-                    i
-            );
-            logger.log(
-                    LogLevel.INFO,
-		            "[NODE-" + this.nodeId + "] committed shared variable " + this.history.get(e).get(i)
-				            .first() + " now the history is\n" + this.history
-            );
-        }
-    }
+		this.history.setState(
+				e,
+				i,
+				msg.decision()
+		);
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] decided " + msg.decision() + " on shared variable " + this.history.get(e)
+						.get(i).first() + " now the history is\n" + this.history
+		);
+
+	}
 
 	private void startHeartBeatCountDown() {
         this.timeOutManager.startCountDown(
@@ -398,6 +397,7 @@ public class Node extends AbstractActor {
 						this.epochPair.e() + 1,
 						0
 				);*/
+				this.history.add(new ArrayList<>());
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] elected as supreme leader with countdown manager: " + this.timeOutManager
@@ -696,13 +696,11 @@ public class Node extends AbstractActor {
 					this.voters.get(e).get(i).finalDecision(),
 					msg.epoch()
 			));
-			if (this.voters.get(e).get(i).finalDecision() == Decision.WRITEOK)
-			{
-				this.history.setStateToTrue(
-						e,
-						i
-				);
-			}
+			this.history.setState(
+					e,
+					i,
+					this.voters.get(e).get(i).finalDecision()
+			);
 		}
 	}
 
@@ -713,7 +711,8 @@ public class Node extends AbstractActor {
 				this.getSelf()
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
-		int i = this.history.isEmpty() ? 0 : this.history.get(e).size();
+		int i = (this.history.isEmpty() || this.history.get(e).isEmpty()) ? 0 : this.history.get(e).size();
+		System.out.println("e: " + e + " i: " + i);
 		/*this.epochPair = new EpochPair(
 				e,
 				i + 1
