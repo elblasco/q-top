@@ -41,6 +41,9 @@ public class Client extends AbstractActor{
         ).match(
 				Utils.ReadValue.class,
 		        this::onReadValue
+        ).match(
+		        Utils.CrashRequest.class,
+		        this::onCrashRequest
         ).matchAny(tmp -> {
         }).build();
     }
@@ -100,6 +103,13 @@ public class Client extends AbstractActor{
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
 						"value " + value
+		);
+	}
+
+	private void onCrashRequest(Utils.CrashRequest msg) {
+		logger.log(
+				LogLevel.INFO,
+				"[CLIENT-" + this.clientId + "] crash request to " + getSender()
 		);
 	}
 }
