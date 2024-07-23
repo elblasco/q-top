@@ -108,6 +108,7 @@ public class Node extends AbstractActor {
         if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
         {
             this.crash();
+	        return;
         }
 	    this.history.insert(
                 msg.epoch().e(),
@@ -136,17 +137,26 @@ public class Node extends AbstractActor {
     }
 
 	private void onReadRequest(ReadRequest msg) {
+		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
+		{
+			this.coordinatorCrash();
+			return;
+		}
 		this.tell(
 				this.getSender(),
 				new ReadValue(this.history.readValidVariable()),
                 this.getSelf()
         );
+		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
+		{
+			this.coordinatorCrash();
+		}
     }
 
 	private void crash() {
 		logger.log(
 				LogLevel.ERROR,
-				"[NODE-" + this.nodeId + "]" + ((getSelf() == coordinator) ? "[Coordinator]" : "") + " crashed!!!"
+				"[NODE-" + this.nodeId + "] crashed!!!"
 		);
         this.getContext().become(receiveBuilder().matchAny(msg -> {
         }).build());
@@ -337,6 +347,7 @@ public class Node extends AbstractActor {
 		if (this.crashType == CrashType.NODE_BEFORE_WRITE_REQUEST)
 		{
 			this.crash();
+			return;
 		}
 		this.tell(
 				this.coordinator,
@@ -709,10 +720,7 @@ public class Node extends AbstractActor {
 		int i = msg.epoch().i();
 		if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
 		{
-			this.coordinatorCrash(
-					e,
-					i
-			);
+			this.coordinatorCrash();
 		}
 		voters.insert(
 				e,
@@ -729,10 +737,7 @@ public class Node extends AbstractActor {
 		{
 			if (this.crashType == CrashType.COORDINATOR_QUORUM)
 			{
-				this.coordinatorCrash(
-						e,
-						i
-				);
+				this.coordinatorCrash();
 			}
 			fixCoordinatorDecision(
 					isQuorumReached ? Decision.WRITEOK : Decision.ABORT,
@@ -752,6 +757,11 @@ public class Node extends AbstractActor {
 	}
 
 	private void coordinatorOnWriteRequest(WriteRequest msg) {
+		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
+		{
+			this.coordinatorCrash();
+			return;
+		}
 		this.tell(
 				this.getSender(),
 				new WriteResponse(msg.nRequest()),
@@ -782,6 +792,10 @@ public class Node extends AbstractActor {
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "][Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
 		);
+		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
+		{
+			this.coordinatorCrash();
+		}
 	}
 
 	private void coordinatorOnCountDown(CountDown msg) {
@@ -915,7 +929,7 @@ public class Node extends AbstractActor {
 		this.crashTypeToFoward = null;
 	}
 
-	private void coordinatorCrash(int e, int i) {
+	private void coordinatorCrash() {
 		for (Cancellable heart : heartBeat)
 		{
 			heart.cancel();
