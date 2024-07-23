@@ -13,7 +13,8 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	private final int refresh;
 	private final static Logger logger = Logger.getInstance();
 
-	public TimeOutManager(int decisionTimeout, int voteTimeout, int heartbeatTimeout, int writeTimeout, int refresh) {
+	public TimeOutManager(int voteTimeout, int heartbeatTimeout, int writeTimeout, int crashResponseTimeout,
+			int refresh) {
 		super(Utils.TimeOutReason.class);
 		this.customTimeouts = new EnumMap<>(Utils.TimeOutReason.class);
 		customTimeouts.put(
@@ -31,6 +32,10 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		customTimeouts.put(
 				Utils.TimeOutReason.ELECTION,
 				Utils.ELECTION_TIMEOUT
+		);
+		customTimeouts.put(
+				Utils.TimeOutReason.CRASH_RESPONSE,
+				crashResponseTimeout
 		);
 		this.refresh = refresh;
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
@@ -77,9 +82,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 * @param logger
 	 */
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
-		try
-		{
-			if (this.get(reason).get(i).second() <= 0)
+		if (this.get(reason).get(i).second() <= 0)
 			{
 				this.get(reason).get(i).first().cancel();
 				node.tell(
@@ -103,13 +106,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								.get(i).second() + " ms left"
 				);
 			}
-		} catch (IndexOutOfBoundsException e)
-		{
-			logger.log(
-					Utils.LogLevel.ERROR,
-					"[NODE-" + node.getNodeId() + "] had trouble with index " + i + " for a " + reason + " countdown"
-			);
-		}
+
 	}
 
 	/**

@@ -27,7 +27,7 @@ public class Utils {
         }
     }
 
-    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION}
+    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION, CRASH_RESPONSE}
 
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
@@ -102,5 +102,7 @@ public class Utils {
     public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
     }
 
+    public record CrashACK() implements Serializable {
+    }
 }
 

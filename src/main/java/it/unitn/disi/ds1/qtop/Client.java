@@ -2,6 +2,7 @@ package it.unitn.disi.ds1.qtop;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.Cancellable;
 import akka.actor.Props;
 import it.unitn.disi.ds1.qtop.Utils.ReadRequest;
 import it.unitn.disi.ds1.qtop.Utils.WriteRequest;
@@ -14,16 +15,22 @@ import static it.unitn.disi.ds1.qtop.Utils.LogLevel;
 import static it.unitn.disi.ds1.qtop.Utils.StartMessage;
 
 public class Client extends AbstractActor{
-    private final Logger logger = Logger.getInstance();
+	private static final int CRASH_TIMEOUT = 1000;
+	private static final Random rand = new Random();
+	private static final Logger logger = Logger.getInstance();
 	private final int clientId;
 	private List<ActorRef> group;
 	private int numberOfNodes;
+	private int timeOutCounter;
+	private Cancellable crashTimeOut;
+	private Utils.CrashType cachedCrashType;
 
     public Client(int clientId, List<ActorRef> group, int numberOfNodes) {
         super();
         this.clientId = clientId;
 		this.group = group;
 		this.numberOfNodes = numberOfNodes;
+	    this.timeOutCounter = CRASH_TIMEOUT;
     }
 
     static public Props props(int clientId, List<ActorRef> group, int numberOfNodes) {
@@ -44,6 +51,15 @@ public class Client extends AbstractActor{
         ).match(
 		        Utils.CrashRequest.class,
 		        this::onCrashRequest
+        ).match(
+		        Utils.TimeOut.class,
+		        this::onTimeOut
+        ).match(
+		        Utils.CrashACK.class,
+		        this::onCrashACK
+        ).match(
+		        Utils.CountDown.class,
+		        this::onCountDown
         ).matchAny(tmp -> {
         }).build();
     }
@@ -68,6 +84,23 @@ public class Client extends AbstractActor{
 	    );
 
     }
+
+	private void onTimeOut(Utils.TimeOut msg) {
+		if (msg.reason() == Utils.TimeOutReason.CRASH_RESPONSE)
+		{
+			this.crashTimeOut.cancel();
+			logger.log(
+					LogLevel.INFO,
+					"[CLIENT-" + this.clientId + "] crash response not received, I am going to resend it"
+			);
+			this.timeOutCounter = CRASH_TIMEOUT;
+			// make another crash request to another random `Node`
+			getSelf().tell(
+					new Utils.CrashRequest(this.cachedCrashType),
+					getSelf()
+			);
+		}
+	}
 
 	private void onMakeRequest(Utils.MakeRequest msg){
 		int index = msg.indexTarget();
@@ -106,10 +139,48 @@ public class Client extends AbstractActor{
 		);
 	}
 
+	private void onCountDown(Utils.CountDown msg) {
+		if (msg.reason() == Utils.TimeOutReason.CRASH_RESPONSE)
+		{
+			if (this.timeOutCounter <= 0)
+			{
+				getSelf().tell(
+						new Utils.TimeOut(Utils.TimeOutReason.CRASH_RESPONSE),
+						getSelf()
+				);
+			}
+			else
+			{
+				this.timeOutCounter -= CRASH_TIMEOUT / 100;
+			}
+		}
+	}
+
 	private void onCrashRequest(Utils.CrashRequest msg) {
+		this.cachedCrashType = msg.crashType();
+		this.crashTimeOut = this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+				Duration.ZERO,
+				Duration.ofMillis(100),
+				getSelf(),
+				new Utils.CountDown(
+						Utils.TimeOutReason.CRASH_RESPONSE,
+						null
+				),
+				getContext().getSystem().dispatcher(),
+				getSelf()
+		);
+		this.group.get(rand.nextInt(this.numberOfNodes)).tell(
+				msg,
+				getSelf()
+		);
+	}
+
+	private void onCrashACK(Utils.CrashACK msg) {
+		this.crashTimeOut.cancel();
+		this.timeOutCounter = CRASH_TIMEOUT;
 		logger.log(
 				LogLevel.INFO,
-				"[CLIENT-" + this.clientId + "] crash request to " + getSender()
+				"[CLIENT-" + this.clientId + "] received crash ack from " + getSender()
 		);
 	}
 }

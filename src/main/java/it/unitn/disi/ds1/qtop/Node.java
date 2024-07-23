@@ -25,6 +25,7 @@ public class Node extends AbstractActor {
 	//private EpochPair epochPair;
     private final int decisionTimeout;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
+	private Utils.CrashType crashTypeToFoward = CrashType.NO_CRASH;
     private final int voteTimeout;
 	private TimeOutManager timeOutManager;
 	private ActorRef coordinator;
@@ -134,11 +135,6 @@ public class Node extends AbstractActor {
         }
     }
 
-	private void onCrashRequest(CrashRequest msg) {
-        this.crashType = msg.crashType();
-		logger.log(LogLevel.INFO, "[NODE-" + this.nodeId+ "] crashed because " + this.crashType);
-    }
-
 	private void onReadRequest(ReadRequest msg) {
 		this.tell(
 				this.getSender(),
@@ -148,6 +144,10 @@ public class Node extends AbstractActor {
     }
 
 	private void crash() {
+		logger.log(
+				LogLevel.ERROR,
+				"[NODE-" + this.nodeId + "]" + ((getSelf() == coordinator) ? "[Coordinator]" : "") + " crashed!!!"
+		);
         this.getContext().become(receiveBuilder().matchAny(msg -> {
         }).build());
     }
@@ -182,7 +182,7 @@ public class Node extends AbstractActor {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] decided " + msg.decision() + " on shared variable " + this.history.get(e)
-						.get(i).first() + " now the history is\n" + this.history
+						.get(i).first()
 		);
 
 	}
@@ -191,7 +191,7 @@ public class Node extends AbstractActor {
         this.timeOutManager.startCountDown(
                 TimeOutReason.HEARTBEAT,
                 this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
-                        Duration.ZERO,
+		                Duration.ZERO,
                         Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
                         getSelf(),
                         new CountDown(
@@ -275,6 +275,14 @@ public class Node extends AbstractActor {
 		).match(
 				Synchronisation.class,
 				this::onSynchronisation
+		).match(
+				CrashACK.class,
+				ack -> {
+					logger.log(
+							LogLevel.INFO,
+							"[NODE-" + this.nodeId + "] received crash ACK from coordinator"
+					);
+				}
 		).build();
 	}
 
@@ -592,6 +600,33 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	private void onCrashRequest(CrashRequest msg) {
+		getSender().tell(
+				new CrashACK(),
+				getSelf()
+		);
+		switch (msg.crashType())
+		{
+			case NODE_BEFORE_WRITE_REQUEST:
+			case NODE_AFTER_WRITE_REQUEST:
+			case NODE_AFTER_VOTE_REQUEST:
+			case NODE_AFTER_VOTE_CAST:
+				this.crashType = msg.crashType();
+				logger.log(
+						LogLevel.INFO,
+						"[NODE-" + this.nodeId + "] will eventually crash because " + this.crashType
+				);
+				break;
+			default:
+				// The crash are forwarded without delay
+				this.coordinator.tell(
+						msg,
+						getSelf()
+				);
+				break;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN COORDINATOR METHODS
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,10 +659,16 @@ public class Node extends AbstractActor {
 				this::coordinatorOnCountDown
 		).match(
 				CrashRequest.class,
-				this::onCrashRequest
+				this::coordinatorOnCrashRequest
 		).match(
 				WriteRequest.class,
 				this::coordinatorOnWriteRequest
+		).match(
+				TimeOut.class,
+				this::coordinatorOnTimeOut
+		).match(
+				CrashACK.class,
+				this::coordinatorOnCrashACK
 		).build();
 
 	}
@@ -710,7 +751,7 @@ public class Node extends AbstractActor {
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
 		int i = (this.history.isEmpty() || this.history.get(e).isEmpty()) ? 0 : this.history.get(e).size();
-		System.out.println("e: " + e + " i: " + i);
+		//System.out.println("e: " + e + " i: " + i);
 		/*this.epochPair = new EpochPair(
 				e,
 				i + 1
@@ -736,6 +777,12 @@ public class Node extends AbstractActor {
 	}
 
 	private void coordinatorOnCountDown(CountDown msg) {
+		this.timeOutManager.handleCountDown(
+				msg.reason(),
+				0,
+				this,
+				this.logger
+		);
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "][Coordinator] countdown of type " + msg.reason()
@@ -789,11 +836,78 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	private void coordinatorCrash(int e, int i) {
-		logger.log(
-				LogLevel.ERROR,
-				"[NODE-" + this.nodeId + "][Coordinator] CRASHED!!! on epoch " + e + " during iteration " + i
+	private void coordinatorOnCrashRequest(CrashRequest msg) {
+		if (getSender() != getSelf())
+		{
+			getSender().tell(
+					new CrashACK(),
+					getSelf()
+			);
+		}
+		switch (msg.crashType())
+		{
+			case COORDINATOR_BEFORE_RW_REQUEST:
+			case COORDINATOR_AFTER_RW_REQUEST:
+			case COORDINATOR_NO_QUORUM:
+			case COORDINATOR_QUORUM:
+				this.crashType = msg.crashType();
+				logger.log(
+						LogLevel.INFO,
+						"[NODE-" + this.nodeId + "][COORDINATOR] will eventually crash because " + this.crashType
+				);
+				break;
+			default:
+				this.crashTypeToFoward = msg.crashType();
+				this.timeOutManager.startCountDown(
+						TimeOutReason.CRASH_RESPONSE,
+						this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+								Duration.ZERO,
+								Duration.ofMillis(100),
+								getSelf(),
+								new CountDown(
+										TimeOutReason.CRASH_RESPONSE,
+										null
+								),
+								getContext().getSystem().dispatcher(),
+								getSelf()
+						),
+						0
+				);
+				this.group.get(rand.nextInt(this.numberOfNodes)).tell(
+						msg,
+						getSelf()
+				);
+				break;
+		}
+	}
+
+	private void coordinatorOnTimeOut(TimeOut msg) {
+		if (msg.reason() == TimeOutReason.CRASH_RESPONSE)
+		{
+			this.timeOutManager.resetCountDown(
+					TimeOutReason.CRASH_RESPONSE,
+					0,
+					this.nodeId,
+					this.logger
+			);
+			getSelf().tell(
+					new CrashRequest(this.crashTypeToFoward),
+					getSelf()
+			);
+		}
+	}
+
+	private void coordinatorOnCrashACK(CrashACK msg) {
+		this.timeOutManager.resetCountDown(
+				TimeOutReason.CRASH_RESPONSE,
+				0,
+				this.nodeId,
+				this.logger
 		);
+		this.crashTypeToFoward = null;
+	}
+
+	private void coordinatorCrash(int e, int i) {
 		for (Cancellable heart : heartBeat)
 		{
 			heart.cancel();
