@@ -334,6 +334,10 @@ public class Node extends AbstractActor {
 	}
 
 	private void onWriteRequest(WriteRequest msg) {
+		if (this.crashType == CrashType.NODE_BEFORE_WRITE_REQUEST)
+		{
+			this.crash();
+		}
 		this.tell(
 				this.coordinator,
 				new WriteRequest(
@@ -348,6 +352,10 @@ public class Node extends AbstractActor {
 				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + " with value " + msg.newValue()
 		);
 		numbersOfWrites++;
+		if (this.crashType == CrashType.NODE_AFTER_WRITE_REQUEST)
+		{
+			this.crash();
+		}
 	}
 
 	private void onWriteResponse(WriteResponse msg) {
