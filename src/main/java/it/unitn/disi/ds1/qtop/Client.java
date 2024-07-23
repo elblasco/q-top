@@ -70,19 +70,14 @@ public class Client extends AbstractActor{
      */
     public void onStartMessage(StartMessage msg) {
         logger.log(LogLevel.INFO,"[CLIENT-"+this.clientId+"] starting...");
-		Random r = new Random();
-	    getContext().getSystem().scheduler().scheduleAtFixedRate(
+	    this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 			    Duration.ZERO,
 			    Duration.ofMillis(1000),
 			    this.getSelf(),
-			    new Utils.MakeRequest(
-					    r.nextBoolean(),
-					    r.nextInt(this.numberOfNodes)
-			    ),
+			    new Utils.MakeRequest(),
 			    getContext().getSystem().dispatcher(),
 			    this.getSelf()
 	    );
-
     }
 
 	private void onTimeOut(Utils.TimeOut msg) {
@@ -103,12 +98,13 @@ public class Client extends AbstractActor{
 	}
 
 	private void onMakeRequest(Utils.MakeRequest msg){
-		int index = msg.indexTarget();
-		if(msg.kindOfRequest())
+		boolean type = rand.nextBoolean();
+		int index = rand.nextInt(this.numberOfNodes);
+		if (type)
 		{
 			//WRITE
 			// the new values are from 0 to 100
-			int proposedValue = new Random().nextInt(101);
+			int proposedValue = rand.nextInt(101);
 			group.get(index).tell(
 					new WriteRequest(
 							proposedValue,
