@@ -13,7 +13,7 @@ public class UserInterface implements SimulationCallback {
 
         //default values
         int numberOfNodes = 5;
-        int numberOfClients = 10;
+        int numberOfClients = 3;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
         int writeTimeout = 20000;
@@ -99,19 +99,16 @@ public class UserInterface implements SimulationCallback {
 
             switch (input) {
                 case 1:
-
-                    System.out.println("Select the node from which you want to read the variable:");
-                    int node = scanner.nextInt();
-                    int var = controller.readVariable(node);
-                    System.out.println("Variable read from node "+node+": "+var);
+                    //System.out.println("Select the node from which you want to read the variable:");
+                    //int node = scanner.nextInt();
+                    int var = controller.readVariable();
+                    System.out.println("Variable read: " + var);
                     break;
                 case 2:
-                    System.out.println("Select the node to which you want to write the variable:");
-                    int nodeWrite = scanner.nextInt();
                     System.out.println("Insert the value to write:");
                     int value = scanner.nextInt();
-                    controller.writeVariable(nodeWrite, value);
-                    System.out.println("Variable written to node "+nodeWrite+": "+value);
+                    controller.writeVariable(value);
+                    System.out.println("Variable written " + value);
                     break;
                 case 3:
                     System.out.println("Select the position of the virtual crash:");
@@ -125,17 +122,7 @@ public class UserInterface implements SimulationCallback {
                     System.out.println("8. COORDINATOR - During votes reception, quorum reached");
 
                     int crashType = scanner.nextInt();
-					if (crashType >= 1 && crashType <= 4){
-						System.out.println("Insert the index of the node to crash");
-						int crashIndex = scanner.nextInt();
-						controller.crashNode(
-											 crashIndex,
-											 crashType
-											 );
-					}
-					else{
-						controller.crashNode(-1,crashType);
-					}
+                    controller.crashNode(crashType);
                     break;
                 case 4:
                     System.out.println("Exiting simulation");

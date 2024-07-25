@@ -35,7 +35,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 				}
 			}
 		}
-		return - 15;
+		return - 1;
 	}
 
 	public void insert(int e, int i, int element) {
