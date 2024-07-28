@@ -27,7 +27,7 @@ public class Utils {
         }
     }
 
-    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION, CRASH_RESPONSE}
+    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION, CRASH_RESPONSE, CLIENT_REQUEST}
 
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
@@ -60,7 +60,7 @@ public class Utils {
     public record CountDown(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
-    public record TimeOut(TimeOutReason reason) implements Serializable {
+    public record TimeOut(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
     public record HeartBeat() implements Serializable {
@@ -72,7 +72,7 @@ public class Utils {
     public record MakeRequest() implements Serializable {
     }
 
-    public record ReadRequest() implements Serializable {
+    public record ReadRequest( int nRequest) implements Serializable {
     }
 
     public record WriteRequest(int newValue, int nRequest) implements Serializable {
@@ -81,7 +81,10 @@ public class Utils {
     public record WriteResponse(int nRequest) implements Serializable {
     }
 
-    public record ReadValue(int value) implements Serializable {
+    public record ReadValue(int value, int nRequest) implements Serializable {
+    }
+
+    public record WriteValue(int value, int nRequest) implements Serializable {
     }
 
     public record EpochPair(int e, int i) implements Serializable {

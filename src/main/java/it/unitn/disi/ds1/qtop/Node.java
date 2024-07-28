@@ -56,6 +56,7 @@ public class Node extends AbstractActor {
                 voteTimeout,
                 HEARTBEAT_TIMEOUT,
                 writeTimeout,
+				0,
                 Node.COUNTDOWN_REFRESH
         );
 		if (coordinator == null)
@@ -107,6 +108,7 @@ public class Node extends AbstractActor {
     private void onVoteRequest(VoteRequest msg) {
         if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
         {
+			logger.log( LogLevel.ERROR, "[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_REQUEST" );
             this.crash();
 	        return;
         }
@@ -117,10 +119,10 @@ public class Node extends AbstractActor {
         );
         Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
         logger.log(
-                LogLevel.INFO,
+                LogLevel.DEBUG,
                 "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + msg.epoch()
 		                .e() + ", " + msg.epoch()
-		                .i() + " > and variable " + msg.newValue() + "\nMy election state is " + this.isElection
+		                .i() + " > and variable " + msg.newValue()
         );
         this.tell(
                 this.getSender(),
@@ -132,6 +134,7 @@ public class Node extends AbstractActor {
         );
         if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
         {
+			logger.log( LogLevel.ERROR, "[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_CAST" );
             this.crash();
         }
     }
@@ -139,16 +142,24 @@ public class Node extends AbstractActor {
 	private void onReadRequest(ReadRequest msg) {
 		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
 		{
+			logger.log(
+					LogLevel.ERROR,
+					"[NODE-" + this.nodeId + "] crashed!!! for reason COORDINATOR_BEFORE_RW_REQUEST"
+			);
 			this.coordinatorCrash();
 			return;
 		}
 		this.tell(
 				this.getSender(),
-				new ReadValue(this.history.readValidVariable()),
+				new ReadValue(this.history.readValidVariable(), msg.nRequest()),
                 this.getSelf()
         );
 		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
 		{
+			logger.log(
+					LogLevel.ERROR,
+					"[NODE-" + this.nodeId + "] crashed!!! for reason COORDINATOR_AFTER_RW_REQUEST"
+			);
 			this.coordinatorCrash();
 		}
     }
@@ -156,7 +167,7 @@ public class Node extends AbstractActor {
 	private void crash() {
 		logger.log(
 				LogLevel.ERROR,
-				"[NODE-" + this.nodeId + "] crashed!!!"
+				"[NODE-" + this.nodeId + "] entered the crash state"
 		);
         this.getContext().become(receiveBuilder().matchAny(msg -> {
         }).build());
@@ -165,6 +176,7 @@ public class Node extends AbstractActor {
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
 	    try
 	    {
+			logger.log(LogLevel.DEBUG, "[NODE-" + this.nodeId + "] sending message to [NODE-" + dest + "]");
 		    Thread.sleep(rand.nextInt(10));
 	    } catch (InterruptedException e)
 	    {
@@ -180,7 +192,7 @@ public class Node extends AbstractActor {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
         logger.log(
-                LogLevel.INFO,
+                LogLevel.DEBUG,
                 "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + msg.epoch()
                         .e() + ", " + msg.epoch().i() + " >"
         );
@@ -190,7 +202,7 @@ public class Node extends AbstractActor {
 				msg.decision()
 		);
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] decided " + msg.decision() + " on shared variable " + this.history.get(e)
 						.get(i).first()
 		);
@@ -221,7 +233,7 @@ public class Node extends AbstractActor {
 	private void onSynchronisation(Synchronisation msg) {
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received synchronisation message, the epoch is going to be <" + msg.newEpochPair()
+				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the epoch is going to be <" + msg.newEpochPair()
 						.e() + ", " + msg.newEpochPair().i() + ">"
 		);
 		this.coordinator = this.getSender();
@@ -232,7 +244,7 @@ public class Node extends AbstractActor {
 		this.timeOutManager.endElectionState();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable() + " with " + "history\n" + this.history
+				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable()
 		);
 	}
 
@@ -311,6 +323,10 @@ public class Node extends AbstractActor {
 	}
 
 	private void onHeartBeat(HeartBeat msg) {
+		logger.log(
+				LogLevel.DEBUG,
+				"[NODE-" + this.nodeId + "] received heartbeat from coordinator"
+		);
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.HEARTBEAT,
 				0,
@@ -325,13 +341,6 @@ public class Node extends AbstractActor {
 	 * @param msg Genre of countdown
 	 */
 	private void onCountDown(CountDown msg) {
-		if (msg.reason() == TimeOutReason.ELECTION)
-		{
-			logger.log(
-					LogLevel.WARN,
-					"[NODE-" + this.nodeId + "] received a countdown of type " + msg.reason()
-			);
-		}
 		int countDownIndex =
 				(msg.reason() == TimeOutReason.HEARTBEAT || msg.reason() == TimeOutReason.ELECTION) ? 0 : msg.epoch()
 						.i();
@@ -344,11 +353,22 @@ public class Node extends AbstractActor {
 	}
 
 	private void onWriteRequest(WriteRequest msg) {
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] received write request with value " + msg.newValue()
+		);
 		if (this.crashType == CrashType.NODE_BEFORE_WRITE_REQUEST)
 		{
 			this.crash();
 			return;
 		}
+
+		this.tell(
+				this.getSender(),
+				new WriteValue(msg.newValue(), msg.nRequest()),
+				this.getSelf()
+		);
+
 		this.tell(
 				this.coordinator,
 				new WriteRequest(
@@ -360,7 +380,7 @@ public class Node extends AbstractActor {
 		this.startWriteCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + " with value " + msg.newValue()
+				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + ", new value proposed: " + msg.newValue()
 		);
 		numbersOfWrites++;
 		if (this.crashType == CrashType.NODE_AFTER_WRITE_REQUEST)
@@ -425,7 +445,7 @@ public class Node extends AbstractActor {
 				this.history.add(new ArrayList<>());
 				logger.log(
 						LogLevel.INFO,
-						"[NODE-" + this.nodeId + "] elected as supreme leader with countdown manager: " + this.timeOutManager
+						"[NODE-" + this.nodeId + "] elected as coordinator"
 				);
 				this.multicast(new Synchronisation(
 						this.history,
@@ -670,7 +690,7 @@ public class Node extends AbstractActor {
 				//Special handler for the self sent Heartbeat, the print is just for debug
 				heartBeat -> logger.log(
 						LogLevel.DEBUG,
-						"[NODE-" + this.nodeId + "][Coordinator] heartbeat"
+						"[NODE-" + this.nodeId + "] [Coordinator] heartbeat"
 				)
 		).match(
 				CountDown.class,
@@ -704,7 +724,7 @@ public class Node extends AbstractActor {
 		this.startHeartBeat();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "][Coordinator] starting with " + this.group.size() + " peer(s)"
+				"[NODE-" + this.nodeId + "] [Coordinator] starting with " + this.group.size() + " peer(s)"
 		);
 	}
 
@@ -781,7 +801,7 @@ public class Node extends AbstractActor {
 		);
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "][Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
+				"[NODE-" + this.nodeId + "] [Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
 		);
 		multicast(new VoteRequest(
 				msg.newValue(),
@@ -790,7 +810,7 @@ public class Node extends AbstractActor {
 		));
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "][Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
+				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
 		);
 		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
 		{
@@ -807,7 +827,7 @@ public class Node extends AbstractActor {
 		);
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "][Coordinator] countdown of type " + msg.reason()
+				"[NODE-" + this.nodeId + "] [Coordinator] countdown of type " + msg.reason()
 		);
 	}
 
@@ -831,7 +851,8 @@ public class Node extends AbstractActor {
 			);
 			logger.log(
 					LogLevel.INFO,
-					"[NODE-" + this.nodeId + "][Coordinator] decided " + d + " for epoch < " + e + ", " + i + " >"
+					"[NODE-" + this.nodeId + "] [Coordinator] decided and broadcasting " + d + " for epoch < " + e +
+							", " + i + " >"
 			);
 		}
 	}
@@ -842,7 +863,7 @@ public class Node extends AbstractActor {
 	private void startHeartBeat() {
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "][Coordinator] starting heartbeat protocol"
+				"[NODE-" + this.nodeId + "] [Coordinator] starting heartbeat protocol"
 		);
 		// Yes the coordinator sends a Heartbeat to itself
 		for (int i = 0; i < this.numberOfNodes; ++ i)
@@ -875,7 +896,7 @@ public class Node extends AbstractActor {
 				this.crashType = msg.crashType();
 				logger.log(
 						LogLevel.INFO,
-						"[NODE-" + this.nodeId + "][COORDINATOR] will eventually crash because " + this.crashType
+						"[NODE-" + this.nodeId + "] [COORDINATOR] will eventually crash because " + this.crashType
 				);
 				break;
 			default:
