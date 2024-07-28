@@ -11,19 +11,24 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Random;
 
-import static it.unitn.disi.ds1.qtop.Utils.LogLevel;
-import static it.unitn.disi.ds1.qtop.Utils.StartMessage;
+import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Client extends AbstractActor{
 	private static final int CRASH_TIMEOUT = 1000;
 	private static final Random rand = new Random();
 	private static final Logger logger = Logger.getInstance();
-	private final int clientId;
+	public final int clientId;
 	private List<ActorRef> group;
 	private int numberOfNodes;
 	private int timeOutCounter;
 	private Cancellable crashTimeOut;
 	private Utils.CrashType cachedCrashType;
+	private TimeOutManager timeOutManager;
+
+	private int requestNumber;
+
+	private  static final int CLIENT_REQUEST_TIMEOUT = 1000;
+	private static final int COUNTDOWN_REFRESH = 10;
 
     public Client(int clientId, List<ActorRef> group, int numberOfNodes) {
         super();
@@ -31,7 +36,19 @@ public class Client extends AbstractActor{
 		this.group = group;
 		this.numberOfNodes = numberOfNodes;
 	    this.timeOutCounter = CRASH_TIMEOUT;
-    }
+	    this.requestNumber = 0;
+			    this.timeOutManager = new TimeOutManager(
+			    0,
+			    0,
+			    0,
+			    0,
+				CLIENT_REQUEST_TIMEOUT,
+			    COUNTDOWN_REFRESH
+	    );
+
+
+
+	}
 
     static public Props props(int clientId, List<ActorRef> group, int numberOfNodes) {
         return Props.create(Client.class, () -> new Client(clientId, group, numberOfNodes));
@@ -47,7 +64,10 @@ public class Client extends AbstractActor{
 		        this::onMakeRequest
         ).match(
 				Utils.ReadValue.class,
-		        this::onReadValue
+		        this::onReadAck
+        ).match(
+				Utils.WriteValue.class,
+		        this::onWriteAck
         ).match(
 		        Utils.CrashRequest.class,
 		        this::onCrashRequest
@@ -69,7 +89,7 @@ public class Client extends AbstractActor{
      * @param msg the init message
      */
     public void onStartMessage(StartMessage msg) {
-        logger.log(LogLevel.INFO,"[CLIENT-"+this.clientId+"] starting...");
+        logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] starting...");
 	    this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 			    Duration.ZERO,
 			    Duration.ofMillis(1000),
@@ -94,12 +114,35 @@ public class Client extends AbstractActor{
 					new Utils.CrashRequest(this.cachedCrashType),
 					getSelf()
 			);
+		} else if (msg.reason() == Utils.TimeOutReason.CLIENT_REQUEST)
+		{
+			logger.log(
+					LogLevel.INFO,
+					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] request number "+ msg.epoch().i()+" timed out "
+			);
 		}
 	}
 
 	private void onMakeRequest(Utils.MakeRequest msg){
 		boolean type = rand.nextBoolean();
 		int index = rand.nextInt(this.numberOfNodes);
+
+		this.timeOutManager.startCountDown(
+				Utils.TimeOutReason.CLIENT_REQUEST,
+				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+						Duration.ZERO,
+						Duration.ofMillis(CLIENT_REQUEST_TIMEOUT / COUNTDOWN_REFRESH),
+						this.getSelf(),
+						new Utils.CountDown(
+								Utils.TimeOutReason.CLIENT_REQUEST,
+								new EpochPair(0, requestNumber)
+						),
+						getContext().getSystem().dispatcher(),
+						getSelf()
+				),
+				this.requestNumber
+
+		);
 		if (type)
 		{
 			//WRITE
@@ -108,32 +151,66 @@ public class Client extends AbstractActor{
 			group.get(index).tell(
 					new WriteRequest(
 							proposedValue,
-							- 1
+							requestNumber
 					),
 					this.getSelf()
 			);
 			logger.log(
 					LogLevel.INFO,
-					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write req to [NODE-" + index + "] of value "
-							+ proposedValue
+					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write requested to [NODE-" + index + "], " +
+							"new value proposed: "
+							+ proposedValue +
+							", operation id: " + requestNumber
 			);
 		}
 		else
 		{
-			//READ
-			logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read req to " + index);
-			group.get(index).tell(new ReadRequest(), this.getSelf());
+
+			logger.log(LogLevel.INFO,
+					"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read number " + requestNumber + " req to " +
+							"[NODE-" + index + "]" + ", operation id: " + requestNumber);
+			group.get(index).tell(new ReadRequest(requestNumber), this.getSelf());
+			this.requestNumber++;
 		}
+
+
+
+
 	}
 
-	private void onReadValue(Utils.ReadValue msg) {
+	private void onReadAck(Utils.ReadValue msg) {
 		int value = msg.value();
+
+		this.timeOutManager.resetCountDown(
+				Utils.TimeOutReason.CLIENT_REQUEST,
+				msg.nRequest(),
+				this.clientId,
+				logger
+		);
+
 		logger.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
-						"value " + value
+						"value" + value + ", operation id: " + msg.nRequest()
 		);
 	}
+
+	private void onWriteAck(Utils.WriteValue msg){
+		this.timeOutManager.resetCountDown(
+				Utils.TimeOutReason.CLIENT_REQUEST,
+				msg.nRequest(),
+				this.clientId,
+				logger
+		);
+		logger.log(
+				LogLevel.INFO,
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write request done, operation id: " + msg.nRequest()
+		);
+
+	}
+
+
+
 
 	private void onCountDown(Utils.CountDown msg) {
 		if (msg.reason() == Utils.TimeOutReason.CRASH_RESPONSE)
@@ -141,7 +218,7 @@ public class Client extends AbstractActor{
 			if (this.timeOutCounter <= 0)
 			{
 				getSelf().tell(
-						new Utils.TimeOut(Utils.TimeOutReason.CRASH_RESPONSE),
+						new Utils.TimeOut(Utils.TimeOutReason.CRASH_RESPONSE,null),
 						getSelf()
 				);
 			}
@@ -149,6 +226,14 @@ public class Client extends AbstractActor{
 			{
 				this.timeOutCounter -= CRASH_TIMEOUT / 100;
 			}
+		} else if (msg.reason() == Utils.TimeOutReason.CLIENT_REQUEST) {
+			this.timeOutManager.handleCountDown(
+					msg.reason(),
+					msg.epoch().i(),
+					this,
+					logger
+			);
+
 		}
 	}
 
@@ -176,7 +261,21 @@ public class Client extends AbstractActor{
 		this.timeOutCounter = CRASH_TIMEOUT;
 		logger.log(
 				LogLevel.INFO,
-				"[CLIENT-" + this.clientId + "] received crash ack from " + getSender()
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] received crash insertion message ack from " + getSender()
+		);
+	}
+
+	public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
+		try
+		{
+			Thread.sleep(rand.nextInt(10));
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		dest.tell(
+				msg,
+				sender
 		);
 	}
 }

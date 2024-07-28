@@ -14,7 +14,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	private final static Logger logger = Logger.getInstance();
 
 	public TimeOutManager(int voteTimeout, int heartbeatTimeout, int writeTimeout, int crashResponseTimeout,
-			int refresh) {
+			int clientRequestTimeout, int refresh) {
 		super(Utils.TimeOutReason.class);
 		this.customTimeouts = new EnumMap<>(Utils.TimeOutReason.class);
 		customTimeouts.put(
@@ -36,6 +36,10 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		customTimeouts.put(
 				Utils.TimeOutReason.CRASH_RESPONSE,
 				crashResponseTimeout
+		);
+		customTimeouts.put(
+				Utils.TimeOutReason.CLIENT_REQUEST,
+				clientRequestTimeout
 		);
 		this.refresh = refresh;
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
@@ -87,7 +91,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				this.get(reason).get(i).first().cancel();
 				node.tell(
 						node.getSelf(),
-						new Utils.TimeOut(reason),
+						new Utils.TimeOut(reason, new Utils.EpochPair(0,i)),
 						node.getSelf()
 				);
 			}
@@ -106,6 +110,31 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								.get(i).second() + " ms left"
 				);
 			}
+
+	}
+
+
+	public void handleCountDown(Utils.TimeOutReason reason, int i, Client node, Logger logger) {
+
+		if (this.get(reason).get(i).second() <= 0)
+		{
+			this.get(reason).get(i).first().cancel();
+			node.tell(
+					node.getSelf(),
+					new Utils.TimeOut(reason,new Utils.EpochPair(0,i)),
+					node.getSelf()
+			);
+		}
+		else
+		{
+			this.get(reason).set(
+					i,
+					new Pair<>(
+							this.get(reason).get(i).first(),
+							this.get(reason).get(i).second() - (this.customTimeouts.get(reason) / this.refresh)
+					)
+			);
+		}
 
 	}
 
