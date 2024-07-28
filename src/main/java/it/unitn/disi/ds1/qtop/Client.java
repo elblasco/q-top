@@ -4,8 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import it.unitn.disi.ds1.qtop.Utils.ReadRequest;
-import it.unitn.disi.ds1.qtop.Utils.WriteRequest;
+import it.unitn.disi.ds1.qtop.Utils.*;
 
 import java.time.Duration;
 import java.util.List;
@@ -191,7 +190,7 @@ public class Client extends AbstractActor{
 		logger.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
-						"value" + value + ", operation id: " + msg.nRequest()
+						"value " + value + ", operation id: " + msg.nRequest()
 		);
 	}
 
