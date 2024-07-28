@@ -46,10 +46,6 @@ public class Node extends AbstractActor {
         this.writeTimeout = writeTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
-		/*this.epochPair = new EpochPair(
-				0,
-				0
-		);*/
         this.timeOutManager = new TimeOutManager(
                 decisionTimeout,
                 voteTimeout,
@@ -235,11 +231,12 @@ public class Node extends AbstractActor {
 				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the epoch is going to be <" + msg.newEpochPair()
 						.e() + ", " + msg.newEpochPair().i() + ">"
 		);
+		this.becomeReceiver();
 		this.coordinator = this.getSender();
 		this.isElection = false;
 		this.lastElectionData = null;
 		this.history = msg.history();
-		//this.epochPair = msg.newEpochPair();
+		this.numbersOfWrites = 0;
 		this.timeOutManager.endElectionState();
 		this.startHeartBeatCountDown();
 		logger.log(
@@ -250,11 +247,52 @@ public class Node extends AbstractActor {
 
 	public void becomeCoordinator() {
 		this.getContext().become(coordinatorBehaviour());
-		this.getSelf().tell(
-				new StartMessage(new ArrayList<>(this.group)),
-				this.getSelf()
-		);
+	}
 
+	public void becomeVoter() {
+		this.getContext().become(voterBehaviour());
+	}
+
+	public void becomeReceiver() {
+		this.getContext().become(createReceive());
+	}
+
+	public Receive voterBehaviour() {
+		return receiveBuilder().match(
+				CountDown.class,
+				this::onCountDown
+		).match(
+				CrashRequest.class,
+				this::onCrashRequest
+		).match(
+				ReadRequest.class,
+				this::onReadRequest
+		).match(
+				TimeOut.class,
+				this::onTimeOut
+		).match(
+				Election.class,
+				this::onElection
+		).match(
+				ElectionACK.class,
+				this::onElectionAck
+		).match(
+				Synchronisation.class,
+				this::onSynchronisation
+		).match(
+				CrashACK.class,
+				ack -> {
+					logger.log(
+							LogLevel.INFO,
+							"[NODE-" + this.nodeId + "] received crash ACK while in voting state"
+					);
+				}
+		).matchAny(msg -> {
+			logger.log(
+					LogLevel.INFO,
+					"[NODE-" + this.nodeId + "] received " + msg.getClass() + " while in voting " + "state"
+			);
+		}).build();
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN RECEIVER METHODS
@@ -426,7 +464,7 @@ public class Node extends AbstractActor {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
-						"params: < e :" + msg.highestEpoch() + ", i :" + msg.highestIteration() + ">, best " +
+						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " +
 						"candidate received:" + msg.bestCandidateId()
 		);
 		this.tell(
@@ -443,14 +481,17 @@ public class Node extends AbstractActor {
 				this.becomeCoordinator();
 				this.isElection = false;
 				this.timeOutManager.endElectionState();
-				/*this.epochPair = new EpochPair(
-						this.epochPair.e() + 1,
-						0
-				);*/
 				this.history.add(new ArrayList<>());
+				this.numbersOfWrites = 0;
+				//this.quorum = (this.group.size() / 2) + 1;
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] elected as coordinator"
+				);
+				this.group.remove(this.coordinator);
+				this.getSelf().tell(
+						new StartMessage(this.group),
+						this.getSelf()
 				);
 				this.multicast(new Synchronisation(
 						this.history,
@@ -466,6 +507,7 @@ public class Node extends AbstractActor {
 			}
 			else
 			{
+				this.becomeVoter();
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] is not going to forward election message from " + this.getSender()
@@ -496,6 +538,7 @@ public class Node extends AbstractActor {
 	private void startElection() {
 		if (! this.isElection)
 		{
+			this.becomeVoter();
 			logger.log(
 					LogLevel.INFO,
 					"[NODE-" + this.nodeId + "] started the election process, my history is: < e:" + this.history.getLatest()
@@ -566,16 +609,21 @@ public class Node extends AbstractActor {
 	private void retryElection() {
 		int oldId = this.lastElectionData.destinationId();
 		int newDestId = (oldId + 1) % numberOfNodes;
+		logger.log(
+				LogLevel.INFO,
+				getSelf() + " is retrying election sending to [NODE-" + newDestId + "] the best " + "candidate " + this.lastElectionData.bestCandidateId()
+		);
 		this.lastElectionData = new Quadruplet<>(
 				newDestId,
 				this.lastElectionData.highestEpoch(),
 				this.lastElectionData.highestIteration(),
 				this.lastElectionData.bestCandidateId()
 		);
-		this.sendNewElectionMessage(
-				new EpochPair(
+		this.forwardPreviousElectionMessage(
+				new Election(
 						this.lastElectionData.highestEpoch(),
-						this.lastElectionData.highestIteration()
+						this.lastElectionData.highestIteration(),
+						this.lastElectionData.bestCandidateId()
 				),
 				newDestId
 		);
@@ -625,7 +673,7 @@ public class Node extends AbstractActor {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] switched election state, my history is :< e:" + highestData.e() + "," + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
+				"[NODE-" + this.nodeId + "] switched election state, my history is < e:" + highestData.e() + ", i:" + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
 		);
 		this.lastElectionData = new Utils.Quadruplet<>(
 				idDest,

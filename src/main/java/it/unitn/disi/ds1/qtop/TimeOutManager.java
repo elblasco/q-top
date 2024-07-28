@@ -2,7 +2,6 @@ package it.unitn.disi.ds1.qtop;
 
 import akka.actor.Cancellable;
 import akka.japi.Pair;
-import akka.japi.Util;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -88,11 +87,17 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 */
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
 		if (this.get(reason).get(i).second() <= 0)
-			{
-				this.get(reason).get(i).first().cancel();
+		{
+			this.get(reason).get(i).first().cancel();
 				node.tell(
 						node.getSelf(),
-						new Utils.TimeOut(reason, new Utils.EpochPair(0,i)),
+						new Utils.TimeOut(
+								reason,
+								new Utils.EpochPair(
+										0,
+										i
+								)
+						),
 						node.getSelf()
 				);
 			}
@@ -111,7 +116,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								.get(i).second() + " ms left"
 				);
 			}
-
 	}
 
 
@@ -177,7 +181,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		Pair<Cancellable,Integer> el = null;
 		try
 		{
-
 			for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
 			{
 				if (entry.getKey() != Utils.TimeOutReason.ELECTION)
@@ -197,19 +200,10 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		{
 			System.out.println("reason: " + reason + " with index " + el);
 		}
-
-		//System.out.println(this);
-		/*try
-		{
-			Thread.sleep(5000);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}*/
 	}
 
 	public void endElectionState() {
-		this.get(Utils.TimeOutReason.ELECTION).get(0).first().cancel();
+		this.get(Utils.TimeOutReason.ELECTION).getFirst().first().cancel();
 		logger.log(
 				Utils.LogLevel.INFO,
 				"[NODE] canceled its election timeout " + this.get(Utils.TimeOutReason.ELECTION).get(0).first()
