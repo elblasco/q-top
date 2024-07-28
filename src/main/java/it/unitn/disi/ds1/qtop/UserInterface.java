@@ -86,31 +86,17 @@ public class UserInterface implements SimulationCallback {
         System.out.println("_________________________________________________________________");
         Scanner scanner = new Scanner(System.in);
         int input = 0;
-        while (input != 4) {
+        while (input != 2) {
             System.out.println("CLIENT MENU - Please select an option:");
             System.out.println("_________________________________________________________________");
-            System.out.println("1. Read the variable through a node");
-            System.out.println("2. Write the variable through a node");
-            System.out.println("3. Insert a virtual crash in a random node");
-            System.out.println("4. Exit simulation");
+            System.out.println("1. Insert a virtual crash in a random node");
+            System.out.println("2. Exit simulation");
             System.out.println("_________________________________________________________________");
 
             input = scanner.nextInt();
 
             switch (input) {
                 case 1:
-                    //System.out.println("Select the node from which you want to read the variable:");
-                    //int node = scanner.nextInt();
-                    int var = controller.readVariable();
-                    System.out.println("Variable read: " + var);
-                    break;
-                case 2:
-                    System.out.println("Insert the value to write:");
-                    int value = scanner.nextInt();
-                    controller.writeVariable(value);
-                    System.out.println("Variable written " + value);
-                    break;
-                case 3:
                     System.out.println("Select the position of the virtual crash:");
                     System.out.println("1. NODE - Before write request");
                     System.out.println("2. NODE - After write request");
@@ -124,7 +110,7 @@ public class UserInterface implements SimulationCallback {
                     int crashType = scanner.nextInt();
                     controller.crashNode(crashType);
                     break;
-                case 4:
+                case 2:
                     System.out.println("Exiting simulation");
                     controller.exitSimulation();
                     break;

@@ -22,7 +22,6 @@ public class Node extends AbstractActor {
 	private VotersMap voters = new VotersMap();
 	private Cancellable[] heartBeat;
 	private List<ActorRef> group;
-	//private EpochPair epochPair;
     private final int decisionTimeout;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
 	private Utils.CrashType crashTypeToFoward = CrashType.NO_CRASH;
@@ -242,6 +241,7 @@ public class Node extends AbstractActor {
 		this.history = msg.history();
 		//this.epochPair = msg.newEpochPair();
 		this.timeOutManager.endElectionState();
+		this.startHeartBeatCountDown();
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable()
@@ -250,6 +250,11 @@ public class Node extends AbstractActor {
 
 	public void becomeCoordinator() {
 		this.getContext().become(coordinatorBehaviour());
+		this.getSelf().tell(
+				new StartMessage(new ArrayList<>(this.group)),
+				this.getSelf()
+		);
+
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN RECEIVER METHODS
@@ -951,10 +956,14 @@ public class Node extends AbstractActor {
 	}
 
 	private void coordinatorCrash() {
-		for (Cancellable heart : heartBeat)
+		if (this.heartBeat != null)
 		{
-			heart.cancel();
+			for (Cancellable heart : this.heartBeat)
+			{
+				heart.cancel();
+			}
 		}
+
 		this.crash();
 	}
 }
