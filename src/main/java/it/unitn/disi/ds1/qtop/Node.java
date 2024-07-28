@@ -169,18 +169,18 @@ public class Node extends AbstractActor {
     }
 
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
-	    try
-	    {
+
 			logger.log(LogLevel.DEBUG, "[NODE-" + this.nodeId + "] sending message to [NODE-" + dest + "]");
-		    Thread.sleep(rand.nextInt(10));
-	    } catch (InterruptedException e)
-	    {
-		    e.printStackTrace();
-	    }
-        dest.tell(
-                msg,
-                sender
-        );
+
+		this.getContext().getSystem().scheduler().scheduleOnce(
+				Duration.ofMillis(rand.nextInt(30)),
+				dest,
+				msg,
+				this.getContext().getSystem().dispatcher(),
+				sender
+		);
+
+
     }
 
 	private void onDecisionResponse(DecisionResponse msg) {
@@ -507,7 +507,6 @@ public class Node extends AbstractActor {
 			}
 			else
 			{
-				this.becomeVoter();
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] is not going to forward election message from " + this.getSender()
@@ -516,6 +515,7 @@ public class Node extends AbstractActor {
 		}
 		else
 		{
+			this.becomeVoter();
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
 			if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
