@@ -2,6 +2,7 @@ package it.unitn.disi.ds1.qtop;
 
 import akka.actor.Cancellable;
 import akka.japi.Pair;
+import akka.japi.Util;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -172,16 +173,31 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 
 	public void startElectionState() {
 		//System.out.println(this);
-		for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
+		Utils.TimeOutReason reason = null;
+		Pair<Cancellable,Integer> el = null;
+		try
 		{
-			if (entry.getKey() != Utils.TimeOutReason.ELECTION)
+
+			for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
 			{
-				for (Pair<Cancellable, Integer> element : entry.getValue())
+				if (entry.getKey() != Utils.TimeOutReason.ELECTION)
 				{
-					element.first().cancel();
+					reason = entry.getKey();
+					for (Pair<Cancellable, Integer> element : entry.getValue())
+					{
+						if (element.first() != null)
+						{
+							el = element;
+							element.first().cancel();
+						}
+					}
 				}
 			}
+		} catch (Exception e)
+		{
+			System.out.println("reason: " + reason + " with index " + el);
 		}
+
 		//System.out.println(this);
 		/*try
 		{
@@ -210,6 +226,8 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				);
 			}
 		}
+
+
 	}
 
 	@Override
