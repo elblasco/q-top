@@ -51,6 +51,13 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		}
 	}
 
+	/**
+	 * Start a count-down for a specific reason.
+	 *
+	 * @param reason the reason for the count-down
+	 * @param action the action to be performed when the count-down reaches 0
+	 * @param i      the index of the count-down
+	 */
 	public void startCountDown(Utils.TimeOutReason reason, Cancellable action, int i) {
 		if (this.get(reason).isEmpty() || this.get(reason).size() <= i)
 		{
@@ -73,16 +80,16 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 				new Pair<>(
 				action,
 				this.customTimeouts.get(reason)
-		));
-		//System.out.println("reason: " + reason + " with index " + i + " in " + this);
+				)
+		);
 	}
 
 	/**
-	 * Decrease the time left for a specific count down
+	 * Decrease the time left for a specific count-down.
 	 *
-	 * @param reason
-	 * @param i
-	 * @param node
+	 * @param reason the reason for the count-down
+	 * @param i      the index of the count-down
+	 * @param node   the node that is handling the count-down
 	 */
 	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node) {
 		if (this.get(reason).get(i).second() <= 0)
@@ -112,7 +119,12 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 			}
 	}
 
-
+	/**
+	 * Client decrease the time left for a specific count-down.
+	 * @param reason the reason for the count-down
+	 * @param i      the index of the count-down
+	 * @param node   the node that is handling the count-down
+	 */
 	public void clientHandleCountDown(Utils.TimeOutReason reason, int i, Client node) {
 		if (this.get(reason).get(i).second() <= 0)
 		{
@@ -137,12 +149,12 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	}
 
 	/**
-	 * Reset a specific count down
+	 * Reset a specific count down.
 	 *
-	 * @param reason
-	 * @param i
+	 * @param reason the reason for the count-down
+	 * @param i    the index of the count-down
 	 *
-	 * @return
+	 * @return true if the count-down was successfully reset, false otherwise
 	 */
 	public boolean resetCountDown(Utils.TimeOutReason reason, int i) {
 		boolean ret;
@@ -167,33 +179,28 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		return ret;
 	}
 
+	/**
+	 * Reset all the count-downs to enter the election state.
+	 */
 	public void startElectionState() {
-		//System.out.println(this);
-		Utils.TimeOutReason reason = null;
-		Pair<Cancellable,Integer> el = null;
-		try
+		for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
 		{
-			for (Map.Entry<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> entry : this.entrySet())
+			if (entry.getKey() != Utils.TimeOutReason.ELECTION)
 			{
-				if (entry.getKey() != Utils.TimeOutReason.ELECTION)
+				for (Pair<Cancellable, Integer> element : entry.getValue())
 				{
-					reason = entry.getKey();
-					for (Pair<Cancellable, Integer> element : entry.getValue())
+					if (element.first() != null)
 					{
-						if (element.first() != null)
-						{
-							el = element;
-							element.first().cancel();
-						}
+						element.first().cancel();
 					}
 				}
 			}
-		} catch (Exception e)
-		{
-			System.out.println("reason: " + reason + " with index " + el);
 		}
 	}
 
+	/**
+	 * Reset the data structure to start a new post election phase.
+	 */
 	public void endElectionState() {
 		this.get(Utils.TimeOutReason.ELECTION).getFirst().first().cancel();
 		logger.log(

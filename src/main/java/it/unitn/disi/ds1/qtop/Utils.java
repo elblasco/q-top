@@ -34,7 +34,9 @@ public class Utils {
         , COORDINATOR_BEFORE_RW_REQUEST, COORDINATOR_AFTER_RW_REQUEST, COORDINATOR_NO_QUORUM, COORDINATOR_QUORUM, COORDINATOR_ON_COMMUNICATION
     }
 
-    // Start message that sends the list of participants to everyone
+    /**
+     * Start message that sends the list of participants to everyone.
+     */
     public record StartMessage(List<ActorRef> group) implements Serializable {
         public StartMessage(List<ActorRef> group) {
             this.group = List.copyOf(group);
@@ -95,7 +97,7 @@ public class Utils {
     public record VotePair(HashMap<ActorRef, Vote> votes, Decision finalDecision) {
     }
 
-    public record Quadruplet<ID, E, I>(ID destinationId, E highestEpoch, I highestIteration, ID bestCandidateId) {
+    public record Quadruplet(int destinationId, int highestEpoch, int highestIteration, int bestCandidateId) {
     }
 
     public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {

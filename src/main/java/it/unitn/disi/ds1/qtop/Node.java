@@ -27,7 +27,7 @@ public class Node extends AbstractActor {
 	private List<ActorRef> group;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
 	private ActorRef coordinator;
-	private Utils.Quadruplet<Integer, Integer, Integer> lastElectionData;
+	private Utils.Quadruplet lastElectionData;
 	private PairsHistory history;
 	private Utils.CrashType crashTypeToForward = CrashType.NO_CRASH;
 	private int quorum;
@@ -641,7 +641,7 @@ public class Node extends AbstractActor {
 			this.isElection = true;
 			int idDest = getNextNodeForElection();
 			EpochPair latest = this.history.getLatest();
-			this.lastElectionData = new Utils.Quadruplet<>(
+			this.lastElectionData = new Utils.Quadruplet(
 					idDest,
 					latest.e(),
 					latest.i(),
@@ -720,7 +720,7 @@ public class Node extends AbstractActor {
 				LogLevel.INFO,
 				getSelf() + " is retrying election sending to [NODE-" + newDestId + "] the best " + "candidate " + this.lastElectionData.bestCandidateId()
 		);
-		this.lastElectionData = new Quadruplet<>(
+		this.lastElectionData = new Quadruplet(
 				newDestId,
 				this.lastElectionData.highestEpoch(),
 				this.lastElectionData.highestIteration(),
@@ -773,7 +773,7 @@ public class Node extends AbstractActor {
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] forwarding election message with best candidate " + msg.bestCandidateId()
 		);
-		this.lastElectionData = new Utils.Quadruplet<>(
+		this.lastElectionData = new Utils.Quadruplet(
 				idDest,
 				msg.highestEpoch(),
 				msg.highestIteration(),
@@ -798,7 +798,7 @@ public class Node extends AbstractActor {
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] switched election state, my history is < e:" + highestData.e() + ", i:" + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
 		);
-		this.lastElectionData = new Utils.Quadruplet<>(
+		this.lastElectionData = new Utils.Quadruplet(
 				idDest,
 				highestData.e(),
 				highestData.i(),

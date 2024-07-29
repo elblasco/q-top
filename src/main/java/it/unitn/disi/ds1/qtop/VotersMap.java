@@ -11,6 +11,14 @@ public class VotersMap extends ArrayList<ArrayList<Utils.VotePair>> {
 		super();
 	}
 
+	/**
+	 * Insert a vote in the map.
+	 *
+	 * @param e        the epoch
+	 * @param i        the index
+	 * @param actorRef the actor reference
+	 * @param vote     the vote
+	 */
 	public void insert(int e, int i, ActorRef actorRef, Utils.Vote vote) {
 		if (this.isEmpty() || this.size() <= e)
 		{
@@ -39,6 +47,13 @@ public class VotersMap extends ArrayList<ArrayList<Utils.VotePair>> {
 
 	}
 
+	/**
+	 * Set the decision for a specific epoch and index.
+	 *
+	 * @param d the decision
+	 * @param e the epoch
+	 * @param i the index
+	 */
 	public void setDecision(Utils.Decision d, int e, int i){
 		this.get(e).set(i, new Utils.VotePair(this.get(e).get(i).votes(), d));
 	}

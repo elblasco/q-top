@@ -9,6 +9,9 @@ public class UserInterface implements SimulationCallback {
         this.controller = controller;
     }
 
+    /**
+     * Start the user interface.
+     */
     public void start() {
 
         //default values
@@ -81,6 +84,9 @@ public class UserInterface implements SimulationCallback {
 
     }
 
+    /**
+     * Display the client menu.
+     */
     @Override
     public void clientMenu() {
         System.out.println("_________________________________________________________________");
@@ -121,6 +127,12 @@ public class UserInterface implements SimulationCallback {
             }
         }
     }
+
+    /**
+     * Set the Controller.
+     *
+     * @param controller the controller
+     */
     public void setController(Controller controller) {
         this.controller = controller;
     }
