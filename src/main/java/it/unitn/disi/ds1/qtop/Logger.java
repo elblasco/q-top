@@ -1,6 +1,7 @@
 package it.unitn.disi.ds1.qtop;
 
 import it.unitn.disi.ds1.qtop.Utils.LogLevel;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,17 +16,17 @@ import java.util.regex.Pattern;
 public class Logger {
 
     private static Logger instance = null;
+    // Map to store PrintWriters for each entity
+    private final Map<String, PrintWriter> entityLogs = new HashMap<>();
     private LogLevel logLevel = LogLevel.INFO;
     private PrintWriter info;
     private PrintWriter debug;
 
-    // Map to store PrintWriters for each entity
-    private final Map<String, PrintWriter> entityLogs = new HashMap<>();
-
-    // Private constructor to prevent instantiation from outside
+    /**
+     * Private constructor to prevent instantiation from outside
+     */
     private Logger() {
         ensureDirectoryExists("logs"); // Ensure logs directory exists
-
         try {
             info = new PrintWriter(
                     "logs" + File.separator + "simulation.log",
@@ -41,7 +42,11 @@ public class Logger {
         }
     }
 
-    // Singleton pattern to get the single instance of Logger
+    /**
+     * Singleton pattern to get the single instance of Logger.
+     *
+     * @return the Logger instance
+     */
     public static Logger getInstance() {
         if (instance == null) {
             synchronized (Logger.class) {
@@ -53,12 +58,20 @@ public class Logger {
         return instance;
     }
 
-    // Set the log level
+    /**
+     * Set the log level.
+     *
+     * @param level level to set
+     */
     public void setLogLevel(LogLevel level) {
         logLevel = level;
     }
 
-    // Ensure the directory exists, create if it does not
+    /**
+     * Ensure the logs directory exists, create if it does not.
+     *
+     * @param path directory path
+     */
     private void ensureDirectoryExists(String path) {
         File directory = new File(path);
         if (!directory.exists()) {
@@ -66,8 +79,14 @@ public class Logger {
         }
     }
 
-    // Get the PrintWriter for the given entity, create if it does not exist
-    private PrintWriter getEntityLog(String entity) {
+    /**
+     * Get the PrintWriter for the given entity, create if it does not exist.
+     *
+     * @param entity entity to get the log for
+     *
+     * @return PrintWriter for the entity
+     */
+    private @Nullable PrintWriter getEntityLog(String entity) {
         if (!entityLogs.containsKey(entity)) {
             ensureDirectoryExists("logs");
             try {
@@ -87,6 +106,14 @@ public class Logger {
     }
 
     // Parse the entity (NODE or CLIENT) from the log message
+
+    /**
+     * Parse the entity (NODE or CLIENT) from the log message.
+     *
+     * @param message log message
+     *
+     * @return the entity "NODE", "CLIENT" or "general"
+     */
     private String parseEntity(String message) {
         // Regular expression to match NODE-<number> or CLIENT-<number>
         Pattern pattern = Pattern.compile("(NODE-\\d+)|(CLIENT-\\d+)");
@@ -100,7 +127,12 @@ public class Logger {
         }
     }
 
-    // Log the message at the specified log level
+    /**
+     * Log the message at the specified log level.
+     *
+     * @param level   log level
+     * @param message log message
+     */
     public void log(LogLevel level, String message) {
         String log = String.format(
                 "[%s] [%s] %s",

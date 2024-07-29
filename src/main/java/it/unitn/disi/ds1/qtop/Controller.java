@@ -1,9 +1,9 @@
 package it.unitn.disi.ds1.qtop;
 
 public class Controller {
-    private Simulation simulation;
-    private UserInterface ui;
-    private final Logger logger = Logger.getInstance();
+	private static final Logger LOGGER = Logger.getInstance();
+	private final Simulation simulation;
+	private final UserInterface ui;
 
     public Controller(Simulation simulation, UserInterface ui) {
         this.simulation = simulation;
@@ -22,33 +22,30 @@ public class Controller {
         clientMenu();
     }
 
-	public int readVariable() {
-		return simulation.readVariable();
-    }
-
-	public void writeVariable(int value) {
-		simulation.writeVariable(value);
-    }
-
+	/**
+	 * Make crash a Node.
+	 *
+	 * @param crashType the type of crash
+	 */
 	public void crashNode(int crashType) {
-            logger.log(
+		LOGGER.log(
                     Utils.LogLevel.INFO,
 		            "[SYSTEM] inserting crash type " + crashType
-            );
-
+		);
 		this.simulation.addCrashNode(crashType);
-    }
+	}
 
+	/**
+	 * Quit.
+	 */
     public void exitSimulation() {
         simulation.exit();
     }
 
+	/**
+	 *
+	 */
     public void clientMenu() {
         ui.clientMenu();
     }
-
-    /*private boolean checkIndex(int nodeIndex) {
-        return nodeIndex >= 0 && nodeIndex < this.simulation.getNumberOfNodes() && ! this.simulation.isNodeCrashed
-        (nodeIndex);
-    }*/
 }
