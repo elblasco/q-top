@@ -97,19 +97,4 @@ public class Simulation {
         logger.log(Utils.LogLevel.INFO, "Simulation terminated");
         system.terminate();
     }
-
-	public int readVariable() {
-		logger.log(
-				Utils.LogLevel.INFO,
-				"[CLIENT] Requesting the value of the shared variable"
-		);
-		return 0;
-    }
-
-	public void writeVariable(int value) {
-		logger.log(
-				Utils.LogLevel.INFO,
-				"[CLIENT] Requesting to write the value " + value
-		);
-    }
 }

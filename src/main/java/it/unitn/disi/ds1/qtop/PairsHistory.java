@@ -9,6 +9,13 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		super();
 	}
 
+	/**
+	 * Get the state of the given epoch and iteration.
+	 *
+	 * @param e          epoch
+	 * @param i          iteration
+	 * @param finalState final state to set
+	 */
 	public void setState(int e, int i, Utils.Decision finalState) {
 		this.get(e).set(i,
 				new Pair<>(
@@ -18,7 +25,11 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		);
 	}
 
-
+	/**
+	 * Read the last valid, i.e., committed, variable.
+	 *
+	 * @return the last valid variable, -1 in case none is set
+	 */
 	public int readValidVariable() {
 		if (! this.isEmpty())
 		{
@@ -38,6 +49,13 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		return - 1;
 	}
 
+	/**
+	 * Insert a new element in the history.
+	 *
+	 * @param e       epoch
+	 * @param i       iteration
+	 * @param element element to insert
+	 */
 	public void insert(int e, int i, int element) {
 		if (this.isEmpty() || this.size() <= e)
 		{
@@ -64,6 +82,11 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		);
 	}
 
+	/**
+	 * Get the latest epoch and iteration.
+	 *
+	 * @return the latest epoch and iteration
+	 */
 	public Utils.EpochPair getLatest() {
 		int latestEpoch = (this.isEmpty()) ? 0 : this.size() - 1;
 		int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
@@ -72,7 +95,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 				latestIteration
 		);
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

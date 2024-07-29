@@ -49,10 +49,6 @@ public class Utils {
 
     }
 
-    /*public record DecisionRequest() implements Serializable {
-
-    }*/
-
     public record DecisionResponse(Decision decision, EpochPair epoch) implements Serializable {
 
     }

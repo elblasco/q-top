@@ -83,9 +83,8 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 * @param reason
 	 * @param i
 	 * @param node
-	 * @param logger
 	 */
-	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node, Logger logger) {
+	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node) {
 		if (this.get(reason).get(i).second() <= 0)
 		{
 			this.get(reason).get(i).first().cancel();
@@ -109,11 +108,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								this.get(reason).get(i).first(),
 								this.get(reason).get(i).second() - (this.customTimeouts.get(reason) / this.refresh)
 						)
-				);
-				logger.log(
-						Utils.LogLevel.DEBUG,
-						"[NODE-" + node.getNodeId() + "] has not received " + reason + " yet, " + this.get(reason)
-								.get(i).second() + " ms left"
 				);
 			}
 	}
