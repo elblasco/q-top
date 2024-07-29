@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Random;
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
 public class Client extends AbstractActor{
+	private static final Random RAND = new Random();
+	private static final Logger LOGGER = Logger.getInstance();
 	private static final int CRASH_TIMEOUT = 1000;
-	private static final Random rand = new Random();
-	private static final Logger logger = Logger.getInstance();
+	private static final int CLIENT_REQUEST_TIMEOUT = 1000;
+	private static final int COUNTDOWN_REFRESH = 10;
 	private final TimeOutManager timeOutManager;
 	private final List<ActorRef> group;
 	public final int clientId;
@@ -22,11 +25,7 @@ public class Client extends AbstractActor{
 	private Cancellable crashTimeOut;
 	private Utils.CrashType cachedCrashType;
 	private int timeOutCounter;
-
 	private int requestNumber;
-
-	private  static final int CLIENT_REQUEST_TIMEOUT = 1000;
-	private static final int COUNTDOWN_REFRESH = 10;
 
     public Client(int clientId, List<ActorRef> group, int numberOfNodes) {
         super();
@@ -49,6 +48,11 @@ public class Client extends AbstractActor{
         return Props.create(Client.class, () -> new Client(clientId, group, numberOfNodes));
     }
 
+	/**
+	 * Mask for to the Client actor.
+	 *
+	 * @return the Receive object
+	 */
     @Override
     public Receive createReceive() {
         return receiveBuilder().match(
@@ -79,12 +83,16 @@ public class Client extends AbstractActor{
         }).build();
     }
 
-    /**
-     * Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.
+	/**
+	 * Initial set up for the Client. It sets up a scheduled message to send requests to the `Node`s.
+	 *
      * @param msg the init message
      */
     public void onStartMessage(StartMessage msg) {
-        logger.log(LogLevel.INFO,"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] starting...");
+	    LOGGER.log(
+			    LogLevel.INFO,
+			    "[CLIENT-" + (this.clientId - this.numberOfNodes) + "] starting..."
+	    );
 	    this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 			    Duration.ZERO,
 			    Duration.ofMillis(1000),
@@ -95,11 +103,16 @@ public class Client extends AbstractActor{
 	    );
     }
 
-	private void onTimeOut(Utils.TimeOut msg) {
+	/**
+	 * General purpose handler for the Client's timeout messages.
+	 *
+	 * @param msg Generic `TimeOut` message
+	 */
+	private void onTimeOut(@NotNull Utils.TimeOut msg) {
 		if (msg.reason() == Utils.TimeOutReason.CRASH_RESPONSE)
 		{
 			this.crashTimeOut.cancel();
-			logger.log(
+			LOGGER.log(
 					LogLevel.INFO,
 					"[CLIENT-" + this.clientId + "] crash response not received, I am going to resend it"
 			);
@@ -111,16 +124,22 @@ public class Client extends AbstractActor{
 			);
 		} else if (msg.reason() == Utils.TimeOutReason.CLIENT_REQUEST)
 		{
-			logger.log(
+			LOGGER.log(
 					LogLevel.INFO,
-					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] request number "+ msg.epoch().i()+" timed out "
+					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] request number " + msg.epoch()
+							.i() + " timed" + " out "
 			);
 		}
 	}
 
-	private void onMakeRequest(Utils.MakeRequest msg){
-		boolean type = rand.nextBoolean();
-		int index = rand.nextInt(this.numberOfNodes);
+	/**
+	 * Make request to a Node within the network, the request is randomised among either read or write.
+	 *
+	 * @param msg the scheduled message to make a request
+	 */
+	private void onMakeRequest(Utils.MakeRequest msg) {
+		boolean type = RAND.nextBoolean(); // true for write, false for read
+		int index = RAND.nextInt(this.numberOfNodes);
 
 		this.timeOutManager.startCountDown(
 				Utils.TimeOutReason.CLIENT_REQUEST,
@@ -142,7 +161,7 @@ public class Client extends AbstractActor{
 		{
 			//WRITE
 			// the new values are from 0 to 100
-			int proposedValue = rand.nextInt(101);
+			int proposedValue = RAND.nextInt(101);
 			group.get(index).tell(
 					new WriteRequest(
 							proposedValue,
@@ -150,7 +169,7 @@ public class Client extends AbstractActor{
 					),
 					this.getSelf()
 			);
-			logger.log(
+			LOGGER.log(
 					LogLevel.INFO,
 					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write requested to [NODE-" + index + "], " +
 							"new value proposed: "
@@ -160,7 +179,8 @@ public class Client extends AbstractActor{
 		}
 		else
 		{
-			logger.log(LogLevel.INFO,
+			LOGGER.log(
+					LogLevel.INFO,
 					"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read number " + requestNumber + " req to " +
 							"[NODE-" + index + "]" + ", operation id: " + requestNumber);
 			group.get(index).tell(new ReadRequest(requestNumber), this.getSelf());
@@ -168,37 +188,48 @@ public class Client extends AbstractActor{
 		this.requestNumber++;
 	}
 
-	private void onReadAck(Utils.ReadValue msg) {
+	/**
+	 * Handler for the read request response from the Node.
+	 *
+	 * @param msg the read response message
+	 */
+	private void onReadAck(@NotNull Utils.ReadValue msg) {
 		int value = msg.value();
 
 		this.timeOutManager.resetCountDown(
 				Utils.TimeOutReason.CLIENT_REQUEST,
 				msg.nRequest()
 		);
-
-		logger.log(
+		LOGGER.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
 						"value " + value + ", operation id: " + msg.nRequest()
 		);
 	}
 
-	private void onWriteAck(Utils.WriteValue msg){
+	/**
+	 * Handler for the write request response from the Node.
+	 *
+	 * @param msg the write response message
+	 */
+	private void onWriteAck(@NotNull Utils.WriteValue msg) {
 		this.timeOutManager.resetCountDown(
 				Utils.TimeOutReason.CLIENT_REQUEST,
 				msg.nRequest()
 		);
-		logger.log(
+		LOGGER.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write request done, operation id: " + msg.nRequest()
 		);
 
 	}
 
-
-
-
-	private void onCountDown(Utils.CountDown msg) {
+	/**
+	 * General purpose handler for the countdown message.
+	 *
+	 * @param msg the countdown message
+	 */
+	private void onCountDown(@NotNull Utils.CountDown msg) {
 		if (msg.reason() == Utils.TimeOutReason.CRASH_RESPONSE)
 		{
 			if (this.timeOutCounter <= 0)
@@ -222,7 +253,13 @@ public class Client extends AbstractActor{
 		}
 	}
 
-	private void onCrashRequest(Utils.CrashRequest msg) {
+	/**
+	 * General purpose handler for the crash request message. Forward a crash request to a random Node in the
+	 * network.
+	 *
+	 * @param msg the crash request message
+	 */
+	private void onCrashRequest(@NotNull Utils.CrashRequest msg) {
 		this.cachedCrashType = msg.crashType();
 		this.crashTimeOut = this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 				Duration.ZERO,
@@ -235,24 +272,36 @@ public class Client extends AbstractActor{
 				getContext().getSystem().dispatcher(),
 				getSelf()
 		);
-		this.group.get(rand.nextInt(this.numberOfNodes)).tell(
+		this.group.get(RAND.nextInt(this.numberOfNodes)).tell(
 				msg,
 				getSelf()
 		);
 	}
 
+	/**
+	 * Handler for the crash request response from the Node.
+	 *
+	 * @param msg the crash response message
+	 */
 	private void onCrashACK(Utils.CrashACK msg) {
 		this.crashTimeOut.cancel();
 		this.timeOutCounter = CRASH_TIMEOUT;
-		logger.log(
+		LOGGER.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] received crash insertion message ack from " + getSender()
 		);
 	}
 
+	/**
+	 * Send a message to a destination actor with a random delay, within 0 and 29 milliseconds.
+	 *
+	 * @param dest the destination actor
+	 * @param msg the message to send
+	 * @param sender the sender actor
+	 */
 	public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
 		this.getContext().getSystem().scheduler().scheduleOnce(
-				Duration.ofMillis(rand.nextInt(30)),
+				Duration.ofMillis(RAND.nextInt(30)),
 				dest,
 				msg,
 				this.getContext().getSystem().dispatcher(),
