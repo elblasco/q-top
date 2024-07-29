@@ -58,9 +58,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		this.get(e).set(
 				i,
 				new Pair<>(
-				element,
+						element,
 						Utils.Decision.PENDING
-		));
+				)
+		);
 	}
 
 	public Utils.EpochPair getLatest() {
