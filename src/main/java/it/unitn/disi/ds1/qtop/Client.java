@@ -4,7 +4,6 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import it.unitn.disi.ds1.qtop.Utils.*;
 
 import java.time.Duration;
 import java.util.List;
@@ -36,7 +35,7 @@ public class Client extends AbstractActor{
 		this.numberOfNodes = numberOfNodes;
 	    this.timeOutCounter = CRASH_TIMEOUT;
 	    this.requestNumber = 0;
-			    this.timeOutManager = new TimeOutManager(
+	    this.timeOutManager = new TimeOutManager(
 			    0,
 			    0,
 			    0,
@@ -44,9 +43,6 @@ public class Client extends AbstractActor{
 				CLIENT_REQUEST_TIMEOUT,
 			    COUNTDOWN_REFRESH
 	    );
-
-
-
 	}
 
     static public Props props(int clientId, List<ActorRef> group, int numberOfNodes) {
@@ -164,17 +160,12 @@ public class Client extends AbstractActor{
 		}
 		else
 		{
-
 			logger.log(LogLevel.INFO,
 					"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read number " + requestNumber + " req to " +
 							"[NODE-" + index + "]" + ", operation id: " + requestNumber);
 			group.get(index).tell(new ReadRequest(requestNumber), this.getSelf());
-			this.requestNumber++;
 		}
-
-
-
-
+		this.requestNumber++;
 	}
 
 	private void onReadAck(Utils.ReadValue msg) {
