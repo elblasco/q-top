@@ -15,13 +15,13 @@ public class Client extends AbstractActor{
 	private static final int CRASH_TIMEOUT = 1000;
 	private static final Random rand = new Random();
 	private static final Logger logger = Logger.getInstance();
+	private final TimeOutManager timeOutManager;
+	private final List<ActorRef> group;
 	public final int clientId;
-	private List<ActorRef> group;
-	private int numberOfNodes;
-	private int timeOutCounter;
+	private final int numberOfNodes;
 	private Cancellable crashTimeOut;
 	private Utils.CrashType cachedCrashType;
-	private TimeOutManager timeOutManager;
+	private int timeOutCounter;
 
 	private int requestNumber;
 
@@ -173,9 +173,7 @@ public class Client extends AbstractActor{
 
 		this.timeOutManager.resetCountDown(
 				Utils.TimeOutReason.CLIENT_REQUEST,
-				msg.nRequest(),
-				this.clientId,
-				logger
+				msg.nRequest()
 		);
 
 		logger.log(
@@ -188,9 +186,7 @@ public class Client extends AbstractActor{
 	private void onWriteAck(Utils.WriteValue msg){
 		this.timeOutManager.resetCountDown(
 				Utils.TimeOutReason.CLIENT_REQUEST,
-				msg.nRequest(),
-				this.clientId,
-				logger
+				msg.nRequest()
 		);
 		logger.log(
 				LogLevel.INFO,
@@ -217,11 +213,10 @@ public class Client extends AbstractActor{
 				this.timeOutCounter -= CRASH_TIMEOUT / 100;
 			}
 		} else if (msg.reason() == Utils.TimeOutReason.CLIENT_REQUEST) {
-			this.timeOutManager.handleCountDown(
+			this.timeOutManager.clientHandleCountDown(
 					msg.reason(),
 					msg.epoch().i(),
-					this,
-					logger
+					this
 			);
 
 		}
@@ -256,15 +251,11 @@ public class Client extends AbstractActor{
 	}
 
 	public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
-		try
-		{
-			Thread.sleep(rand.nextInt(10));
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		dest.tell(
+		this.getContext().getSystem().scheduler().scheduleOnce(
+				Duration.ofMillis(rand.nextInt(30)),
+				dest,
 				msg,
+				this.getContext().getSystem().dispatcher(),
 				sender
 		);
 	}

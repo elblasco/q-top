@@ -3,13 +3,11 @@ package it.unitn.disi.ds1.qtop;
 import it.unitn.disi.ds1.qtop.Utils.LogLevel;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,22 +16,27 @@ public class Logger {
 
     private static Logger instance = null;
     private LogLevel logLevel = LogLevel.INFO;
-    private List<String> infoList;
     private PrintWriter info;
     private PrintWriter debug;
 
     // Map to store PrintWriters for each entity
-    private Map<String, PrintWriter> entityLogs = new HashMap<>();
+    private final Map<String, PrintWriter> entityLogs = new HashMap<>();
 
     // Private constructor to prevent instantiation from outside
     private Logger() {
-        infoList = new ArrayList<>();
         ensureDirectoryExists("logs"); // Ensure logs directory exists
 
         try {
-            info = new PrintWriter("logs" + File.separator + "simulation.log", "UTF-8");
-            debug = new PrintWriter("logs" + File.separator + "debug.log", "UTF-8");
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            info = new PrintWriter(
+                    "logs" + File.separator + "simulation.log",
+                    StandardCharsets.UTF_8
+            );
+            debug = new PrintWriter(
+                    "logs" + File.separator + "debug.log",
+                    StandardCharsets.UTF_8
+            );
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
@@ -68,10 +71,14 @@ public class Logger {
         if (!entityLogs.containsKey(entity)) {
             ensureDirectoryExists("logs");
             try {
-                PrintWriter writer = new PrintWriter("logs" + File.separator + entity + ".log", "UTF-8");
+                PrintWriter writer = new PrintWriter(
+                        "logs" + File.separator + entity + ".log",
+                        StandardCharsets.UTF_8
+                );
                 entityLogs.put(entity, writer);
                 return writer;
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
                 return null;
             }
@@ -106,7 +113,6 @@ public class Logger {
         if (level.ordinal() >= logLevel.ordinal()) {
             info.println(log);
             info.flush();
-            infoList.add(String.format("[%s] %s", level, message));
         }
 
         // Log to debug logs

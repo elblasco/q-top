@@ -17,23 +17,21 @@ import static it.unitn.disi.ds1.qtop.Utils.*;
 public class Node extends AbstractActor {
 	private static final int COUNTDOWN_REFRESH = 10;
 	private static final Random rand = new Random();
+	private final VotersMap voters = new VotersMap();
+	private final TimeOutManager timeOutManager;
+	private final int numberOfNodes;
 	private final int writeTimeout;
 	private final int nodeId;
-	private int quorum;
-	private VotersMap voters = new VotersMap();
 	private Cancellable[] heartBeat;
 	private List<ActorRef> group;
-    private final int decisionTimeout;
 	private Utils.CrashType crashType = CrashType.NO_CRASH;
-	private Utils.CrashType crashTypeToFoward = CrashType.NO_CRASH;
-    private final int voteTimeout;
-	private TimeOutManager timeOutManager;
 	private ActorRef coordinator;
+	private Utils.Quadruplet<Integer, Integer, Integer> lastElectionData;
+	private PairsHistory history;
+	private Utils.CrashType crashTypeToForward = CrashType.NO_CRASH;
+	private int quorum;
 	private boolean isElection = false;
 	private int numbersOfWrites = 0;
-	private Utils.Quadruplet<Integer, Integer, Integer> lastElectionData;
-    private PairsHistory history;
-    private int numberOfNodes;
 
     private final Logger logger = Logger.getInstance();
 
@@ -42,8 +40,6 @@ public class Node extends AbstractActor {
         super();
         this.history = new PairsHistory();
         this.nodeId = nodeId;
-        this.decisionTimeout = decisionTimeout;
-        this.voteTimeout = voteTimeout;
         this.writeTimeout = writeTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
@@ -182,8 +178,10 @@ public class Node extends AbstractActor {
     }
 
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
-
-			logger.log(LogLevel.DEBUG, "[NODE-" + this.nodeId + "] sending message to [NODE-" + dest + "]");
+	    logger.log(
+			    LogLevel.DEBUG,
+			    "[NODE-" + this.nodeId + "] sending message to [NODE-" + dest + "]"
+	    );
 
 		this.getContext().getSystem().scheduler().scheduleOnce(
 				Duration.ofMillis(rand.nextInt(30)),
@@ -294,7 +292,7 @@ public class Node extends AbstractActor {
 				this::onSynchronisation
 		).match(
 				WriteRequest.class,
-				msg -> {
+				msg ->
 					this.tell(
 							this.getSender(),
 							new WriteValue(
@@ -302,22 +300,19 @@ public class Node extends AbstractActor {
 									msg.nRequest()
 							),
 							this.getSelf()
-					);
-				}
+					)
 		).match(
 				CrashACK.class,
-				ack -> {
+				ack ->
 					logger.log(
 							LogLevel.INFO,
 							"[NODE-" + this.nodeId + "] received crash ACK while in voting state"
-					);
-				}
-		).matchAny(msg -> {
+					)
+		).matchAny(msg ->
 			logger.log(
 					LogLevel.INFO,
 					"[NODE-" + this.nodeId + "] received " + msg.getClass() + " while in voting " + "state"
-			);
-		}).build();
+			)).build();
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN RECEIVER METHODS
@@ -367,12 +362,11 @@ public class Node extends AbstractActor {
 				this::onSynchronisation
 		).match(
 				CrashACK.class,
-				ack -> {
+				ack ->
 					logger.log(
 							LogLevel.INFO,
 							"[NODE-" + this.nodeId + "] received crash ACK from coordinator"
-					);
-				}
+					)
 		).build();
 	}
 
@@ -397,9 +391,7 @@ public class Node extends AbstractActor {
 		);
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.HEARTBEAT,
-				0,
-				nodeId,
-				this.logger
+				0
 		);
 	}
 
@@ -460,9 +452,7 @@ public class Node extends AbstractActor {
 	private void onWriteResponse(WriteResponse msg) {
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
-				msg.nRequest(),
-				nodeId,
-				this.logger
+				msg.nRequest()
 		);
 	}
 
@@ -591,9 +581,7 @@ public class Node extends AbstractActor {
 	private void onElectionAck(ElectionACK msg) {
 		boolean res = this.timeOutManager.resetCountDown(
 				TimeOutReason.ELECTION,
-				0,
-				this.nodeId,
-				logger
+				0
 		);
 		logger.log(
 				LogLevel.INFO,
@@ -989,7 +977,7 @@ public class Node extends AbstractActor {
 			case NO_CRASH:
 				break;
 			default:
-				this.crashTypeToFoward = msg.crashType();
+				this.crashTypeToForward = msg.crashType();
 				this.timeOutManager.startCountDown(
 						TimeOutReason.CRASH_RESPONSE,
 						this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
@@ -1018,12 +1006,10 @@ public class Node extends AbstractActor {
 		{
 			this.timeOutManager.resetCountDown(
 					TimeOutReason.CRASH_RESPONSE,
-					0,
-					this.nodeId,
-					this.logger
+					0
 			);
 			getSelf().tell(
-					new CrashRequest(this.crashTypeToFoward),
+					new CrashRequest(this.crashTypeToForward),
 					getSelf()
 			);
 		}
@@ -1032,11 +1018,9 @@ public class Node extends AbstractActor {
 	private void coordinatorOnCrashACK(CrashACK msg) {
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.CRASH_RESPONSE,
-				0,
-				this.nodeId,
-				this.logger
+				0
 		);
-		this.crashTypeToFoward = null;
+		this.crashTypeToForward = null;
 	}
 
 	private void coordinatorCrash() {

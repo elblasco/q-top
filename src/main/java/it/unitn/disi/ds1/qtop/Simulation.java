@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class Simulation {
     private final ActorSystem system;
-    private List<ActorRef> group;
+	private final List<ActorRef> group;
     private int numberOfNodes;
 
     private final Logger logger = Logger.getInstance();

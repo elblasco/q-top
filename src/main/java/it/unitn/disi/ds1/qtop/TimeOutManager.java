@@ -119,8 +119,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	}
 
 
-	public void handleCountDown(Utils.TimeOutReason reason, int i, Client node, Logger logger) {
-
+	public void clientHandleCountDown(Utils.TimeOutReason reason, int i, Client node) {
 		if (this.get(reason).get(i).second() <= 0)
 		{
 			this.get(reason).get(i).first().cancel();
@@ -148,16 +147,14 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 *
 	 * @param reason
 	 * @param i
-	 * @param nodeId
-	 * @param logger
 	 *
 	 * @return
 	 */
-	public boolean resetCountDown(Utils.TimeOutReason reason, int i, int nodeId, Logger logger) {
+	public boolean resetCountDown(Utils.TimeOutReason reason, int i) {
 		boolean ret;
-		switch (reason)
+		if (reason == Utils.TimeOutReason.HEARTBEAT)
 		{
-			case HEARTBEAT: // in the HEARTBEAT case the countdown is reset to its max
+			// in the HEARTBEAT case the countdown is reset to its max
 				this.get(reason).set(
 						i,
 						new Pair<>(
@@ -165,12 +162,13 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 								this.customTimeouts.get(reason)
 						)
 				);
-				ret = true;
-				break;
-			default: // in all other cases the timeout countdown is cancelled
-				this.get(reason).get(i).first().cancel();
-				ret = this.get(reason).get(i).first().isCancelled();
-				break;
+			ret = true;
+		}
+		else
+		{
+			// in all other cases the timeout countdown is cancelled
+			this.get(reason).get(i).first().cancel();
+			ret = this.get(reason).get(i).first().isCancelled();
 		}
 		return ret;
 	}
@@ -206,7 +204,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 		this.get(Utils.TimeOutReason.ELECTION).getFirst().first().cancel();
 		logger.log(
 				Utils.LogLevel.INFO,
-				"[NODE] canceled its election timeout " + this.get(Utils.TimeOutReason.ELECTION).get(0).first()
+				"[NODE] canceled its election timeout " + this.get(Utils.TimeOutReason.ELECTION).getFirst().first()
 						.isCancelled()
 		);
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
