@@ -8,6 +8,7 @@ import akka.actor.Props;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -84,9 +85,21 @@ public class Node extends AbstractActor {
         this.group.addAll(sm.group());
     }
 
-	private void multicast(Serializable m) {
-        for (ActorRef node : group)
+	private void multicast(Serializable m, boolean hasToCrash) {
+		ArrayList<ActorRef> groupCopy = new ArrayList<>(this.group);
+		Collections.shuffle(groupCopy);
+		for (ActorRef node : groupCopy)
         {
+	        if (hasToCrash)
+	        {
+		        System.out.println("Destination for this message " + node);
+	        }
+	        if (hasToCrash && (rand.nextInt(100) < 10) && node != this.getSelf())
+	        {
+		        System.out.println(node + "will not receive the message");
+		        this.coordinatorCrash();
+		        return;
+	        }
             this.tell(
                     node,
                     m,
@@ -279,6 +292,18 @@ public class Node extends AbstractActor {
 		).match(
 				Synchronisation.class,
 				this::onSynchronisation
+		).match(
+				WriteRequest.class,
+				msg -> {
+					this.tell(
+							this.getSender(),
+							new WriteValue(
+									msg.newValue(),
+									msg.nRequest()
+							),
+							this.getSelf()
+					);
+				}
 		).match(
 				CrashACK.class,
 				ack -> {
@@ -496,7 +521,9 @@ public class Node extends AbstractActor {
 				this.multicast(new Synchronisation(
 						this.history,
 						this.history.getLatest()
-				));
+						),
+						false
+				);
 			}
 			else if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
 			{
@@ -709,6 +736,8 @@ public class Node extends AbstractActor {
 						"[NODE-" + this.nodeId + "] will eventually crash because " + this.crashType
 				);
 				break;
+			case NO_CRASH:
+				break;
 			default:
 				// The crash are forwarded without delay
 				this.coordinator.tell(
@@ -820,7 +849,9 @@ public class Node extends AbstractActor {
 			multicast(new DecisionResponse(
 					this.voters.get(e).get(i).finalDecision(),
 					msg.epoch()
-			));
+					),
+					this.crashType == CrashType.COORDINATOR_ON_COMMUNICATION
+			);
 			this.history.setState(
 					e,
 					i,
@@ -860,7 +891,9 @@ public class Node extends AbstractActor {
 				msg.newValue(),
 				new EpochPair(e,
 						i)
-		));
+				),
+				this.crashType == CrashType.COORDINATOR_ON_COMMUNICATION
+		);
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
@@ -946,11 +979,14 @@ public class Node extends AbstractActor {
 			case COORDINATOR_AFTER_RW_REQUEST:
 			case COORDINATOR_NO_QUORUM:
 			case COORDINATOR_QUORUM:
+			case COORDINATOR_ON_COMMUNICATION:
 				this.crashType = msg.crashType();
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] [COORDINATOR] will eventually crash because " + this.crashType
 				);
+				break;
+			case NO_CRASH:
 				break;
 			default:
 				this.crashTypeToFoward = msg.crashType();
