@@ -12,7 +12,7 @@ public class UserInterface implements SimulationCallback {
     public void start() {
 
         //default values
-        int numberOfNodes = 5;
+        int numberOfNodes = 10;
         int numberOfClients = 3;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
@@ -106,6 +106,7 @@ public class UserInterface implements SimulationCallback {
                     System.out.println("6. COORDINATOR - After R/W request");
                     System.out.println("7. COORDINATOR - During votes reception, NO quorum reached");
                     System.out.println("8. COORDINATOR - During votes reception, quorum reached");
+                    System.out.println("9. COORDINATOR - During the multicast of a message");
 
                     int crashType = scanner.nextInt();
                     controller.crashNode(crashType);

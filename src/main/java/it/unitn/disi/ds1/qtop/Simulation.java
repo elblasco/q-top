@@ -83,6 +83,7 @@ public class Simulation {
             case 6 -> Utils.CrashType.COORDINATOR_AFTER_RW_REQUEST;
             case 7 -> Utils.CrashType.COORDINATOR_NO_QUORUM;
             case 8 -> Utils.CrashType.COORDINATOR_QUORUM;
+	        case 9 -> Utils.CrashType.COORDINATOR_ON_COMMUNICATION;
             default -> Utils.CrashType.NO_CRASH;
         };
 			// Crash messages are instantaneous
