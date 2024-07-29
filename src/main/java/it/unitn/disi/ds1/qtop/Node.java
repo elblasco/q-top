@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -72,15 +73,21 @@ public class Node extends AbstractActor {
 		);
 	}
 
-	public int getNodeId() {
-		return nodeId;
-	}
-
-	private void setGroup(StartMessage sm) {
+	/**
+	 * Generate the group of nodes.
+	 *
+	 * @param sm the start message
+	 */
+	private void setGroup(@NotNull StartMessage sm) {
         this.group = new ArrayList<>();
         this.group.addAll(sm.group());
-    }
+	}
 
+	/**
+	 * Multicast a message to every node in the group in random order, it can make the sender crash.
+	 * @param m message to multicast
+	 * @param hasToCrash if the current node has to crash
+	 */
 	private void multicast(Serializable m, boolean hasToCrash) {
 		ArrayList<ActorRef> groupCopy = new ArrayList<>(this.group);
 		Collections.shuffle(groupCopy);
@@ -143,6 +150,10 @@ public class Node extends AbstractActor {
         }
     }
 
+	/**
+	 * Handle the ReadRequest from a Client, if a crash for the coordinator is set it triggers it.
+	 * @param msg the ReadRequest
+	 */
 	private void onReadRequest(ReadRequest msg) {
 		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
 		{
@@ -166,8 +177,11 @@ public class Node extends AbstractActor {
 			);
 			this.coordinatorCrash();
 		}
-    }
+	}
 
+	/**
+	 * Make the current Node crash.
+	 */
 	private void crash() {
 		logger.log(
 				LogLevel.ERROR,
@@ -175,8 +189,15 @@ public class Node extends AbstractActor {
 		);
         this.getContext().become(receiveBuilder().matchAny(msg -> {
         }).build());
-    }
+	}
 
+	/**
+	 * Send a message to a destination actor with a random delay, within 0 and 29 milliseconds.
+	 *
+	 * @param dest   the destination actor
+	 * @param msg    the message to send
+	 * @param sender the sender actor
+	 */
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
 	    logger.log(
 			    LogLevel.DEBUG,
@@ -190,11 +211,14 @@ public class Node extends AbstractActor {
 				this.getContext().getSystem().dispatcher(),
 				sender
 		);
-
-
     }
 
-	private void onDecisionResponse(DecisionResponse msg) {
+	/**
+	 * Handle DecisionResponse from the coordinator.
+	 *
+	 * @param msg the massage with the decision
+	 */
+	private void onDecisionResponse(@NotNull DecisionResponse msg) {
         int e = msg.epoch().e();
         int i = msg.epoch().i();
         logger.log(
@@ -212,9 +236,11 @@ public class Node extends AbstractActor {
 				"[NODE-" + this.nodeId + "] decided " + msg.decision() + " on shared variable " + this.history.get(e)
 						.get(i).first()
 		);
-
 	}
 
+	/**
+	 * Start the countdown for the Heartbeat.
+	 */
 	private void startHeartBeatCountDown() {
         this.timeOutManager.startCountDown(
                 TimeOutReason.HEARTBEAT,
@@ -232,11 +258,16 @@ public class Node extends AbstractActor {
                         getContext().getSystem().dispatcher(),
                         getSelf()
                 ),
-                0
+		        0
         );
-    }
+	}
 
-	private void onSynchronisation(Synchronisation msg) {
+	/**
+	 * Handle the Synchronisation messages typically triggered after an election.
+	 *
+	 * @param msg the Synchronisation message
+	 */
+	private void onSynchronisation(@NotNull Synchronisation msg) {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the epoch is going to be <" + msg.newEpochPair()
@@ -256,18 +287,32 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Make the current Node become a coordinator.
+	 */
 	public void becomeCoordinator() {
 		this.getContext().become(coordinatorBehaviour());
 	}
 
+	/**
+	 * Make the current Node become a voter for the election process.
+	 */
 	public void becomeVoter() {
 		this.getContext().become(voterBehaviour());
 	}
 
+	/**
+	 * Make the current Node become a receiver, aka, a normal replica.
+	 */
 	public void becomeReceiver() {
 		this.getContext().become(createReceive());
 	}
 
+	/**
+	 * Mask for to the voter actor.
+	 *
+	 * @return the Receive object
+	 */
 	public Receive voterBehaviour() {
 		return receiveBuilder().match(
 				CountDown.class,
@@ -318,6 +363,11 @@ public class Node extends AbstractActor {
 	// BEGIN RECEIVER METHODS
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Mask for to the Receiver actor.
+	 *
+	 * @return the Receive object
+	 */
 	@Override
 	public Receive createReceive() {
 		return receiveBuilder().match(
@@ -384,6 +434,11 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Handler for the Heartbeat message.
+	 *
+	 * @param msg the Heartbeat message
+	 */
 	private void onHeartBeat(HeartBeat msg) {
 		logger.log(
 				LogLevel.DEBUG,
@@ -400,19 +455,23 @@ public class Node extends AbstractActor {
 	 *
 	 * @param msg Genre of countdown
 	 */
-	private void onCountDown(CountDown msg) {
+	private void onCountDown(@NotNull CountDown msg) {
 		int countDownIndex =
 				(msg.reason() == TimeOutReason.HEARTBEAT || msg.reason() == TimeOutReason.ELECTION) ? 0 : msg.epoch()
 						.i();
 		this.timeOutManager.handleCountDown(
 				msg.reason(),
 				countDownIndex,
-				this,
-				this.logger
+				this
 		);
 	}
 
-	private void onWriteRequest(WriteRequest msg) {
+	/**
+	 * Receiver handler for write requests, if a receiver crash is set this function triggers it.
+	 *
+	 * @param msg the WriteRequest message
+	 */
+	private void onWriteRequest(@NotNull WriteRequest msg) {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] received write request with value " + msg.newValue()
@@ -449,14 +508,24 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	private void onWriteResponse(WriteResponse msg) {
+	/**
+	 * Receiver handler for the WriteResponse message.
+	 *
+	 * @param msg the WriteResponse message
+	 */
+	private void onWriteResponse(@NotNull WriteResponse msg) {
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
 				msg.nRequest()
 		);
 	}
 
-	private void onTimeOut(TimeOut msg) {
+	/**
+	 * Receiver general purpose handler for the timeout messages.
+	 *
+	 * @param msg timeout message
+	 */
+	private void onTimeOut(@NotNull TimeOut msg) {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] received a timeout " + msg.reason()
@@ -475,7 +544,12 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	private void onElection(Election msg) {
+	/**
+	 * Receiver handler for the Election message.
+	 *
+	 * @param msg the Election message
+	 */
+	private void onElection(@NotNull Election msg) {
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
@@ -552,6 +626,9 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Start the election process.
+	 */
 	private void startElection() {
 		if (! this.isElection)
 		{
@@ -578,6 +655,11 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Handler for the ElectionACK message.
+	 *
+	 * @param msg the ElectionACK message
+	 */
 	private void onElectionAck(ElectionACK msg) {
 		boolean res = this.timeOutManager.resetCountDown(
 				TimeOutReason.ELECTION,
@@ -590,6 +672,10 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Get the next node to send the election message. It is called if the previous Node did not reply in time.
+	 * @return the next node ID to send the election message
+	 */
 	private int getNextNodeForElection() {
 		int idDest = (this.nodeId + 1) % this.numberOfNodes;
 		while (this.group.get(idDest) == this.coordinator && idDest != this.nodeId)
@@ -599,6 +685,9 @@ public class Node extends AbstractActor {
 		return idDest;
 	}
 
+	/**
+	 * Start an Election CountDown to wait the ElectionACK
+	 */
 	private void startElectionCountDown() {
 		logger.log(
 				LogLevel.INFO,
@@ -621,6 +710,9 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Retry the election process if the previous Node did not reply.
+	 */
 	private void retryElection() {
 		int oldId = this.lastElectionData.destinationId();
 		int newDestId = (oldId + 1) % numberOfNodes;
@@ -644,6 +736,9 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Start the Write CountDown to wait the WriteResponse
+	 */
 	private void startWriteCountDown() {
 		this.timeOutManager.startCountDown(
 				TimeOutReason.WRITE,
@@ -665,7 +760,14 @@ public class Node extends AbstractActor {
 		);
 	}
 
-	private void forwardPreviousElectionMessage(Election msg, int idDest) {
+	/**
+	 * Forward the previous election message to the next node. It is used only if the current Node will lose the
+	 * election.
+	 *
+	 * @param msg    the Election message
+	 * @param idDest the destination node ID
+	 */
+	private void forwardPreviousElectionMessage(@NotNull Election msg, int idDest) {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
@@ -684,7 +786,13 @@ public class Node extends AbstractActor {
 		);
 	}
 
-	private void sendNewElectionMessage(EpochPair highestData, int idDest) {
+	/**
+	 * Craft a new Election message and send it to the next node.
+	 *
+	 * @param highestData the highest epoch and iteration registered by the current Node
+	 * @param idDest      the destination node ID
+	 */
+	private void sendNewElectionMessage(@NotNull EpochPair highestData, int idDest) {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
@@ -707,7 +815,11 @@ public class Node extends AbstractActor {
 		);
 	}
 
-	private void onCrashRequest(CrashRequest msg) {
+	/**
+	 * Handle the CrashRequest messages. In case it is a message for the coordinator it forwards the message.
+	 * @param msg the CrashRequest message
+	 */
+	private void onCrashRequest(@NotNull CrashRequest msg) {
 		getSender().tell(
 				new CrashACK(),
 				getSelf()
@@ -739,6 +851,12 @@ public class Node extends AbstractActor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN COORDINATOR METHODS
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Mask for to the Coordinator actor.
+	 *
+	 * @return the Receive object
+	 */
 	public AbstractActor.Receive coordinatorBehaviour() {
 		return receiveBuilder().match(
 				StartMessage.class,
@@ -764,7 +882,6 @@ public class Node extends AbstractActor {
 				)
 		).match(
 				CountDown.class,
-				//Special handler for the self sent Heartbeat, the print is just for debug
 				this::coordinatorOnCountDown
 		).match(
 				CrashRequest.class,
@@ -804,7 +921,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @param msg request to make a vote
 	 */
-	public void coordinatorOnVoteResponse(VoteResponse msg) {
+	public void coordinatorOnVoteResponse(@NotNull VoteResponse msg) {
 		Vote v = msg.vote();
 		int e = msg.epoch().e();
 		int i = msg.epoch().i();
@@ -848,6 +965,10 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Coordinator handler for the WriteRequest messages. If a crash for the coordinator is set it triggers it.
+	 * @param msg the WriteRequest message
+	 */
 	private void coordinatorOnWriteRequest(WriteRequest msg) {
 		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
 		{
@@ -861,11 +982,6 @@ public class Node extends AbstractActor {
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
 		int i = (this.history.isEmpty() || this.history.get(e).isEmpty()) ? 0 : this.history.get(e).size();
-		//System.out.println("e: " + e + " i: " + i);
-		/*this.epochPair = new EpochPair(
-				e,
-				i + 1
-		);*/
 		this.history.insert(
 				e,
 				i,
@@ -892,12 +1008,16 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	private void coordinatorOnCountDown(CountDown msg) {
+	/**
+	 * Coordinator general purpose handler for countdowns.
+	 *
+	 * @param msg the CountDown message
+	 */
+	private void coordinatorOnCountDown(@NotNull CountDown msg) {
 		this.timeOutManager.handleCountDown(
 				msg.reason(),
 				0,
-				this,
-				this.logger
+				this
 		);
 		logger.log(
 				LogLevel.INFO,
@@ -905,6 +1025,13 @@ public class Node extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Check if the quorum is reached for a specific epoch and iteration.
+	 *
+	 * @param e the epoch
+	 * @param i the iteration
+	 * @return true if the quorum is reached, false otherwise
+	 */
 	private boolean quorumReached(int e, int i) {
 		return voters.get(e).get(i).votes().entrySet().stream().filter(entry -> entry.getValue() == Vote.YES).toList()
 				.size() >= quorum;
@@ -953,6 +1080,11 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Coordinator handler for the CrashRequest messages. If a message is for a receiver it forwards the message.
+	 *
+	 * @param msg the CrashRequest message
+	 */
 	private void coordinatorOnCrashRequest(CrashRequest msg) {
 		if (getSender() != getSelf())
 		{
@@ -1001,7 +1133,12 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	private void coordinatorOnTimeOut(TimeOut msg) {
+	/**
+	 * Coordinator general purpose handler for the timeout messages.
+	 *
+	 * @param msg the TimeOut message
+	 */
+	private void coordinatorOnTimeOut(@NotNull TimeOut msg) {
 		if (msg.reason() == TimeOutReason.CRASH_RESPONSE)
 		{
 			this.timeOutManager.resetCountDown(
@@ -1015,6 +1152,11 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Coordinator handler for the CrashACK messages.
+	 *
+	 * @param msg the CrashACK message
+	 */
 	private void coordinatorOnCrashACK(CrashACK msg) {
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.CRASH_RESPONSE,
@@ -1023,6 +1165,9 @@ public class Node extends AbstractActor {
 		this.crashTypeToForward = null;
 	}
 
+	/**
+	 * Coordinator wrapper for the crash method.
+	 */
 	private void coordinatorCrash() {
 		if (this.heartBeat != null)
 		{

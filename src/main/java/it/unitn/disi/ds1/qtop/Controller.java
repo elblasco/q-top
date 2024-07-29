@@ -43,7 +43,7 @@ public class Controller {
     }
 
 	/**
-	 *
+	 * Print the menu to tty.
 	 */
     public void clientMenu() {
         ui.clientMenu();
