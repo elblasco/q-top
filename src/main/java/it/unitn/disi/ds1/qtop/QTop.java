@@ -1,5 +1,8 @@
 package it.unitn.disi.ds1.qtop;
 
+/**
+ * Main class to start the simulation.
+ */
 public class QTop{
 
     public static void main(String[] args) {

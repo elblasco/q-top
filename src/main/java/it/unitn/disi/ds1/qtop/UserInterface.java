@@ -2,6 +2,9 @@ package it.unitn.disi.ds1.qtop;
 
 import java.util.Scanner;
 
+/**
+ * UserInterface class to manage/generate the user interface.
+ */
 public class UserInterface implements SimulationCallback {
     private Controller controller;
 

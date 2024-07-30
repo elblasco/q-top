@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * TimeOutManager class to manage the timeouts of a Node
+ */
 public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> {
 	// Phony map to associate a reason with its specific refresh ratio
 	private final EnumMap<Utils.TimeOutReason, Integer> customTimeouts;

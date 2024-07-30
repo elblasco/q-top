@@ -1,5 +1,8 @@
 package it.unitn.disi.ds1.qtop;
 
+/**
+ * Controller for the simulation.
+ */
 public class Controller {
 	private static final Logger LOGGER = Logger.getInstance();
 	private final Simulation simulation;
@@ -10,6 +13,14 @@ public class Controller {
         this.ui = ui;
     }
 
+	/**
+	 * Start the simulation (network), with the given parameters.
+	 * @param numberOfNodes number of nodes
+	 * @param numberOfClients number of clients
+	 * @param decisionTimeout decision timeout
+	 * @param voteTimeout vote timeout
+	 * @param writeTimeout write timeout
+	 */
 	public void startSimulation(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout,
 			int writeTimeout) {
 		simulation.start(

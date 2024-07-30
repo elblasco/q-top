@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Simulation class layer between the UserInterface and the network.
+ */
 public class Simulation {
     private final ActorSystem system;
 	private final List<ActorRef> group;
@@ -19,6 +22,15 @@ public class Simulation {
         system = ActorSystem.create("qtop");
     }
 
+	/**
+	 * Start the network with the given parameters.
+	 *
+	 * @param numberOfNodes    number of nodes
+	 * @param numberOfClients  number of clients
+	 * @param decisionTimeout  decision timeout
+	 * @param voteTimeout      vote timeout
+	 * @param writeTimeout     write timeout
+	 */
 	public void start(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout, int writeTimeout) {
         // Set initial number of nodes
         this.numberOfNodes = numberOfNodes;
@@ -71,6 +83,11 @@ public class Simulation {
 
     }
 
+	/**
+	 * Add a crash to the network.
+	 *
+	 * @param crashType the type of crash
+	 */
 	public void addCrashNode(int crashType) {
 		int clientId = new Random().nextInt(this.group.size() - this.numberOfNodes) + this.numberOfNodes;
         Utils.CrashType crashReason = switch (crashType)
@@ -93,6 +110,9 @@ public class Simulation {
 		);
 	}
 
+	/**
+	 * Shut down the network.
+	 */
     public void exit() {
         logger.log(Utils.LogLevel.INFO, "Simulation terminated");
         system.terminate();

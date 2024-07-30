@@ -4,6 +4,9 @@ import akka.japi.Pair;
 
 import java.util.ArrayList;
 
+/**
+ * PairsHistory class to store the history of the pairs and the final decision associated to it
+ */
 public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decision>>> {
 	public PairsHistory() {
 		super();

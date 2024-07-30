@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Logger class to log messages to the console and to files.
+ */
 public class Logger {
 
     private static Logger instance = null;

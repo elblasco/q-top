@@ -15,6 +15,10 @@ import java.util.Random;
 
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
+/**
+ * Node class, it represents a single node in the network. It can be either receiver or coordinator.
+ * During the election all the nodes become voters.
+ */
 public class Node extends AbstractActor {
 	private static final int COUNTDOWN_REFRESH = 10;
 	private static final Random rand = new Random();

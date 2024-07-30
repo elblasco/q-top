@@ -12,6 +12,10 @@ import java.util.Random;
 
 import static it.unitn.disi.ds1.qtop.Utils.*;
 
+/**
+ * The Client actor is responsible for sending requests to the Nodes in the network. The requests are randomised
+ * between read and write operations. The Client actor also has the ability to make crash a random Node in the network.
+ */
 public class Client extends AbstractActor{
 	private static final Random RAND = new Random();
 	private static final Logger LOGGER = Logger.getInstance();

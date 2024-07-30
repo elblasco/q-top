@@ -5,6 +5,9 @@ import akka.actor.ActorRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Class that represents/handle the voters map.
+ */
 public class VotersMap extends ArrayList<ArrayList<Utils.VotePair>> {
 
 	public VotersMap() {
