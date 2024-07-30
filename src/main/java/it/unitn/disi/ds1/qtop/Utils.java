@@ -6,13 +6,34 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Class that contains all the utility classes and messages used by the actors.
+ */
 public class Utils {
+
+    /**
+     * The timeout for the heartbeat.
+     */
     final static int HEARTBEAT_TIMEOUT = 1000; // timeout for the heartbeat, ms
+
+    /**
+     * The timeout for the vote request.
+     */
     final static int ELECTION_TIMEOUT = 300; // timeout for the heartbeat, ms
+
+    /**
+     * Enum to represent all the possible votes that can be taken by a Node.
+     */
     public enum Vote {NO, YES}
 
+    /**
+     * Enum to represent all the possible decisions that can be taken by the coordinator.
+     */
     public enum Decision {ABORT, WRITEOK, PENDING}
 
+    /**
+     * Enum to represent all the log levels.
+     */
     public enum LogLevel {
         TRACE(1),
         DEBUG(2),
@@ -27,8 +48,14 @@ public class Utils {
         }
     }
 
+    /**
+     * Enum to represent all the possible reasons for a timeout.
+     */
     public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION, CRASH_RESPONSE, CLIENT_REQUEST}
 
+    /**
+     * Enum to represent all the possible crashes that can be triggered.
+     */
     public enum CrashType {
         NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
         , COORDINATOR_BEFORE_RW_REQUEST, COORDINATOR_AFTER_RW_REQUEST, COORDINATOR_NO_QUORUM, COORDINATOR_QUORUM, COORDINATOR_ON_COMMUNICATION
@@ -50,71 +77,143 @@ public class Utils {
      * @param epoch    epoch associated to the request
      */
     public record VoteRequest(int newValue, EpochPair epoch) implements Serializable {
-
     }
 
     /**
-     * Message that sends the vote.
+     * Message to send the vote of a node to the coordinator.
      *
      * @param vote  the vote of the node
      * @param epoch the epoch associated to the vote
      */
     public record VoteResponse(Vote vote, EpochPair epoch) implements Serializable {
-
     }
 
+    /**
+     * Message to propagate the coordinator final decision regarding a certain epoch.
+     *
+     * @param decision the decision of the coordinator
+     * @param epoch epoch associated to the request
+     */
     public record DecisionResponse(Decision decision, EpochPair epoch) implements Serializable {
-
     }
 
+    /**
+     * Message self-lopped by a node to trigger a timeout.
+     * @param reason the reason for the timeout
+     * @param epoch (optional) epoch associated to it
+     */
     public record CountDown(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
+    /**
+     * Message to notify a timeout.
+     * @param reason the reason for the timeout
+     * @param epoch (optional) epoch associated to it
+     */
     public record TimeOut(TimeOutReason reason, EpochPair epoch) implements Serializable {
     }
 
+    /**
+     * Special message to multicast a heartbeat from a coordinator to all the nodes.
+     */
     public record HeartBeat() implements Serializable {
     }
 
+    /**
+     * Message to ask for a crash.
+     */
     public record CrashRequest(CrashType crashType) implements Serializable {
     }
 
+    /**
+     * Message used by a Client to generate a random request to a random Node.
+     */
     public record MakeRequest() implements Serializable {
     }
 
+    /**
+     * Message used by a Client to ask for a read operation.
+     * @param nRequest the number of the request
+     */
     public record ReadRequest( int nRequest) implements Serializable {
     }
 
+    /**
+     * Message used by a Client to ask for a read operation.
+     * @param newValue the new value proposed by the Client
+     * @param nRequest the number of the request
+     */
     public record WriteRequest(int newValue, int nRequest) implements Serializable {
     }
 
-    public record WriteResponse(int nRequest) implements Serializable {
-    }
-
+    /**
+     * Message used by a Node to notify the Client that it received the ReadRequest, and reply to it.
+     * @param value the value read by the Node
+     * @param nRequest the number of the request
+     */
     public record ReadValue(int value, int nRequest) implements Serializable {
     }
 
+    /**
+     * Message used by a Node to notify the Client that it received the WriteRequest, and reply to it.
+     * @param value the value written by the Node
+     * @param nRequest the number of the request
+     */
     public record WriteValue(int value, int nRequest) implements Serializable {
     }
 
+    /**
+     * Struct to represent and send an epoch and an iteration.
+     * @param e epoch
+     * @param i iteration
+     */
     public record EpochPair(int e, int i) implements Serializable {
     }
 
+    /**
+     * Message to send election data
+     * @param highestEpoch highest epoch known
+     * @param highestIteration highest iteration known
+     * @param bestCandidateId node that have that EpochPair
+     */
     public record Election(int highestEpoch, int highestIteration, int bestCandidateId) implements Serializable {
     }
 
+    /**
+     * Message to acknowledge an Election
+     */
     public record ElectionACK() implements Serializable {
     }
 
+    /**
+     * Struct to represent the map of voters for every write, and the final decision taken for that write.
+     * @param votes map of voters
+     * @param finalDecision coordinator final decision
+     */
     public record VotePair(HashMap<ActorRef, Vote> votes, Decision finalDecision) {
     }
 
+    /**
+     * Struct cache the best candidate data during the election.
+     * @param destinationId the next node to send the election message
+     * @param highestEpoch highest epoch known
+     * @param highestIteration highest iteration known
+     * @param bestCandidateId node that have that EpochPair
+     */
     public record Quadruplet(int destinationId, int highestEpoch, int highestIteration, int bestCandidateId) {
     }
 
+    /**
+     * Message to synchronise all the node after an election.
+     * @param history the new history of transactions
+     * @param newEpochPair the new epoch pair
+     */
     public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
     }
 
+    /**
+     * Message to acknowledge a CrashRequest.
+     */
     public record CrashACK() implements Serializable {
     }
 }
