@@ -20,4 +20,4 @@ jobs:
           java-version: 21
           target-folder: javadoc
           project: gradle
-          custom-command: javadoc -private -splitindex -use -author -version -link https://docs.oracle.com/en/java/javase/21/docs/api/ -d javadoc -sourcepath src/main/java src/main/java/it/unitn/disi/ds1/qtop/
+          custom-command: javadoc -private -splitindex -use -author -version -link https://docs.oracle.com/en/java/javase/21/docs/api/ -d javadoc
