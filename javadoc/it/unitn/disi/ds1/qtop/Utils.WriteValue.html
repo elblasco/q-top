@@ -90,6 +90,11 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-value">value</span></code> - the value written by the Node</dd>
+<dd><code><span id="param-nRequest">nRequest</span></code> - the number of the request</dd>
+</dl>
+<dl class="notes">
 <dt>All Implemented Interfaces:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></code></dd>
 </dl>
@@ -101,6 +106,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">Utils.WriteValue</span>(int&nbsp;value, int&nbsp;nRequest)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
 implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></span></div>
+<div class="block">Message used by a Node to notify the Client that it received the WriteRequest, and reply to it.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
@@ -152,7 +158,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nRequest()" class="member-name-link">nRequest</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>nRequest</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-nRequest"><code>nRequest</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
@@ -162,7 +168,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#value()" class="member-name-link">value</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>value</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-value"><code>value</code></a> record component.</div>
 </div>
 </div>
 </div>
@@ -189,8 +195,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="block">Creates an instance of a <code>WriteValue</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - the value for the <code>value</code> record component</dd>
-<dd><code>nRequest</code> - the value for the <code>nRequest</code> record component</dd>
+<dd><code>value</code> - the value for the <a href="#param-value"><code>value</code></a> record component</dd>
+<dd><code>nRequest</code> - the value for the <a href="#param-nRequest"><code>nRequest</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -247,10 +253,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="value()">
 <h3>value</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">value</span>()</div>
-<div class="block">Returns the value of the <code>value</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-value"><code>value</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>value</code> record component</dd>
+<dd>the value of the <a href="#param-value"><code>value</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -258,10 +264,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="nRequest()">
 <h3>nRequest</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">nRequest</span>()</div>
-<div class="block">Returns the value of the <code>nRequest</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-nRequest"><code>nRequest</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>nRequest</code> record component</dd>
+<dd>the value of the <a href="#param-nRequest"><code>nRequest</code></a> record component</dd>
 </dl>
 </section>
 </li>

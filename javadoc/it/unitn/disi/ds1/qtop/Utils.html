@@ -90,6 +90,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Utils</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">Class that contains all the utility classes and messages used by the actors.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -104,49 +105,79 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.CountDown.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.CountDown</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Message self-lopped by a node to trigger a timeout.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.CrashACK.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.CrashACK</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message to acknowledge a CrashRequest.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.CrashRequest.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.CrashRequest</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Message to ask for a crash.</div>
+</div>
 <div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.CrashType.html" class="type-name-link" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Enum to represent all the possible crashes that can be triggered.</div>
+</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.Decision.html" class="type-name-link" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Enum to represent all the possible decisions that can be taken by the coordinator.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.DecisionResponse.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.DecisionResponse</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message to propagate the coordinator final decision regarding a certain epoch.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.Election.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.Election</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Message to send election data</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.ElectionACK.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.ElectionACK</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message to acknowledge an Election</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.EpochPair.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Struct to represent and send an epoch and an iteration.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.HeartBeat.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.HeartBeat</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Special message to multicast a heartbeat from a coordinator to all the nodes.</div>
+</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.LogLevel.html" class="type-name-link" title="enum class in it.unitn.disi.ds1.qtop">Utils.LogLevel</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Enum to represent all the log levels.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.MakeRequest.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.MakeRequest</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message used by a Client to generate a random request to a random Node.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.Quadruplet.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.Quadruplet</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Struct cache the best candidate data during the election.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.ReadRequest.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.ReadRequest</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message used by a Client to ask for a read operation.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.ReadValue.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.ReadValue</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Message used by a Node to notify the Client that it received the ReadRequest, and reply to it.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.StartMessage.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.StartMessage</a></code></div>
 <div class="col-last odd-row-color">
@@ -154,19 +185,29 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.Synchronisation.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.Synchronisation</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Message to synchronise all the node after an election.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.TimeOut.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.TimeOut</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message to notify a timeout.</div>
+</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.TimeOutReason.html" class="type-name-link" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Enum to represent all the possible reasons for a timeout.</div>
+</div>
 <div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.Vote.html" class="type-name-link" title="enum class in it.unitn.disi.ds1.qtop">Utils.Vote</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Enum to represent all the possible votes that can be taken by a Node.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.VotePair.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.VotePair</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Struct to represent the map of voters for every write, and the final decision taken for that write.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.VoteRequest.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.VoteRequest</a></code></div>
 <div class="col-last odd-row-color">
@@ -175,17 +216,18 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="Utils.VoteResponse.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.VoteResponse</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Message that sends the vote.</div>
+<div class="block">Message to send the vote of a node to the coordinator.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="Utils.WriteRequest.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.WriteRequest</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Message used by a Client to ask for a read operation.</div>
+</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="Utils.WriteResponse.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.WriteResponse</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="Utils.WriteValue.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.WriteValue</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="Utils.WriteValue.html" class="type-name-link" title="class in it.unitn.disi.ds1.qtop">Utils.WriteValue</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Message used by a Node to notify the Client that it received the WriteRequest, and reply to it.</div>
+</div>
 </div>
 </section>
 </li>

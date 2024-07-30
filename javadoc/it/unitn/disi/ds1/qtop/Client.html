@@ -96,6 +96,8 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Client</span>
 <span class="extends-implements">extends akka.actor.AbstractActor</span></div>
+<div class="block">The Client actor is responsible for sending requests to the Nodes in the network. The requests are randomised
+ between read and write operations. The Client actor also has the ability to make crash a random Node in the network.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">

@@ -90,6 +90,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Simulation</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">Simulation class layer between the UserInterface and the network.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -119,17 +120,23 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addCrashNode(int)" class="member-name-link">addCrashNode</a><wbr>(int&nbsp;crashType)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Add a crash to the network.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#exit()" class="member-name-link">exit</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Shut down the network.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start(int,int,int,int,int)" class="member-name-link">start</a><wbr>(int&nbsp;numberOfNodes,
  int&nbsp;numberOfClients,
  int&nbsp;decisionTimeout,
  int&nbsp;voteTimeout,
  int&nbsp;writeTimeout)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Start the network with the given parameters.</div>
+</div>
 </div>
 </div>
 </div>
@@ -169,18 +176,33 @@ loadScripts(document, 'script');</script>
  int&nbsp;decisionTimeout,
  int&nbsp;voteTimeout,
  int&nbsp;writeTimeout)</span></div>
+<div class="block">Start the network with the given parameters.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>numberOfNodes</code> - number of nodes</dd>
+<dd><code>numberOfClients</code> - number of clients</dd>
+<dd><code>decisionTimeout</code> - decision timeout</dd>
+<dd><code>voteTimeout</code> - vote timeout</dd>
+<dd><code>writeTimeout</code> - write timeout</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="addCrashNode(int)">
 <h3>addCrashNode</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCrashNode</span><wbr><span class="parameters">(int&nbsp;crashType)</span></div>
+<div class="block">Add a crash to the network.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>crashType</code> - the type of crash</dd>
+</dl>
 </section>
 </li>
 <li>
 <section class="detail" id="exit()">
 <h3>exit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">exit</span>()</div>
+<div class="block">Shut down the network.</div>
 </section>
 </li>
 </ul>

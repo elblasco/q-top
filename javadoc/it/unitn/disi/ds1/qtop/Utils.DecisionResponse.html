@@ -90,6 +90,11 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-decision">decision</span></code> - the decision of the coordinator</dd>
+<dd><code><span id="param-epoch">epoch</span></code> - epoch associated to the request</dd>
+</dl>
+<dl class="notes">
 <dt>All Implemented Interfaces:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></code></dd>
 </dl>
@@ -101,6 +106,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">Utils.DecisionResponse</span>(<a href="Utils.Decision.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a>&nbsp;decision, <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;epoch)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
 implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></span></div>
+<div class="block">Message to propagate the coordinator final decision regarding a certain epoch.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
@@ -142,12 +148,12 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Utils.Decision.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#decision()" class="member-name-link">decision</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>decision</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-decision"><code>decision</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#epoch()" class="member-name-link">epoch</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>epoch</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-epoch"><code>epoch</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
@@ -189,8 +195,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="block">Creates an instance of a <code>DecisionResponse</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>decision</code> - the value for the <code>decision</code> record component</dd>
-<dd><code>epoch</code> - the value for the <code>epoch</code> record component</dd>
+<dd><code>decision</code> - the value for the <a href="#param-decision"><code>decision</code></a> record component</dd>
+<dd><code>epoch</code> - the value for the <a href="#param-epoch"><code>epoch</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -247,10 +253,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="decision()">
 <h3>decision</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Utils.Decision.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a></span>&nbsp;<span class="element-name">decision</span>()</div>
-<div class="block">Returns the value of the <code>decision</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-decision"><code>decision</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>decision</code> record component</dd>
+<dd>the value of the <a href="#param-decision"><code>decision</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -258,10 +264,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="epoch()">
 <h3>epoch</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></span>&nbsp;<span class="element-name">epoch</span>()</div>
-<div class="block">Returns the value of the <code>epoch</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-epoch"><code>epoch</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>epoch</code> record component</dd>
+<dd>the value of the <a href="#param-epoch"><code>epoch</code></a> record component</dd>
 </dl>
 </section>
 </li>

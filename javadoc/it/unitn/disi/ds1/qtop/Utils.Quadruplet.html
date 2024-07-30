@@ -90,12 +90,20 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-destinationId">destinationId</span></code> - the next node to send the election message</dd>
+<dd><code><span id="param-highestEpoch">highestEpoch</span></code> - highest epoch known</dd>
+<dd><code><span id="param-highestIteration">highestIteration</span></code> - highest iteration known</dd>
+<dd><code><span id="param-bestCandidateId">bestCandidateId</span></code> - node that have that EpochPair</dd>
+</dl>
+<dl class="notes">
 <dt>Enclosing class:</dt>
 <dd><code><a href="Utils.html" title="class in it.unitn.disi.ds1.qtop">Utils</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">Utils.Quadruplet</span>(int&nbsp;destinationId, int&nbsp;highestEpoch, int&nbsp;highestIteration, int&nbsp;bestCandidateId)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
+<div class="block">Struct cache the best candidate data during the election.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -131,12 +139,12 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#bestCandidateId()" class="member-name-link">bestCandidateId</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>bestCandidateId</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-bestCandidateId"><code>bestCandidateId</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#destinationId()" class="member-name-link">destinationId</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>destinationId</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-destinationId"><code>destinationId</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
@@ -151,12 +159,12 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#highestEpoch()" class="member-name-link">highestEpoch</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>highestEpoch</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-highestEpoch"><code>highestEpoch</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#highestIteration()" class="member-name-link">highestIteration</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>highestIteration</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-highestIteration"><code>highestIteration</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
@@ -190,10 +198,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Creates an instance of a <code>Quadruplet</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>destinationId</code> - the value for the <code>destinationId</code> record component</dd>
-<dd><code>highestEpoch</code> - the value for the <code>highestEpoch</code> record component</dd>
-<dd><code>highestIteration</code> - the value for the <code>highestIteration</code> record component</dd>
-<dd><code>bestCandidateId</code> - the value for the <code>bestCandidateId</code> record component</dd>
+<dd><code>destinationId</code> - the value for the <a href="#param-destinationId"><code>destinationId</code></a> record component</dd>
+<dd><code>highestEpoch</code> - the value for the <a href="#param-highestEpoch"><code>highestEpoch</code></a> record component</dd>
+<dd><code>highestIteration</code> - the value for the <a href="#param-highestIteration"><code>highestIteration</code></a> record component</dd>
+<dd><code>bestCandidateId</code> - the value for the <a href="#param-bestCandidateId"><code>bestCandidateId</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -250,10 +258,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="destinationId()">
 <h3>destinationId</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">destinationId</span>()</div>
-<div class="block">Returns the value of the <code>destinationId</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-destinationId"><code>destinationId</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>destinationId</code> record component</dd>
+<dd>the value of the <a href="#param-destinationId"><code>destinationId</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -261,10 +269,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="highestEpoch()">
 <h3>highestEpoch</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">highestEpoch</span>()</div>
-<div class="block">Returns the value of the <code>highestEpoch</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-highestEpoch"><code>highestEpoch</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>highestEpoch</code> record component</dd>
+<dd>the value of the <a href="#param-highestEpoch"><code>highestEpoch</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -272,10 +280,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="highestIteration()">
 <h3>highestIteration</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">highestIteration</span>()</div>
-<div class="block">Returns the value of the <code>highestIteration</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-highestIteration"><code>highestIteration</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>highestIteration</code> record component</dd>
+<dd>the value of the <a href="#param-highestIteration"><code>highestIteration</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -283,10 +291,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="bestCandidateId()">
 <h3>bestCandidateId</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">bestCandidateId</span>()</div>
-<div class="block">Returns the value of the <code>bestCandidateId</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-bestCandidateId"><code>bestCandidateId</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>bestCandidateId</code> record component</dd>
+<dd>the value of the <a href="#param-bestCandidateId"><code>bestCandidateId</code></a> record component</dd>
 </dl>
 </section>
 </li>
