@@ -24,7 +24,7 @@ public class Client extends AbstractActor{
 	private static final int COUNTDOWN_REFRESH = 10;
 	private final TimeOutManager timeOutManager;
 	private final List<ActorRef> group;
-	public final int clientId;
+	private final int clientId;
 	private final int numberOfNodes;
 	private Cancellable crashTimeOut;
 	private Utils.CrashType cachedCrashType;

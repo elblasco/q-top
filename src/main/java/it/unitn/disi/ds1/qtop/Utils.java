@@ -24,21 +24,58 @@ public class Utils {
     /**
      * Enum to represent all the possible votes that can be taken by a Node.
      */
-    public enum Vote {NO, YES}
+    public enum Vote {
+        /**
+         * A Node voted no for a write request.
+         */
+        NO,
+        /**
+         * A Node voted yes for a write request.
+         */
+        YES
+    }
 
     /**
      * Enum to represent all the possible decisions that can be taken by the coordinator.
      */
-    public enum Decision {ABORT, WRITEOK, PENDING}
+    public enum Decision {
+        /**
+         * The coordinator decided to abort the operation.
+         */
+        ABORT,
+        /**
+         * The coordinator decided to execute the operation.
+         */
+        WRITEOK,
+        /**
+         * The coordinator is still waiting for the votes.
+         */
+        PENDING
+    }
 
     /**
-     * Enum to represent all the log levels.
+     * Enum to represent all the log levels, selected a level all the highest levels would be printed.
      */
     public enum LogLevel {
+        /**
+         * Log level for trace messages.
+         */
         TRACE(1),
+        /**
+         * Log level for debug messages.
+         */
         DEBUG(2),
+        /**
+         * Log level for info messages.
+         */
         INFO(3),
+        /**
+         * Log level for warning messages.
+         */
         WARN(4),
+        /**
+         * Log level for error messages.
+         */
         ERROR(5);
 
         final int level;
@@ -51,14 +88,77 @@ public class Utils {
     /**
      * Enum to represent all the possible reasons for a timeout.
      */
-    public enum TimeOutReason {HEARTBEAT, VOTE, WRITE, ELECTION, CRASH_RESPONSE, CLIENT_REQUEST}
+    public enum TimeOutReason {
+        /**
+         * Timeout for the heartbeat.
+         */
+        HEARTBEAT,
+        /**
+         * Timeout for a vote request.
+         */
+        VOTE,
+        /**
+         * Timeout for a write request.
+         */
+        WRITE,
+        /**
+         * Timeout for an election message.
+         */
+        ELECTION,
+        /**
+         * Timeout for a CrashRequest message.
+         */
+        CRASH_RESPONSE,
+        /**
+         * Timeout to make a request via a Client.
+         */
+        CLIENT_REQUEST
+    }
 
     /**
      * Enum to represent all the possible crashes that can be triggered.
      */
     public enum CrashType {
-        NO_CRASH, NODE_BEFORE_WRITE_REQUEST, NODE_AFTER_WRITE_REQUEST, NODE_AFTER_VOTE_REQUEST, NODE_AFTER_VOTE_CAST
-        , COORDINATOR_BEFORE_RW_REQUEST, COORDINATOR_AFTER_RW_REQUEST, COORDINATOR_NO_QUORUM, COORDINATOR_QUORUM, COORDINATOR_ON_COMMUNICATION
+        /**
+         * No crash.
+         */
+        NO_CRASH,
+        /**
+         * Receiver crash before propagating a write request.
+         */
+        NODE_BEFORE_WRITE_REQUEST,
+        /**
+         * Receiver crash after propagating a write request.
+         */
+        NODE_AFTER_WRITE_REQUEST,
+        /**
+         * Receiver crash after receiving a vote request.
+         */
+        NODE_AFTER_VOTE_REQUEST,
+        /**
+         * Receiver crash after casting a vote.
+         */
+        NODE_AFTER_VOTE_CAST,
+        /**
+         * Coordinator crash before receiving propagating a R/W request.
+         */
+        COORDINATOR_BEFORE_RW_REQUEST,
+        /**
+         * Coordinator crash after propagating a R/W request.
+         */
+        COORDINATOR_AFTER_RW_REQUEST,
+        /**
+         * Coordinator crash after receiving a vote.
+         */
+        COORDINATOR_NO_QUORUM,
+        /**
+         * Coordinator crash after reaching the quorum.
+         */
+        COORDINATOR_QUORUM,
+        /**
+         * Probabilistic crash during a multicast.
+         */
+        COORDINATOR_ON_COMMUNICATION
     }
 
     /**
