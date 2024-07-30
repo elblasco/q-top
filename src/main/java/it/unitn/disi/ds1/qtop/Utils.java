@@ -53,6 +53,12 @@ public class Utils {
 
     }
 
+    /**
+     * Message that sends the vote.
+     *
+     * @param vote  the vote of the node
+     * @param epoch the epoch associated to the vote
+     */
     public record VoteResponse(Vote vote, EpochPair epoch) implements Serializable {
 
     }
