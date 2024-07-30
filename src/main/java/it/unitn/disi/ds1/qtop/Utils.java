@@ -43,6 +43,12 @@ public class Utils {
         }
     }
 
+    /**
+     * Message that asks for a vote.
+     *
+     * @param newValue new value proposed
+     * @param epoch    epoch associated to the request
+     */
     public record VoteRequest(int newValue, EpochPair epoch) implements Serializable {
 
     }
