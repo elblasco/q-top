@@ -62,18 +62,6 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#becomeCoordinator()" class="member-name-link">becomeCoordinator()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Make the current Node become a coordinator.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#becomeReceiver()" class="member-name-link">becomeReceiver()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Make the current Node become a receiver, aka, a normal replica.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#becomeVoter()" class="member-name-link">becomeVoter()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Make the current Node become a voter for the election process.</div>
-</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.Election.html#bestCandidateId()" class="member-name-link">bestCandidateId()</a> - Method in record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.Election.html" title="class in it.unitn.disi.ds1.qtop">Utils.Election</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unitn/disi/ds1/qtop/Utils.Election.html#param-bestCandidateId"><code>bestCandidateId</code></a> record component.</div>
@@ -136,18 +124,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_QUORUM" class="member-name-link">COORDINATOR_QUORUM</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
 <dd>
 <div class="block">Coordinator crash after reaching the quorum.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#coordinatorBehaviour()" class="member-name-link">coordinatorBehaviour()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Mask for to the Coordinator actor.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#coordinatorOnStartMessage(it.unitn.disi.ds1.qtop.Utils.StartMessage)" class="member-name-link">coordinatorOnStartMessage(Utils.StartMessage)</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#coordinatorOnVoteResponse(it.unitn.disi.ds1.qtop.Utils.VoteResponse)" class="member-name-link">coordinatorOnVoteResponse(Utils.VoteResponse)</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Register a Node vote.</div>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html#%3Cinit%3E(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">CountDown(Utils.TimeOutReason, Utils.EpochPair)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html" title="class in it.unitn.disi.ds1.qtop">Utils.CountDown</a></dt>
 <dd>
@@ -994,10 +970,6 @@ the order they are declared.</div>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.VotePair.html#%3Cinit%3E(java.util.HashMap,it.unitn.disi.ds1.qtop.Utils.Decision)" class="member-name-link">VotePair(HashMap&lt;ActorRef, Utils.Vote&gt;, Utils.Decision)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.VotePair.html" title="class in it.unitn.disi.ds1.qtop">Utils.VotePair</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>VotePair</code> record class.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#voterBehaviour()" class="member-name-link">voterBehaviour()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
-<dd>
-<div class="block">Mask for to the voter actor.</div>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.VoteRequest.html#%3Cinit%3E(int,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">VoteRequest(int, Utils.EpochPair)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.VoteRequest.html" title="class in it.unitn.disi.ds1.qtop">Utils.VoteRequest</a></dt>
 <dd>

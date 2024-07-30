@@ -142,36 +142,6 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#becomeCoordinator()" class="member-name-link">becomeCoordinator</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Make the current Node become a coordinator.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#becomeReceiver()" class="member-name-link">becomeReceiver</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Make the current Node become a receiver, aka, a normal replica.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#becomeVoter()" class="member-name-link">becomeVoter</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Make the current Node become a voter for the election process.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>akka.actor.AbstractActor.Receive</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#coordinatorBehaviour()" class="member-name-link">coordinatorBehaviour</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Mask for to the Coordinator actor.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#coordinatorOnStartMessage(it.unitn.disi.ds1.qtop.Utils.StartMessage)" class="member-name-link">coordinatorOnStartMessage</a><wbr>(<a href="Utils.StartMessage.html" title="class in it.unitn.disi.ds1.qtop">Utils.StartMessage</a>&nbsp;msg)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#coordinatorOnVoteResponse(it.unitn.disi.ds1.qtop.Utils.VoteResponse)" class="member-name-link">coordinatorOnVoteResponse</a><wbr>(@NotNull <a href="Utils.VoteResponse.html" title="class in it.unitn.disi.ds1.qtop">Utils.VoteResponse</a>&nbsp;msg)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Register a Node vote.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>akka.actor.AbstractActor.Receive</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createReceive()" class="member-name-link">createReceive</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -191,11 +161,6 @@ loadScripts(document, 'script');</script>
  akka.actor.ActorRef&nbsp;sender)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Send a message to a destination actor with a random delay, within 0 and 29 milliseconds.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>akka.actor.AbstractActor.Receive</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#voterBehaviour()" class="member-name-link">voterBehaviour</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Mask for to the voter actor.</div>
 </div>
 </div>
 </div>
@@ -263,38 +228,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="becomeCoordinator()">
-<h3>becomeCoordinator</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">becomeCoordinator</span>()</div>
-<div class="block">Make the current Node become a coordinator.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="becomeVoter()">
-<h3>becomeVoter</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">becomeVoter</span>()</div>
-<div class="block">Make the current Node become a voter for the election process.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="becomeReceiver()">
-<h3>becomeReceiver</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">becomeReceiver</span>()</div>
-<div class="block">Make the current Node become a receiver, aka, a normal replica.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="voterBehaviour()">
-<h3>voterBehaviour</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">akka.actor.AbstractActor.Receive</span>&nbsp;<span class="element-name">voterBehaviour</span>()</div>
-<div class="block">Mask for to the voter actor.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the Receive object</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="createReceive()">
 <h3>createReceive</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">akka.actor.AbstractActor.Receive</span>&nbsp;<span class="element-name">createReceive</span>()</div>
@@ -304,41 +237,6 @@ loadScripts(document, 'script');</script>
 <dd><code>createReceive</code>&nbsp;in class&nbsp;<code>akka.actor.AbstractActor</code></dd>
 <dt>Returns:</dt>
 <dd>the Receive object</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="coordinatorBehaviour()">
-<h3>coordinatorBehaviour</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">akka.actor.AbstractActor.Receive</span>&nbsp;<span class="element-name">coordinatorBehaviour</span>()</div>
-<div class="block">Mask for to the Coordinator actor.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the Receive object</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="coordinatorOnStartMessage(it.unitn.disi.ds1.qtop.Utils.StartMessage)">
-<h3>coordinatorOnStartMessage</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">coordinatorOnStartMessage</span><wbr><span class="parameters">(<a href="Utils.StartMessage.html" title="class in it.unitn.disi.ds1.qtop">Utils.StartMessage</a>&nbsp;msg)</span></div>
-<div class="block">Initial set up for the Coordinator, should be called whenever an ActorRef becomes Coordinator.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>msg</code> - the init message</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="coordinatorOnVoteResponse(it.unitn.disi.ds1.qtop.Utils.VoteResponse)">
-<h3>coordinatorOnVoteResponse</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">coordinatorOnVoteResponse</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="Utils.VoteResponse.html" title="class in it.unitn.disi.ds1.qtop">Utils.VoteResponse</a>&nbsp;msg)</span></div>
-<div class="block">Register a Node vote.
- Then, if the quorum is reached or everybody voted, fix the decision and multicast the decision.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>msg</code> - request to make a vote</dd>
 </dl>
 </section>
 </li>
