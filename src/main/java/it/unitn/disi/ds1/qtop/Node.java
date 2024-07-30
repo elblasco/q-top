@@ -396,8 +396,8 @@ public class Node extends AbstractActor {
 				WriteRequest.class,
 				this::onWriteRequest
 		).match(
-				WriteResponse.class,
-				this::onWriteResponse
+				WriteValue.class,
+				this::onWriteValue
 		).match(
 				TimeOut.class,
 				this::onTimeOut
@@ -417,7 +417,8 @@ public class Node extends AbstractActor {
 							LogLevel.INFO,
 							"[NODE-" + this.nodeId + "] received crash ACK from coordinator"
 					)
-		).build();
+		).matchAny(msg -> {})
+				.build();
 	}
 
 	/**
@@ -513,7 +514,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @param msg the WriteResponse message
 	 */
-	private void onWriteResponse(@NotNull WriteResponse msg) {
+	private void onWriteValue(@NotNull WriteValue msg) {
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
 				msg.nRequest()
@@ -977,7 +978,7 @@ public class Node extends AbstractActor {
 		}
 		this.tell(
 				this.getSender(),
-				new WriteResponse(msg.nRequest()),
+				new WriteValue(msg.newValue(), msg.nRequest()),
 				this.getSelf()
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
