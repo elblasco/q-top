@@ -24,6 +24,8 @@ compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
 }
 
+mainClassName = "it.unitn.disi.ds1.qtop.QTop"
+
 run {
     standardInput = System.in
 }
