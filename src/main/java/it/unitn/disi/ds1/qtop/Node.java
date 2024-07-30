@@ -294,21 +294,21 @@ public class Node extends AbstractActor {
 	/**
 	 * Make the current Node become a coordinator.
 	 */
-	public void becomeCoordinator() {
+	private void becomeCoordinator() {
 		this.getContext().become(coordinatorBehaviour());
 	}
 
 	/**
 	 * Make the current Node become a voter for the election process.
 	 */
-	public void becomeVoter() {
+	private void becomeVoter() {
 		this.getContext().become(voterBehaviour());
 	}
 
 	/**
 	 * Make the current Node become a receiver, aka, a normal replica.
 	 */
-	public void becomeReceiver() {
+	private void becomeReceiver() {
 		this.getContext().become(createReceive());
 	}
 
@@ -317,7 +317,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @return the Receive object
 	 */
-	public Receive voterBehaviour() {
+	private Receive voterBehaviour() {
 		return receiveBuilder().match(
 				CountDown.class,
 				this::onCountDown
@@ -862,7 +862,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @return the Receive object
 	 */
-	public AbstractActor.Receive coordinatorBehaviour() {
+	private AbstractActor.Receive coordinatorBehaviour() {
 		return receiveBuilder().match(
 				StartMessage.class,
 				this::coordinatorOnStartMessage
@@ -909,7 +909,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @param msg the init message
 	 */
-	public void coordinatorOnStartMessage(StartMessage msg) {
+	private void coordinatorOnStartMessage(StartMessage msg) {
 		this.heartBeat = new Cancellable[numberOfNodes];
 		this.quorum = (numberOfNodes / 2) + 1;
 		this.setGroup(msg);
@@ -926,7 +926,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @param msg request to make a vote
 	 */
-	public void coordinatorOnVoteResponse(@NotNull VoteResponse msg) {
+	private void coordinatorOnVoteResponse(@NotNull VoteResponse msg) {
 		Vote v = msg.vote();
 		int e = msg.epoch().e();
 		int i = msg.epoch().i();
