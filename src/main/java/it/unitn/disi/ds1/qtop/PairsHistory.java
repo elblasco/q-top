@@ -100,7 +100,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	}
 
 	/**
-	 * Get the latest epoch and iteration commited.
+	 * Get the latest epoch and iteration commited .
 	 *
 	 * @return the latest epoch and iteration
 	 */
@@ -108,7 +108,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		for (int i = this.size() - 1; i >= 0; i--){
 			if (! this.get(i).isEmpty()){
 				for (int j = this.get(i).size() - 1; j >= 0; j--){
-					if (this.get(i).get(j).second() == Utils.Decision.WRITEOK){
+					if (this.get(i).get(j).second() == Utils.Decision.WRITEOK || this.get(i).get(j).second() == Utils.Decision.ABORT){
 						return new Utils.EpochPair(i, j);
 					}
 				}
