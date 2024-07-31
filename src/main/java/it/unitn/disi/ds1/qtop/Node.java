@@ -575,7 +575,7 @@ public class Node extends AbstractActor {
 				this.getSelf()
 		);
 		int idDest = getNextNodeForElection();
-		EpochPair nodeLatest = this.history.getLatest();
+		EpochPair nodeLatest = this.history.getLatestCommitted();
 		if (this.isElection)
 		{
 			if (msg.bestCandidateId() == this.nodeId)
@@ -596,7 +596,7 @@ public class Node extends AbstractActor {
 				);
 				this.multicast(new Synchronisation(
 						this.history,
-						this.history.getLatest()
+						this.history.getLatestCommitted()
 						),
 						false
 				);
@@ -657,12 +657,12 @@ public class Node extends AbstractActor {
 			this.becomeVoter();
 			logger.log(
 					LogLevel.INFO,
-					"[NODE-" + this.nodeId + "] started the election process, my history is: < e:" + this.history.getLatest()
-							.e() + ", i:" + this.history.getLatest().i() + " >"
+					"[NODE-" + this.nodeId + "] started the election process, my history is: < e:" + this.history.getLatestCommitted()
+							.e() + ", i:" + this.history.getLatestCommitted().i() + " >"
 			);
 			this.isElection = true;
 			int idDest = getNextNodeForElection();
-			EpochPair latest = this.history.getLatest();
+			EpochPair latest = this.history.getLatestCommitted();
 			this.lastElectionData = new Utils.Quadruplet(
 					idDest,
 					latest.e(),
