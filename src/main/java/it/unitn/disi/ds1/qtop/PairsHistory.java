@@ -100,9 +100,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	}
 
 	/**
-	 * Get the latest epoch and iteration commited .
+	 * Get the epoch and iteration of the last commited transaction, by commited transaction we consider a
+	 * transaction that has non-pending state.
 	 *
-	 * @return the latest epoch and iteration
+	 * @return the latest epoch and iteration committed
 	 */
 	public Utils.EpochPair getLatestCommitted(){
 		for (int i = this.size() - 1; i >= 0; i--){
