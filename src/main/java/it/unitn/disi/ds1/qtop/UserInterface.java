@@ -22,7 +22,7 @@ public class UserInterface implements SimulationCallback {
         int numberOfClients = 3;
         int decisionTimeout = 2000;
         int voteTimeout = 1000;
-        int writeTimeout = 20000;
+        int writeTimeout = 2000;
 
         System.out.println("Qtop - DS Project 2023/2024 - Blascovich Alessio, Cereser Lorenzo \n");
 

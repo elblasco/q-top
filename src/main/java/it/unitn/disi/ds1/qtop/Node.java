@@ -95,15 +95,19 @@ public class Node extends AbstractActor {
 	private void multicast(Serializable m, boolean hasToCrash) {
 		ArrayList<ActorRef> groupCopy = new ArrayList<>(this.group);
 		Collections.shuffle(groupCopy);
+		if (hasToCrash)
+		{
+			System.out.println("The coordinator is multicasting " + m + " to the group");
+		}
 		for (ActorRef node : groupCopy)
         {
 	        if (hasToCrash)
 	        {
 		        System.out.println("Destination for this message " + node);
 	        }
-	        if (hasToCrash && (rand.nextInt(100) < 10) && node != this.getSelf())
+	        if (hasToCrash && (rand.nextInt(100) < 20) && node != this.getSelf())
 	        {
-		        System.out.println(node + "will not receive the message");
+		        System.out.println("Bye Bye\n-------------------------------------");
 		        this.coordinatorCrash();
 		        return;
 	        }
@@ -113,6 +117,10 @@ public class Node extends AbstractActor {
                     getSelf()
             );
         }
+		if (hasToCrash)
+		{
+			System.out.println("-------------------------------------");
+		}
     }
 
     /**
@@ -577,7 +585,6 @@ public class Node extends AbstractActor {
 				this.timeOutManager.endElectionState();
 				this.history.add(new ArrayList<>());
 				this.numbersOfWrites = 0;
-				//this.quorum = (this.group.size() / 2) + 1;
 				logger.log(
 						LogLevel.INFO,
 						"[NODE-" + this.nodeId + "] elected as coordinator"
@@ -595,8 +602,10 @@ public class Node extends AbstractActor {
 				);
 			}
 			else if (
-					(msg.highestEpoch() > nodeLatest.e() && msg.highestIteration() > nodeLatest.i()) ||
-							(msg.highestEpoch() == nodeLatest.e() && msg.highestIteration() == nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+					msg.isGreaterThanLocalData(
+							this.nodeId,
+							nodeLatest
+					)
 			)
 			{
 				this.forwardPreviousElectionMessage(
@@ -618,8 +627,10 @@ public class Node extends AbstractActor {
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
 			if (
-					(msg.highestEpoch() > nodeLatest.e() && msg.highestIteration() > nodeLatest.i()) ||
-							(msg.highestEpoch() == nodeLatest.e() && msg.highestIteration() == nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+					msg.isGreaterThanLocalData(
+							this.nodeId,
+							nodeLatest
+					)
 			)
 			{
 				this.forwardPreviousElectionMessage(

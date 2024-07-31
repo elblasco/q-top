@@ -1,6 +1,7 @@
 package it.unitn.disi.ds1.qtop;
 
 import akka.actor.ActorRef;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -277,6 +278,11 @@ public class Utils {
      * @param bestCandidateId node that have that EpochPair
      */
     public record Election(int highestEpoch, int highestIteration, int bestCandidateId) implements Serializable {
+        public boolean isGreaterThanLocalData(int nodeId, @NotNull EpochPair ep){
+            return ((this.highestEpoch() > ep.e()) ||
+                    (this.highestEpoch() == ep.e() && this.highestIteration() > ep.i()) ||
+                    (this.highestEpoch() == ep.e() && this.highestIteration() == ep.i() && this.bestCandidateId() < nodeId));
+        }
     }
 
     /**
