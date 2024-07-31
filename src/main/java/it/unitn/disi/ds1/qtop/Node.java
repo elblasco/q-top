@@ -594,7 +594,10 @@ public class Node extends AbstractActor {
 						false
 				);
 			}
-			else if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+			else if (
+					(msg.highestEpoch() > nodeLatest.e() && msg.highestIteration() > nodeLatest.i()) ||
+							(msg.highestEpoch() == nodeLatest.e() && msg.highestIteration() == nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+			)
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
@@ -614,7 +617,10 @@ public class Node extends AbstractActor {
 			this.becomeVoter();
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
-			if (msg.highestEpoch() >= nodeLatest.e() && msg.highestIteration() >= nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+			if (
+					(msg.highestEpoch() > nodeLatest.e() && msg.highestIteration() > nodeLatest.i()) ||
+							(msg.highestEpoch() == nodeLatest.e() && msg.highestIteration() == nodeLatest.i() && msg.bestCandidateId() < this.nodeId)
+			)
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
