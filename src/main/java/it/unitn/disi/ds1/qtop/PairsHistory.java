@@ -98,6 +98,24 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 				latestIteration
 		);
 	}
+
+	/**
+	 * Get the latest epoch and iteration commited.
+	 *
+	 * @return the latest epoch and iteration
+	 */
+	public Utils.EpochPair getLatestCommitted(){
+		for (int i = this.size() - 1; i >= 0; i--){
+			if (! this.get(i).isEmpty()){
+				for (int j = this.get(i).size() - 1; j >= 0; j--){
+					if (this.get(i).get(j).second() == Utils.Decision.WRITEOK){
+						return new Utils.EpochPair(i, j);
+					}
+				}
+			}
+		}
+		return new Utils.EpochPair(0, 0);
+	}
 	
 	@Override
 	public String toString() {
