@@ -141,25 +141,13 @@ public class Utils {
          */
         NODE_AFTER_VOTE_CAST,
         /**
-         * Coordinator crash before receiving propagating a R/W request.
+         * Probabilistic crash during a vote request multicast.
          */
-        COORDINATOR_BEFORE_RW_REQUEST,
+        COORDINATOR_ON_VOTE_REQUEST,
         /**
-         * Coordinator crash after propagating a R/W request.
+         * Probabilistic crash during a decision multicast.
          */
-        COORDINATOR_AFTER_RW_REQUEST,
-        /**
-         * Coordinator crash after receiving a vote.
-         */
-        COORDINATOR_NO_QUORUM,
-        /**
-         * Coordinator crash after reaching the quorum.
-         */
-        COORDINATOR_QUORUM,
-        /**
-         * Probabilistic crash during a multicast.
-         */
-        COORDINATOR_ON_COMMUNICATION
+        COORDINATOR_ON_DECISION_RESPONSE,
     }
 
     /**
