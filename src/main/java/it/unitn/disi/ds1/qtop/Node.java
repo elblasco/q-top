@@ -167,28 +167,11 @@ public class Node extends AbstractActor {
 	 * @param msg the ReadRequest
 	 */
 	private void onReadRequest(ReadRequest msg) {
-		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
-		{
-			logger.log(
-					LogLevel.ERROR,
-					"[NODE-" + this.nodeId + "] crashed!!! for reason COORDINATOR_BEFORE_RW_REQUEST"
-			);
-			this.coordinatorCrash();
-			return;
-		}
 		this.tell(
 				this.getSender(),
 				new ReadValue(this.history.readValidVariable(), msg.nRequest()),
                 this.getSelf()
         );
-		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
-		{
-			logger.log(
-					LogLevel.ERROR,
-					"[NODE-" + this.nodeId + "] crashed!!! for reason COORDINATOR_AFTER_RW_REQUEST"
-			);
-			this.coordinatorCrash();
-		}
 	}
 
 	/**
@@ -213,7 +196,7 @@ public class Node extends AbstractActor {
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
 	    logger.log(
 			    LogLevel.DEBUG,
-			    "[NODE-" + this.nodeId + "] sending message to [NODE-" + dest + "]"
+			    "[NODE-" + this.nodeId + "] sending a " + msg.getClass().getSimpleName() + " to " + dest
 	    );
 
 		this.getContext().getSystem().scheduler().scheduleOnce(
@@ -475,7 +458,7 @@ public class Node extends AbstractActor {
 		this.timeOutManager.handleCountDown(
 				msg.reason(),
 				countDownIndex,
-				this
+				this.getSelf()
 		);
 	}
 
@@ -818,6 +801,10 @@ public class Node extends AbstractActor {
 		this.startElectionCountDown();
 		logger.log(
 				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] has " + this.history
+		);
+		logger.log(
+				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] switched election state, my history is < e:" + highestData.e() + ", i:" + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
 		);
 		this.lastElectionData = new Utils.Quadruplet(
@@ -917,7 +904,13 @@ public class Node extends AbstractActor {
 		).match(
 				CrashACK.class,
 				this::coordinatorOnCrashACK
-		).build();
+		).match(
+				Synchronisation.class,
+						msg -> System.out.println(
+								"[NODE-" + this.nodeId + "] elected as new leader"
+						)
+				)
+				.build();
 
 	}
 
@@ -947,10 +940,6 @@ public class Node extends AbstractActor {
 		Vote v = msg.vote();
 		int e = msg.epoch().e();
 		int i = msg.epoch().i();
-		if (this.crashType == CrashType.COORDINATOR_NO_QUORUM)
-		{
-			this.coordinatorCrash();
-		}
 		voters.insert(
 				e,
 				i,
@@ -964,10 +953,6 @@ public class Node extends AbstractActor {
 		if ((isQuorumReached || voters.get(e).get(i).votes().size() == this.numberOfNodes) && this.voters.get(e).get(i)
 				.finalDecision() == Decision.PENDING)
 		{
-			if (this.crashType == CrashType.COORDINATOR_QUORUM)
-			{
-				this.coordinatorCrash();
-			}
 			fixCoordinatorDecision(
 					isQuorumReached ? Decision.WRITEOK : Decision.ABORT,
 					e,
@@ -977,7 +962,7 @@ public class Node extends AbstractActor {
 					this.voters.get(e).get(i).finalDecision(),
 					msg.epoch()
 					),
-					this.crashType == CrashType.COORDINATOR_ON_COMMUNICATION
+					this.crashType == CrashType.COORDINATOR_ON_DECISION_RESPONSE
 			);
 			this.history.setState(
 					e,
@@ -992,11 +977,6 @@ public class Node extends AbstractActor {
 	 * @param msg the WriteRequest message
 	 */
 	private void coordinatorOnWriteRequest(WriteRequest msg) {
-		if (this.crashType == CrashType.COORDINATOR_BEFORE_RW_REQUEST)
-		{
-			this.coordinatorCrash();
-			return;
-		}
 		this.tell(
 				this.getSender(),
 				new WriteValue(msg.newValue(), msg.nRequest()),
@@ -1018,16 +998,12 @@ public class Node extends AbstractActor {
 				new EpochPair(e,
 						i)
 				),
-				this.crashType == CrashType.COORDINATOR_ON_COMMUNICATION
+				this.crashType == CrashType.COORDINATOR_ON_VOTE_REQUEST
 		);
 		logger.log(
 				LogLevel.INFO,
 				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
 		);
-		if (this.crashType == CrashType.COORDINATOR_AFTER_RW_REQUEST)
-		{
-			this.coordinatorCrash();
-		}
 	}
 
 	/**
@@ -1039,7 +1015,7 @@ public class Node extends AbstractActor {
 		this.timeOutManager.handleCountDown(
 				msg.reason(),
 				0,
-				this
+				this.getSelf()
 		);
 		logger.log(
 				LogLevel.INFO,
@@ -1117,11 +1093,8 @@ public class Node extends AbstractActor {
 		}
 		switch (msg.crashType())
 		{
-			case COORDINATOR_BEFORE_RW_REQUEST:
-			case COORDINATOR_AFTER_RW_REQUEST:
-			case COORDINATOR_NO_QUORUM:
-			case COORDINATOR_QUORUM:
-			case COORDINATOR_ON_COMMUNICATION:
+			case COORDINATOR_ON_VOTE_REQUEST:
+			case COORDINATOR_ON_DECISION_RESPONSE:
 				this.crashType = msg.crashType();
 				logger.log(
 						LogLevel.INFO,
