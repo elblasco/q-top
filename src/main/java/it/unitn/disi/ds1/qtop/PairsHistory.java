@@ -39,8 +39,8 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			for (int x = this.size() - 1; x >= 0; x--)
 			{
 				// If the current epoch is still empty, we have to check the previous epoch, i.e., -2
-				int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
-				for (int y = this.get(x).size() + endOffSet; y >= 0; y--)
+				//int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
+				for (int y = this.get(x).size() - 1; y >= 0; y--)
 				{
 					if (this.get(x).get(y) != null && this.get(x).get(y).second() == Utils.Decision.WRITEOK)
 					{
@@ -91,12 +91,16 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	 * @return the latest epoch and iteration
 	 */
 	public Utils.EpochPair getLatest() {
-		int latestEpoch = (this.isEmpty()) ? 0 : this.size() - 1;
-		int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
-		return new Utils.EpochPair(
-				latestEpoch,
-				latestIteration
-		);
+		if (! this.isEmpty())
+		{
+			int latestEpoch = this.size() - 1;
+			int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
+			return new Utils.EpochPair(
+					latestEpoch,
+					latestIteration
+			);
+		}
+		return new Utils.EpochPair(-1, -1);
 	}
 
 	/**
@@ -106,16 +110,27 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	 * @return the latest epoch and iteration committed
 	 */
 	public Utils.EpochPair getLatestCommitted(){
-		for (int i = this.size() - 1; i >= 0; i--){
-			if (! this.get(i).isEmpty()){
-				for (int j = this.get(i).size() - 1; j >= 0; j--){
-					if (this.get(i).get(j).second() == Utils.Decision.WRITEOK || this.get(i).get(j).second() == Utils.Decision.ABORT){
-						return new Utils.EpochPair(i, j);
+		if (! this.isEmpty())
+		{
+			for (int i = this.size() - 1; i >= 0; i--)
+			{
+				if (! this.get(i).isEmpty())
+				{
+					for (int j = this.get(i).size() - 1; j >= 0; j--)
+					{
+						if (this.get(i).get(j).second() == Utils.Decision.WRITEOK || this.get(i).get(j)
+								.second() == Utils.Decision.ABORT)
+						{
+							return new Utils.EpochPair(
+									i,
+									j
+							);
+						}
 					}
 				}
 			}
 		}
-		return new Utils.EpochPair(0, 0);
+		return new Utils.EpochPair(-1, -1);
 	}
 	
 	@Override
@@ -128,8 +143,33 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			{
 				sb.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
 			}
-			sb.append("]\n");
+			sb.replace(sb.length() - 2, sb.length(), "");
+			sb.append(" ]\n");
 		}
+		sb.replace(sb.length() - 1, sb.length(), "");
 		return sb.toString();
+	}
+
+	public static void main(String[] args) {
+		PairsHistory pairsHistory = new PairsHistory();
+		pairsHistory.insert(0, 0, 1);
+		pairsHistory.insert(0, 1, 2);
+		pairsHistory.insert(0, 2, 3);
+		pairsHistory.insert(1, 0, 4);
+		pairsHistory.insert(1, 1, 5);
+		pairsHistory.insert(1, 2, 6);
+		pairsHistory.insert(2, 0, 7);
+		pairsHistory.insert(2, 1, 8);
+		pairsHistory.insert(2, 2, 9);
+		pairsHistory.setState(0, 0, Utils.Decision.WRITEOK);
+		System.out.println(pairsHistory);
+		System.out.println("Last element in the history " + pairsHistory.getLatest());
+		System.out.println("Last element committed, either WRITEOK or ABORT " + pairsHistory.getLatestCommitted());
+		System.out.println("Last vaue committed with WRITEOK " + pairsHistory.readValidVariable());
+		pairsHistory.setState(2, 2, Utils.Decision.ABORT);
+		System.out.println(pairsHistory);
+		System.out.println("Last element in the history " + pairsHistory.getLatest());
+		System.out.println("Last element committed, either WRITEOK or ABORT " + pairsHistory.getLatestCommitted());
+		System.out.println("Last vaue committed with WRITEOK " + pairsHistory.readValidVariable());
 	}
 }
