@@ -111,12 +111,8 @@ public class UserInterface implements SimulationCallback {
                     System.out.println("2. NODE - After write request");
                     System.out.println("3. NODE - After vote request received");
                     System.out.println("4. NODE - After vote casted");
-                    System.out.println("5. COORDINATOR - Before R/W request");
-                    System.out.println("6. COORDINATOR - After R/W request");
-                    System.out.println("7. COORDINATOR - During votes reception, NO quorum reached");
-                    System.out.println("8. COORDINATOR - During votes reception, quorum reached");
-                    System.out.println("9. COORDINATOR - During the multicast of a message");
-
+                    System.out.println("5. COORDINATOR - During the multicast of a vote request");
+                    System.out.println("6. COORDINATOR - During the multicast of a decision response");
                     int crashType = scanner.nextInt();
                     controller.crashNode(crashType);
                     break;
