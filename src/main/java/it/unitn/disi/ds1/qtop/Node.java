@@ -272,7 +272,7 @@ public class Node extends AbstractActor {
 		this.coordinator = this.getSender();
 		this.isElection = false;
 		this.lastElectionData = null;
-		this.history = msg.history();
+		this.history = new PairsHistory(msg.history());
 		this.numbersOfWrites = 0;
 		this.timeOutManager.endElectionState();
 		this.startHeartBeatCountDown();
@@ -578,8 +578,8 @@ public class Node extends AbstractActor {
 						this.getSelf()
 				);
 				this.multicast(new Synchronisation(
-						this.history,
-						this.history.getLatestCommitted()
+						new PairsHistory(this.history),
+								new Utils.EpochPair(this.history.getLatestCommitted().e(), this.history.getLatestCommitted().i())
 						),
 						false
 				);

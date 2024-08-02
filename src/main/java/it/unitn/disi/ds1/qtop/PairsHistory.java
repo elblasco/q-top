@@ -1,6 +1,7 @@
 package it.unitn.disi.ds1.qtop;
 
 import akka.japi.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -8,8 +9,34 @@ import java.util.ArrayList;
  * PairsHistory class to store the history of the pairs and the final decision associated to it
  */
 public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decision>>> {
+	/**
+	 * Default constructor.
+	 */
 	public PairsHistory() {
 		super();
+	}
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param sourceObject source object to copy
+	 */
+	public PairsHistory(@NotNull PairsHistory sourceObject) {
+		super();
+		for (ArrayList<Pair<Integer, Utils.Decision>> epoch : sourceObject)
+		{
+			ArrayList<Pair<Integer, Utils.Decision>> newEpoch = new ArrayList<>();
+			for (Pair<Integer, Utils.Decision> iteration : epoch)
+			{
+				newEpoch.add(
+						new Pair<>(
+								iteration.first(),
+								iteration.second()
+						)
+				);
+			}
+			this.add(newEpoch);
+		}
 	}
 
 	/**
@@ -148,28 +175,5 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 		}
 		sb.replace(sb.length() - 1, sb.length(), "");
 		return sb.toString();
-	}
-
-	public static void main(String[] args) {
-		PairsHistory pairsHistory = new PairsHistory();
-		pairsHistory.insert(0, 0, 1);
-		pairsHistory.insert(0, 1, 2);
-		pairsHistory.insert(0, 2, 3);
-		pairsHistory.insert(1, 0, 4);
-		pairsHistory.insert(1, 1, 5);
-		pairsHistory.insert(1, 2, 6);
-		pairsHistory.insert(2, 0, 7);
-		pairsHistory.insert(2, 1, 8);
-		pairsHistory.insert(2, 2, 9);
-		pairsHistory.setState(0, 0, Utils.Decision.WRITEOK);
-		System.out.println(pairsHistory);
-		System.out.println("Last element in the history " + pairsHistory.getLatest());
-		System.out.println("Last element committed, either WRITEOK or ABORT " + pairsHistory.getLatestCommitted());
-		System.out.println("Last vaue committed with WRITEOK " + pairsHistory.readValidVariable());
-		pairsHistory.setState(2, 2, Utils.Decision.ABORT);
-		System.out.println(pairsHistory);
-		System.out.println("Last element in the history " + pairsHistory.getLatest());
-		System.out.println("Last element committed, either WRITEOK or ABORT " + pairsHistory.getLatestCommitted());
-		System.out.println("Last vaue committed with WRITEOK " + pairsHistory.readValidVariable());
 	}
 }
