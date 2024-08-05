@@ -164,9 +164,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Reset the data structure to start a new post election phase.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,it.unitn.disi.ds1.qtop.Node)" class="member-name-link">handleCountDown</a><wbr>(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,akka.actor.ActorRef)" class="member-name-link">handleCountDown</a><wbr>(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
  int&nbsp;i,
- <a href="Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a>&nbsp;node)</code></div>
+ akka.actor.ActorRef&nbsp;nodeRef)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Decrease the time left for a specific count-down.</div>
 </div>
@@ -252,17 +252,17 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,it.unitn.disi.ds1.qtop.Node)">
+<section class="detail" id="handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,akka.actor.ActorRef)">
 <h3>handleCountDown</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handleCountDown</span><wbr><span class="parameters">(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
  int&nbsp;i,
- <a href="Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a>&nbsp;node)</span></div>
+ akka.actor.ActorRef&nbsp;nodeRef)</span></div>
 <div class="block">Decrease the time left for a specific count-down.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>reason</code> - the reason for the count-down</dd>
 <dd><code>i</code> - the index of the count-down</dd>
-<dd><code>node</code> - the node that is handling the count-down</dd>
+<dd><code>nodeRef</code> - the ActorRef of the node that is handling the count-down</dd>
 </dl>
 </section>
 </li>

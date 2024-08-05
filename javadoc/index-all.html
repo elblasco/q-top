@@ -105,25 +105,13 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Controller.html#%3Cinit%3E(it.unitn.disi.ds1.qtop.Simulation,it.unitn.disi.ds1.qtop.UserInterface)" class="member-name-link">Controller(Simulation, UserInterface)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Controller.html" title="class in it.unitn.disi.ds1.qtop">Controller</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_AFTER_RW_REQUEST" class="member-name-link">COORDINATOR_AFTER_RW_REQUEST</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_ON_DECISION_RESPONSE" class="member-name-link">COORDINATOR_ON_DECISION_RESPONSE</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
 <dd>
-<div class="block">Coordinator crash after propagating a R/W request.</div>
+<div class="block">Probabilistic crash during a decision multicast.</div>
 </dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_BEFORE_RW_REQUEST" class="member-name-link">COORDINATOR_BEFORE_RW_REQUEST</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_ON_VOTE_REQUEST" class="member-name-link">COORDINATOR_ON_VOTE_REQUEST</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
 <dd>
-<div class="block">Coordinator crash before receiving propagating a R/W request.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_NO_QUORUM" class="member-name-link">COORDINATOR_NO_QUORUM</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
-<dd>
-<div class="block">Coordinator crash after receiving a vote.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_ON_COMMUNICATION" class="member-name-link">COORDINATOR_ON_COMMUNICATION</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
-<dd>
-<div class="block">Probabilistic crash during a multicast.</div>
-</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#COORDINATOR_QUORUM" class="member-name-link">COORDINATOR_QUORUM</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
-<dd>
-<div class="block">Coordinator crash after reaching the quorum.</div>
+<div class="block">Probabilistic crash during a vote request multicast.</div>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html#%3Cinit%3E(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">CountDown(Utils.TimeOutReason, Utils.EpochPair)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html" title="class in it.unitn.disi.ds1.qtop">Utils.CountDown</a></dt>
 <dd>
@@ -333,6 +321,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the latest epoch and iteration.</div>
 </dd>
+<dt><a href="it/unitn/disi/ds1/qtop/PairsHistory.html#getLatestCommitted()" class="member-name-link">getLatestCommitted()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a></dt>
+<dd>
+<div class="block">Get the epoch and iteration of the last commited transaction, by commited transaction we consider a
+ transaction that has non-pending state.</div>
+</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.StartMessage.html#group()" class="member-name-link">group()</a> - Method in record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.StartMessage.html" title="class in it.unitn.disi.ds1.qtop">Utils.StartMessage</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>group</code> record component.</div>
@@ -340,7 +333,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:H">H</h2>
 <dl class="index">
-<dt><a href="it/unitn/disi/ds1/qtop/TimeOutManager.html#handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,it.unitn.disi.ds1.qtop.Node)" class="member-name-link">handleCountDown(Utils.TimeOutReason, int, Node)</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/TimeOutManager.html" title="class in it.unitn.disi.ds1.qtop">TimeOutManager</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/TimeOutManager.html#handleCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int,akka.actor.ActorRef)" class="member-name-link">handleCountDown(Utils.TimeOutReason, int, ActorRef)</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/TimeOutManager.html" title="class in it.unitn.disi.ds1.qtop">TimeOutManager</a></dt>
 <dd>
 <div class="block">Decrease the time left for a specific count-down.</div>
 </dd>
@@ -571,7 +564,13 @@ loadScripts(document, 'script');</script>
 <div class="block">PairsHistory class to store the history of the pairs and the final decision associated to it</div>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/PairsHistory.html#%3Cinit%3E()" class="member-name-link">PairsHistory()</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="it/unitn/disi/ds1/qtop/PairsHistory.html#%3Cinit%3E(it.unitn.disi.ds1.qtop.PairsHistory)" class="member-name-link">PairsHistory(PairsHistory)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a></dt>
+<dd>
+<div class="block">Copy constructor.</div>
+</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.Decision.html#PENDING" class="member-name-link">PENDING</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.Decision.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a></dt>
 <dd>
 <div class="block">The coordinator is still waiting for the votes.</div>

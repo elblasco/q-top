@@ -130,7 +130,13 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">PairsHistory</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Default constructor.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(it.unitn.disi.ds1.qtop.PairsHistory)" class="member-name-link">PairsHistory</a><wbr>(@NotNull <a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;sourceObject)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Copy constructor.</div>
+</div>
 </div>
 </section>
 </li>
@@ -150,28 +156,34 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the latest epoch and iteration.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#insert(int,int,int)" class="member-name-link">insert</a><wbr>(int&nbsp;e,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLatestCommitted()" class="member-name-link">getLatestCommitted</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the epoch and iteration of the last commited transaction, by commited transaction we consider a
+ transaction that has non-pending state.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#insert(int,int,int)" class="member-name-link">insert</a><wbr>(int&nbsp;e,
  int&nbsp;i,
  int&nbsp;element)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Insert a new element in the history.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#readValidVariable()" class="member-name-link">readValidVariable</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#readValidVariable()" class="member-name-link">readValidVariable</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Read the last valid, i.e., committed, variable.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setState(int,int,it.unitn.disi.ds1.qtop.Utils.Decision)" class="member-name-link">setState</a><wbr>(int&nbsp;e,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setState(int,int,it.unitn.disi.ds1.qtop.Utils.Decision)" class="member-name-link">setState</a><wbr>(int&nbsp;e,
  int&nbsp;i,
  <a href="Utils.Decision.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.Decision</a>&nbsp;finalState)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the state of the given epoch and iteration.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -205,6 +217,19 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;()">
 <h3>PairsHistory</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PairsHistory</span>()</div>
+<div class="block">Default constructor.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(it.unitn.disi.ds1.qtop.PairsHistory)">
+<h3>PairsHistory</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">PairsHistory</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;sourceObject)</span></div>
+<div class="block">Copy constructor.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>sourceObject</code> - source object to copy</dd>
+</dl>
 </section>
 </li>
 </ul>
@@ -264,6 +289,18 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the latest epoch and iteration</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getLatestCommitted()">
+<h3>getLatestCommitted</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></span>&nbsp;<span class="element-name">getLatestCommitted</span>()</div>
+<div class="block">Get the epoch and iteration of the last commited transaction, by commited transaction we consider a
+ transaction that has non-pending state.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the latest epoch and iteration committed</dd>
 </dl>
 </section>
 </li>

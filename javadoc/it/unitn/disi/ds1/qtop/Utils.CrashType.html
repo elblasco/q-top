@@ -121,44 +121,32 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Enum Constant</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code><a href="#COORDINATOR_AFTER_RW_REQUEST" class="member-name-link">COORDINATOR_AFTER_RW_REQUEST</a></code></div>
+<div class="col-first even-row-color"><code><a href="#COORDINATOR_ON_DECISION_RESPONSE" class="member-name-link">COORDINATOR_ON_DECISION_RESPONSE</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Coordinator crash after propagating a R/W request.</div>
+<div class="block">Probabilistic crash during a decision multicast.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#COORDINATOR_BEFORE_RW_REQUEST" class="member-name-link">COORDINATOR_BEFORE_RW_REQUEST</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#COORDINATOR_ON_VOTE_REQUEST" class="member-name-link">COORDINATOR_ON_VOTE_REQUEST</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Coordinator crash before receiving propagating a R/W request.</div>
+<div class="block">Probabilistic crash during a vote request multicast.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#COORDINATOR_NO_QUORUM" class="member-name-link">COORDINATOR_NO_QUORUM</a></code></div>
+<div class="col-first even-row-color"><code><a href="#NO_CRASH" class="member-name-link">NO_CRASH</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Coordinator crash after receiving a vote.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="#COORDINATOR_ON_COMMUNICATION" class="member-name-link">COORDINATOR_ON_COMMUNICATION</a></code></div>
-<div class="col-last odd-row-color">
-<div class="block">Probabilistic crash during a multicast.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="#COORDINATOR_QUORUM" class="member-name-link">COORDINATOR_QUORUM</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">Coordinator crash after reaching the quorum.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="#NO_CRASH" class="member-name-link">NO_CRASH</a></code></div>
-<div class="col-last odd-row-color">
 <div class="block">No crash.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#NODE_AFTER_VOTE_CAST" class="member-name-link">NODE_AFTER_VOTE_CAST</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_VOTE_CAST" class="member-name-link">NODE_AFTER_VOTE_CAST</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Receiver crash after casting a vote.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_VOTE_REQUEST" class="member-name-link">NODE_AFTER_VOTE_REQUEST</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#NODE_AFTER_VOTE_REQUEST" class="member-name-link">NODE_AFTER_VOTE_REQUEST</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Receiver crash after receiving a vote request.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#NODE_AFTER_WRITE_REQUEST" class="member-name-link">NODE_AFTER_WRITE_REQUEST</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_WRITE_REQUEST" class="member-name-link">NODE_AFTER_WRITE_REQUEST</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Receiver crash after propagating a write request.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#NODE_BEFORE_WRITE_REQUEST" class="member-name-link">NODE_BEFORE_WRITE_REQUEST</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#NODE_BEFORE_WRITE_REQUEST" class="member-name-link">NODE_BEFORE_WRITE_REQUEST</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Receiver crash before propagating a write request.</div>
 </div>
 </div>
@@ -242,38 +230,17 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="COORDINATOR_BEFORE_RW_REQUEST">
-<h3>COORDINATOR_BEFORE_RW_REQUEST</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_BEFORE_RW_REQUEST</span></div>
-<div class="block">Coordinator crash before receiving propagating a R/W request.</div>
+<section class="detail" id="COORDINATOR_ON_VOTE_REQUEST">
+<h3>COORDINATOR_ON_VOTE_REQUEST</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_ON_VOTE_REQUEST</span></div>
+<div class="block">Probabilistic crash during a vote request multicast.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="COORDINATOR_AFTER_RW_REQUEST">
-<h3>COORDINATOR_AFTER_RW_REQUEST</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_AFTER_RW_REQUEST</span></div>
-<div class="block">Coordinator crash after propagating a R/W request.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="COORDINATOR_NO_QUORUM">
-<h3>COORDINATOR_NO_QUORUM</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_NO_QUORUM</span></div>
-<div class="block">Coordinator crash after receiving a vote.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="COORDINATOR_QUORUM">
-<h3>COORDINATOR_QUORUM</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_QUORUM</span></div>
-<div class="block">Coordinator crash after reaching the quorum.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="COORDINATOR_ON_COMMUNICATION">
-<h3>COORDINATOR_ON_COMMUNICATION</h3>
-<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_ON_COMMUNICATION</span></div>
-<div class="block">Probabilistic crash during a multicast.</div>
+<section class="detail" id="COORDINATOR_ON_DECISION_RESPONSE">
+<h3>COORDINATOR_ON_DECISION_RESPONSE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">COORDINATOR_ON_DECISION_RESPONSE</span></div>
+<div class="block">Probabilistic crash during a decision multicast.</div>
 </section>
 </li>
 </ul>
