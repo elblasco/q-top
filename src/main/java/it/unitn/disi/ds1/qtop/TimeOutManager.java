@@ -1,5 +1,6 @@
 package it.unitn.disi.ds1.qtop;
 
+import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.japi.Pair;
 
@@ -90,16 +91,15 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	/**
 	 * Decrease the time left for a specific count-down.
 	 *
-	 * @param reason the reason for the count-down
-	 * @param i      the index of the count-down
-	 * @param node   the node that is handling the count-down
+	 * @param reason  the reason for the count-down
+	 * @param i       the index of the count-down
+	 * @param nodeRef the ActorRef of the node that is handling the count-down
 	 */
-	public void handleCountDown(Utils.TimeOutReason reason, int i, Node node) {
+	public void handleCountDown(Utils.TimeOutReason reason, int i, ActorRef nodeRef) {
 		if (this.get(reason).get(i).second() <= 0)
 		{
 			this.get(reason).get(i).first().cancel();
-				node.tell(
-						node.getSelf(),
+				nodeRef.tell(
 						new Utils.TimeOut(
 								reason,
 								new Utils.EpochPair(
@@ -107,7 +107,7 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 										i
 								)
 						),
-						node.getSelf()
+						nodeRef
 				);
 			}
 			else
@@ -206,11 +206,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 */
 	public void endElectionState() {
 		this.get(Utils.TimeOutReason.ELECTION).getFirst().first().cancel();
-		logger.log(
-				Utils.LogLevel.INFO,
-				"[NODE] canceled its election timeout " + this.get(Utils.TimeOutReason.ELECTION).getFirst().first()
-						.isCancelled()
-		);
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
 		{
 			if (reason != Utils.TimeOutReason.ELECTION)

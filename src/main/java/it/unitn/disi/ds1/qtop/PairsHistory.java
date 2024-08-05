@@ -1,6 +1,7 @@
 package it.unitn.disi.ds1.qtop;
 
 import akka.japi.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -8,8 +9,34 @@ import java.util.ArrayList;
  * PairsHistory class to store the history of the pairs and the final decision associated to it
  */
 public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decision>>> {
+	/**
+	 * Default constructor.
+	 */
 	public PairsHistory() {
 		super();
+	}
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param sourceObject source object to copy
+	 */
+	public PairsHistory(@NotNull PairsHistory sourceObject) {
+		super();
+		for (ArrayList<Pair<Integer, Utils.Decision>> epoch : sourceObject)
+		{
+			ArrayList<Pair<Integer, Utils.Decision>> newEpoch = new ArrayList<>();
+			for (Pair<Integer, Utils.Decision> iteration : epoch)
+			{
+				newEpoch.add(
+						new Pair<>(
+								iteration.first(),
+								iteration.second()
+						)
+				);
+			}
+			this.add(newEpoch);
+		}
 	}
 
 	/**
@@ -39,8 +66,8 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			for (int x = this.size() - 1; x >= 0; x--)
 			{
 				// If the current epoch is still empty, we have to check the previous epoch, i.e., -2
-				int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
-				for (int y = this.get(x).size() + endOffSet; y >= 0; y--)
+				//int endOffSet = this.get(x).isEmpty() ? - 1 : - 2;
+				for (int y = this.get(x).size() - 1; y >= 0; y--)
 				{
 					if (this.get(x).get(y) != null && this.get(x).get(y).second() == Utils.Decision.WRITEOK)
 					{
@@ -91,12 +118,46 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	 * @return the latest epoch and iteration
 	 */
 	public Utils.EpochPair getLatest() {
-		int latestEpoch = (this.isEmpty()) ? 0 : this.size() - 1;
-		int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
-		return new Utils.EpochPair(
-				latestEpoch,
-				latestIteration
-		);
+		if (! this.isEmpty())
+		{
+			int latestEpoch = this.size() - 1;
+			int latestIteration = (this.get(latestEpoch).isEmpty()) ? 0 : this.get(latestEpoch).size() - 1;
+			return new Utils.EpochPair(
+					latestEpoch,
+					latestIteration
+			);
+		}
+		return new Utils.EpochPair(-1, -1);
+	}
+
+	/**
+	 * Get the epoch and iteration of the last commited transaction, by commited transaction we consider a
+	 * transaction that has non-pending state.
+	 *
+	 * @return the latest epoch and iteration committed
+	 */
+	public Utils.EpochPair getLatestCommitted(){
+		if (! this.isEmpty())
+		{
+			for (int i = this.size() - 1; i >= 0; i--)
+			{
+				if (! this.get(i).isEmpty())
+				{
+					for (int j = this.get(i).size() - 1; j >= 0; j--)
+					{
+						if (this.get(i).get(j).second() == Utils.Decision.WRITEOK || this.get(i).get(j)
+								.second() == Utils.Decision.ABORT)
+						{
+							return new Utils.EpochPair(
+									i,
+									j
+							);
+						}
+					}
+				}
+			}
+		}
+		return new Utils.EpochPair(-1, -1);
 	}
 	
 	@Override
@@ -109,8 +170,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			{
 				sb.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
 			}
-			sb.append("]\n");
+			sb.replace(sb.length() - 2, sb.length(), "");
+			sb.append(" ]\n");
 		}
+		sb.replace(sb.length() - 1, sb.length(), "");
 		return sb.toString();
 	}
 }

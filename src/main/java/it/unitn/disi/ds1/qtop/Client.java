@@ -178,15 +178,15 @@ public class Client extends AbstractActor{
 					"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write requested to [NODE-" + index + "], " +
 							"new value proposed: "
 							+ proposedValue +
-							", operation id: " + requestNumber
+							", local operation id: " + requestNumber
 			);
 		}
 		else
 		{
 			LOGGER.log(
 					LogLevel.INFO,
-					"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] read number " + requestNumber + " req to " +
-							"[NODE-" + index + "]" + ", operation id: " + requestNumber);
+					"[CLIENT-"+ (this.clientId - this.numberOfNodes) +"] requesting read to " +
+							"[NODE-" + index + "]" + ", local operation id: " + requestNumber);
 			group.get(index).tell(new ReadRequest(requestNumber), this.getSelf());
 		}
 		this.requestNumber++;
@@ -207,7 +207,7 @@ public class Client extends AbstractActor{
 		LOGGER.log(
 				LogLevel.INFO,
 				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
-						"value " + value + ", operation id: " + msg.nRequest()
+						"value " + value + ", local operation id: " + msg.nRequest()
 		);
 	}
 
@@ -223,7 +223,7 @@ public class Client extends AbstractActor{
 		);
 		LOGGER.log(
 				LogLevel.INFO,
-				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write request done, operation id: " + msg.nRequest()
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] write request done, local operation id: " + msg.nRequest()
 		);
 
 	}
