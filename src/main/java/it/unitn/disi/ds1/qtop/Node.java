@@ -95,19 +95,12 @@ public class Node extends AbstractActor {
 	private void multicast(Serializable m, boolean hasToCrash) {
 		ArrayList<ActorRef> groupCopy = new ArrayList<>(this.group);
 		Collections.shuffle(groupCopy);
-		if (hasToCrash)
-		{
-			System.out.println("The coordinator is multicasting " + m + " to the group");
-		}
+
 		for (ActorRef node : groupCopy)
         {
-	        if (hasToCrash)
-	        {
-		        System.out.println("Destination for this message " + node);
-	        }
 	        if (hasToCrash && (rand.nextInt(100) < 20) && node != this.getSelf())
 	        {
-		        System.out.println("Bye Bye\n-------------------------------------");
+
 		        this.coordinatorCrash();
 		        return;
 	        }
@@ -117,10 +110,6 @@ public class Node extends AbstractActor {
                     getSelf()
             );
         }
-		if (hasToCrash)
-		{
-			System.out.println("-------------------------------------");
-		}
     }
 
     /**
@@ -145,7 +134,7 @@ public class Node extends AbstractActor {
                 LogLevel.DEBUG,
                 "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + msg.epoch()
 		                .e() + ", " + msg.epoch()
-		                .i() + " > and variable " + msg.newValue()
+		                .i() + " > and new proposed variable " + msg.newValue()
         );
         this.tell(
                 this.getSender(),
@@ -194,11 +183,6 @@ public class Node extends AbstractActor {
 	 * @param sender the sender actor
 	 */
     public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
-	    logger.log(
-			    LogLevel.DEBUG,
-			    "[NODE-" + this.nodeId + "] sending a " + msg.getClass().getSimpleName() + " to " + dest
-	    );
-
 		this.getContext().getSystem().scheduler().scheduleOnce(
 				Duration.ofMillis(rand.nextInt(30)),
 				dest,
@@ -263,11 +247,7 @@ public class Node extends AbstractActor {
 	 * @param msg the Synchronisation message
 	 */
 	private void onSynchronisation(@NotNull Synchronisation msg) {
-		logger.log(
-				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the epoch is going to be <" + msg.newEpochPair()
-						.e() + ", " + msg.newEpochPair().i() + ">"
-		);
+
 		this.becomeReceiver();
 		this.coordinator = this.getSender();
 		this.isElection = false;
@@ -278,7 +258,10 @@ public class Node extends AbstractActor {
 		this.startHeartBeatCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] has now last valid value: " + this.history.readValidVariable()
+				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the new epoch is going" +
+						" to be <" + msg.newEpochPair()
+						.e() + ", " + msg.newEpochPair().i() + ">" +
+						"last value is now : " + this.history.readValidVariable()
 		);
 	}
 
@@ -436,10 +419,6 @@ public class Node extends AbstractActor {
 	 * @param msg the Heartbeat message
 	 */
 	private void onHeartBeat(HeartBeat msg) {
-		logger.log(
-				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] received heartbeat from coordinator"
-		);
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.HEARTBEAT,
 				0
@@ -495,7 +474,8 @@ public class Node extends AbstractActor {
 		this.startWriteCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + ", new value proposed: " + msg.newValue()
+				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + " to coordinator, new " +
+						"value proposed: " + msg.newValue()
 		);
 		numbersOfWrites++;
 		if (this.crashType == CrashType.NODE_AFTER_WRITE_REQUEST)
@@ -510,6 +490,11 @@ public class Node extends AbstractActor {
 	 * @param msg the WriteResponse message
 	 */
 	private void onWriteValue(@NotNull WriteValue msg) {
+		logger.log(
+				LogLevel.DEBUG,
+				"[NODE-" + this.nodeId + "] received write ACK for write request number " + msg.nRequest() + " with " +
+						"value " + msg.value()
+		);
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
 				msg.nRequest()
@@ -524,7 +509,7 @@ public class Node extends AbstractActor {
 	private void onTimeOut(@NotNull TimeOut msg) {
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received a timeout " + msg.reason()
+				"[NODE-" + this.nodeId + "] timed out for reason : " + msg.reason()
 		);
 		switch (msg.reason())
 		{
@@ -547,7 +532,7 @@ public class Node extends AbstractActor {
 	 */
 	private void onElection(@NotNull Election msg) {
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
 						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " +
 						"candidate received:" + msg.bestCandidateId()
@@ -599,7 +584,7 @@ public class Node extends AbstractActor {
 			else
 			{
 				logger.log(
-						LogLevel.INFO,
+						LogLevel.DEBUG,
 						"[NODE-" + this.nodeId + "] is not going to forward election message from " + this.getSender()
 				);
 			}
@@ -671,7 +656,7 @@ public class Node extends AbstractActor {
 				0
 		);
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] received election ACK from [NODE-" + this.getSender() + "], timer " +
 						"stopped: " + res
 		);
@@ -695,7 +680,7 @@ public class Node extends AbstractActor {
 	 */
 	private void startElectionCountDown() {
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] starting election countdown"
 		);
 		this.timeOutManager.startCountDown(
@@ -722,7 +707,7 @@ public class Node extends AbstractActor {
 		int oldId = this.lastElectionData.destinationId();
 		int newDestId = (oldId + 1) % numberOfNodes;
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				getSelf() + " is retrying election sending to [NODE-" + newDestId + "] the best " + "candidate " + this.lastElectionData.bestCandidateId()
 		);
 		this.lastElectionData = new Quadruplet(
@@ -800,11 +785,7 @@ public class Node extends AbstractActor {
 	private void sendNewElectionMessage(@NotNull EpochPair highestData, int idDest) {
 		this.startElectionCountDown();
 		logger.log(
-				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] has " + this.history
-		);
-		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] switched election state, my history is < e:" + highestData.e() + ", i:" + highestData.i() + ">, sending new election message to [NODE-" + idDest + "]"
 		);
 		this.lastElectionData = new Utils.Quadruplet(
@@ -909,7 +890,7 @@ public class Node extends AbstractActor {
 						msg -> System.out.println(
 								"[NODE-" + this.nodeId + "] elected as new leader"
 						)
-				)
+				).matchAny(msg -> {})
 				.build();
 
 	}
@@ -990,7 +971,7 @@ public class Node extends AbstractActor {
 				msg.newValue()
 		);
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] [Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
 		);
 		multicast(new VoteRequest(
@@ -1001,7 +982,7 @@ public class Node extends AbstractActor {
 				this.crashType == CrashType.COORDINATOR_ON_VOTE_REQUEST
 		);
 		logger.log(
-				LogLevel.INFO,
+				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
 		);
 	}
@@ -1050,7 +1031,9 @@ public class Node extends AbstractActor {
 			);
 			logger.log(
 					LogLevel.INFO,
-					"[NODE-" + this.nodeId + "] [Coordinator] decided and broadcasting " + d + " for epoch < " + e +
+					"[NODE-" + this.nodeId + "] [Coordinator] collected enough votes, decided and broadcasting " + d +
+							" " +
+							"for epoch < " + e +
 							", " + i + " >"
 			);
 		}

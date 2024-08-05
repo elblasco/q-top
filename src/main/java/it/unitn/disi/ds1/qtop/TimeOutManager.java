@@ -206,11 +206,6 @@ public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<
 	 */
 	public void endElectionState() {
 		this.get(Utils.TimeOutReason.ELECTION).getFirst().first().cancel();
-		logger.log(
-				Utils.LogLevel.INFO,
-				"[NODE] canceled its election timeout " + this.get(Utils.TimeOutReason.ELECTION).getFirst().first()
-						.isCancelled()
-		);
 		for (Utils.TimeOutReason reason : Utils.TimeOutReason.values())
 		{
 			if (reason != Utils.TimeOutReason.ELECTION)
