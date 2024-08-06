@@ -124,23 +124,23 @@ public class Node extends AbstractActor {
             this.crash();
 	        return;
         }
+		int e = msg.epoch().e();
+		int i = msg.epoch().i();
 	    this.history.insert(
-                msg.epoch().e(),
-                msg.epoch().i(),
+                e,
+				i,
                 msg.newValue()
         );
         Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
         logger.log(
                 LogLevel.DEBUG,
-                "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + msg.epoch()
-		                .e() + ", " + msg.epoch()
-		                .i() + " > and new proposed variable " + msg.newValue()
+                "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + e + ", " + i + " > and new proposed variable " + msg.newValue()
         );
         this.tell(
                 this.getSender(),
                 new VoteResponse(
                         vote,
-                        msg.epoch()
+                        new EpochPair(msg.epoch())
                 ),
                 this.getSelf()
         );
@@ -202,8 +202,7 @@ public class Node extends AbstractActor {
         int i = msg.epoch().i();
         logger.log(
                 LogLevel.DEBUG,
-                "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + msg.epoch()
-                        .e() + ", " + msg.epoch().i() + " >"
+                "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + e + ", " + i + " >"
         );
 		this.history.setState(
 				e,
@@ -941,7 +940,7 @@ public class Node extends AbstractActor {
 			);
 			multicast(new DecisionResponse(
 					this.voters.get(e).get(i).finalDecision(),
-					msg.epoch()
+					new EpochPair(msg.epoch())
 					),
 					this.crashType == CrashType.COORDINATOR_ON_DECISION_RESPONSE
 			);

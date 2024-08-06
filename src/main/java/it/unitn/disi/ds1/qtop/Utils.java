@@ -257,6 +257,13 @@ public class Utils {
      * @param i iteration
      */
     public record EpochPair(int e, int i) implements Serializable {
+        /**
+         * Copy constructor
+         * @param ep the EpochPair to copy
+         */
+        public EpochPair(EpochPair ep) {
+            this(ep.e(), ep.i());
+        }
     }
 
     /**
@@ -280,6 +287,20 @@ public class Utils {
     }
 
     /**
+     * Message to synchronise all the node after an election.
+     * @param history the new history of transactions
+     * @param newEpochPair the new epoch pair
+     */
+    public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
+    }
+
+    /**
+     * Message to acknowledge a CrashRequest.
+     */
+    public record CrashACK() implements Serializable {
+    }
+
+    /**
      * Struct to represent the map of voters for every write, and the final decision taken for that write.
      * @param votes map of voters
      * @param finalDecision coordinator final decision
@@ -295,20 +316,6 @@ public class Utils {
      * @param bestCandidateId node that have that EpochPair
      */
     public record Quadruplet(int destinationId, int highestEpoch, int highestIteration, int bestCandidateId) {
-    }
-
-    /**
-     * Message to synchronise all the node after an election.
-     * @param history the new history of transactions
-     * @param newEpochPair the new epoch pair
-     */
-    public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
-    }
-
-    /**
-     * Message to acknowledge a CrashRequest.
-     */
-    public record CrashACK() implements Serializable {
     }
 }
 
