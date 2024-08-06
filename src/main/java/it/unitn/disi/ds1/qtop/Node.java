@@ -302,7 +302,7 @@ public class Node extends AbstractActor {
 	private Receive voterBehaviour() {
 		return receiveBuilder().match(
 				CountDown.class,
-				this::onCountDown
+				this::voterOnCountDown
 		).match(
 				CrashRequest.class,
 				this::onCrashRequest
@@ -430,14 +430,12 @@ public class Node extends AbstractActor {
 	}
 
 	/**
-	 * General purpose handler for the countdown which a Receiver can support
+	 * Receiver handler for the countdown which a Receiver can support
 	 *
 	 * @param msg Genre of countdown
 	 */
 	private void onCountDown(@NotNull CountDown msg) {
-		int countDownIndex =
-				(msg.reason() == TimeOutReason.HEARTBEAT || msg.reason() == TimeOutReason.ELECTION) ? 0 : msg.epoch()
-						.i();
+		int countDownIndex = (msg.reason() == TimeOutReason.HEARTBEAT) ? 0 : msg.epoch().i();
 		this.timeOutManager.handleCountDown(
 				msg.reason(),
 				countDownIndex,
@@ -1208,5 +1206,22 @@ public class Node extends AbstractActor {
 			default:
 				break;
 		}
+	}
+
+	/**
+	 * Voter handler for the countdown which a Receiver can support
+	 *
+	 * @param msg Genre of countdown
+	 */
+	private void voterOnCountDown(@NotNull CountDown msg) {
+		int countDownIndex =
+				(msg.reason() == TimeOutReason.ELECTION || msg.reason() == TimeOutReason.ELECTION_GLOBAL) ? 0 :
+						msg.epoch()
+						.i();
+		this.timeOutManager.handleCountDown(
+				msg.reason(),
+				countDownIndex,
+				this.getSelf()
+		);
 	}
 }
