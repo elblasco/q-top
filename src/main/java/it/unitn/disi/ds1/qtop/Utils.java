@@ -107,6 +107,10 @@ public class Utils {
          */
         ELECTION,
         /**
+         * Timeout to elect a leader.
+         */
+        ELECTION_GLOBAL,
+        /**
          * Timeout for a CrashRequest message.
          */
         CRASH_RESPONSE,

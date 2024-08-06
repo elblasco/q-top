@@ -38,32 +38,32 @@ public class Node extends AbstractActor {
 	private boolean isElection = false;
 	private int numbersOfWrites = 0;
 
-    private final Logger logger = Logger.getInstance();
+	private final Logger logger = Logger.getInstance();
 
 	public Node(ActorRef coordinator, int nodeId, int decisionTimeout, int voteTimeout, int writeTimeout,
-			int numberOfNodes) {
-        super();
-        this.history = new PairsHistory();
-        this.nodeId = nodeId;
-        this.writeTimeout = writeTimeout;
+			int electionGlobalTimeout, int numberOfNodes) {
+		this.history = new PairsHistory();
+		this.nodeId = nodeId;
+		this.writeTimeout = writeTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
-        this.timeOutManager = new TimeOutManager(
-                decisionTimeout,
-                voteTimeout,
-                HEARTBEAT_TIMEOUT,
-                writeTimeout,
+		this.timeOutManager = new TimeOutManager(
+				decisionTimeout,
+				voteTimeout,
+				HEARTBEAT_TIMEOUT,
+				writeTimeout,
+				electionGlobalTimeout,
 				0,
-                Node.COUNTDOWN_REFRESH
-        );
+				Node.COUNTDOWN_REFRESH
+		);
 		if (coordinator == null)
 		{
 			this.becomeCoordinator();
 		}
-    }
+	}
 
 	static public Props props(ActorRef coordinator, int nodeId, int decisionTimeout, int voteTimeout, int writeTimeout,
-			int numberOfNodes) {
+			int electionGlobalTimeout, int numberOfNodes) {
 		return Props.create(
 				Node.class,
 				() -> new Node(
@@ -72,6 +72,7 @@ public class Node extends AbstractActor {
 						decisionTimeout,
 						voteTimeout,
 						writeTimeout,
+						electionGlobalTimeout,
 						numberOfNodes
 				)
 		);
@@ -83,84 +84,94 @@ public class Node extends AbstractActor {
 	 * @param sm the start message
 	 */
 	private void setGroup(@NotNull StartMessage sm) {
-        this.group = new ArrayList<>();
-        this.group.addAll(sm.group());
+		this.group = new ArrayList<>();
+		this.group.addAll(sm.group());
 	}
 
 	/**
 	 * Multicast a message to every node in the group in random order, it can make the sender crash.
-	 * @param m message to multicast
+	 *
+	 * @param m          message to multicast
 	 * @param hasToCrash if the current node has to crash
 	 */
 	private void multicast(Serializable m, boolean hasToCrash) {
 		ArrayList<ActorRef> groupCopy = new ArrayList<>(this.group);
 		Collections.shuffle(groupCopy);
-
 		for (ActorRef node : groupCopy)
-        {
-	        if (hasToCrash && (rand.nextInt(100) < 20) && node != this.getSelf())
-	        {
+		{
+			if (hasToCrash && (rand.nextInt(100) < 20) && node != this.getSelf())
+			{
+				this.coordinatorCrash();
+				return;
+			}
+			this.tell(
+					node,
+					m,
+					getSelf()
+			);
+		}
+	}
 
-		        this.coordinatorCrash();
-		        return;
-	        }
-            this.tell(
-                    node,
-                    m,
-                    getSelf()
-            );
-        }
-    }
-
-    /**
-     * Make a vote, fix it and then send it back to the coordinator.
-     *
-     * @param msg request to make a vote
-     */
-    private void onVoteRequest(VoteRequest msg) {
-        if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
-        {
-			logger.log( LogLevel.ERROR, "[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_REQUEST" );
-            this.crash();
-	        return;
-        }
+	/**
+	 * Make a vote, fix it and then send it back to the coordinator.
+	 *
+	 * @param msg request to make a vote
+	 */
+	private void onVoteRequest(VoteRequest msg) {
+		if (this.crashType == CrashType.NODE_AFTER_VOTE_REQUEST)
+		{
+			logger.log(
+					LogLevel.ERROR,
+					"[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_REQUEST"
+			);
+			this.crash();
+			return;
+		}
 		int e = msg.epoch().e();
 		int i = msg.epoch().i();
-	    this.history.insert(
-                e,
+		this.history.insert(
+				e,
 				i,
-                msg.newValue()
-        );
-        Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
-        logger.log(
-                LogLevel.DEBUG,
-                "[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + e + ", " + i + " > and new proposed variable " + msg.newValue()
-        );
-        this.tell(
-                this.getSender(),
-                new VoteResponse(
-                        vote,
-                        new EpochPair(msg.epoch())
-                ),
-                this.getSelf()
-        );
-        if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
-        {
-			logger.log( LogLevel.ERROR, "[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_CAST" );
-            this.crash();
-        }
-    }
+				msg.newValue()
+		);
+		Vote vote = new Random().nextBoolean() ? Vote.YES : Vote.NO;
+		logger.log(
+				LogLevel.DEBUG,
+				"[NODE-" + this.nodeId + "] sending vote " + vote + " for epoch < " + e + ", " + i + " > and new " +
+						"proposed variable " + msg.newValue()
+		);
+		this.tell(
+				this.getSender(),
+				new VoteResponse(
+						vote,
+						new EpochPair(msg.epoch())
+				),
+				this.getSelf()
+		);
+		if (this.crashType == CrashType.NODE_AFTER_VOTE_CAST)
+		{
+			logger.log(
+					LogLevel.ERROR,
+					"[NODE-" + this.nodeId + "] crashed!!! for reason NODE_AFTER_VOTE_CAST"
+			);
+			this.crash();
+		}
+	}
 
 	/**
 	 * Handle the ReadRequest from a Client, if a crash for the coordinator is set it triggers it.
+	 *
 	 * @param msg the ReadRequest
 	 */
 	private void onReadRequest(ReadRequest msg) {
 		this.tell(
 				this.getSender(),
-				new ReadValue(this.history.readValidVariable(), msg.nRequest()),
-                this.getSelf()
-        );
+				new ReadValue(
+						this.history.readValidVariable(),
+						msg.nRequest()
+				),
+				this.getSelf()
+		);
 	}
 
 	/**
@@ -171,8 +182,8 @@ public class Node extends AbstractActor {
 				LogLevel.ERROR,
 				"[NODE-" + this.nodeId + "] entered the crash state"
 		);
-        this.getContext().become(receiveBuilder().matchAny(msg -> {
-        }).build());
+		this.getContext().become(receiveBuilder().matchAny(msg -> {
+		}).build());
 	}
 
 	/**
@@ -182,7 +193,7 @@ public class Node extends AbstractActor {
 	 * @param msg    the message to send
 	 * @param sender the sender actor
 	 */
-    public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
+	public void tell(ActorRef dest, final Object msg, final ActorRef sender) {
 		this.getContext().getSystem().scheduler().scheduleOnce(
 				Duration.ofMillis(rand.nextInt(30)),
 				dest,
@@ -190,7 +201,7 @@ public class Node extends AbstractActor {
 				this.getContext().getSystem().dispatcher(),
 				sender
 		);
-    }
+	}
 
 	/**
 	 * Handle DecisionResponse from the coordinator.
@@ -198,12 +209,12 @@ public class Node extends AbstractActor {
 	 * @param msg the massage with the decision
 	 */
 	private void onDecisionResponse(@NotNull DecisionResponse msg) {
-        int e = msg.epoch().e();
-        int i = msg.epoch().i();
-        logger.log(
-                LogLevel.DEBUG,
-                "[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + e + ", " + i + " >"
-        );
+		int e = msg.epoch().e();
+		int i = msg.epoch().i();
+		logger.log(
+				LogLevel.DEBUG,
+				"[NODE-" + this.nodeId + "] received the decision " + msg.decision() + " for epoch < " + e + ", " + i + " >"
+		);
 		this.history.setState(
 				e,
 				i,
@@ -220,24 +231,24 @@ public class Node extends AbstractActor {
 	 * Start the countdown for the Heartbeat.
 	 */
 	private void startHeartBeatCountDown() {
-        this.timeOutManager.startCountDown(
-                TimeOutReason.HEARTBEAT,
-                this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
-		                Duration.ZERO,
-                        Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
-                        getSelf(),
-                        new CountDown(
-                                TimeOutReason.HEARTBEAT,
-                                new EpochPair(
-                                        0,
-                                        0
-                                )
-                        ),
-                        getContext().getSystem().dispatcher(),
-                        getSelf()
-                ),
-		        0
-        );
+		this.timeOutManager.startCountDown(
+				TimeOutReason.HEARTBEAT,
+				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+						Duration.ZERO,
+						Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
+						getSelf(),
+						new CountDown(
+								TimeOutReason.HEARTBEAT,
+								new EpochPair(
+										0,
+										0
+								)
+						),
+						getContext().getSystem().dispatcher(),
+						getSelf()
+				),
+				0
+		);
 	}
 
 	/**
@@ -246,7 +257,6 @@ public class Node extends AbstractActor {
 	 * @param msg the Synchronisation message
 	 */
 	private void onSynchronisation(@NotNull Synchronisation msg) {
-
 		this.becomeReceiver();
 		this.coordinator = this.getSender();
 		this.isElection = false;
@@ -257,10 +267,9 @@ public class Node extends AbstractActor {
 		this.startHeartBeatCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the new epoch is going" +
-						" to be <" + msg.newEpochPair()
-						.e() + ", " + msg.newEpochPair().i() + ">" +
-						"last value is now : " + this.history.readValidVariable()
+				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the new epoch is going" + " to be <" + msg.newEpochPair()
+						.e() + ", " + msg.newEpochPair()
+						.i() + ">" + "last value is now : " + this.history.readValidVariable()
 		);
 	}
 
@@ -302,7 +311,7 @@ public class Node extends AbstractActor {
 				this::onReadRequest
 		).match(
 				TimeOut.class,
-				this::onTimeOut
+				this::voterOnTimeOut
 		).match(
 				Election.class,
 				this::onElection
@@ -314,27 +323,24 @@ public class Node extends AbstractActor {
 				this::onSynchronisation
 		).match(
 				WriteRequest.class,
-				msg ->
-					this.tell(
-							this.getSender(),
-							new WriteValue(
-									msg.newValue(),
-									msg.nRequest()
-							),
-							this.getSelf()
-					)
+				msg -> this.tell(
+						this.getSender(),
+						new WriteValue(
+								msg.newValue(),
+								msg.nRequest()
+						),
+						this.getSelf()
+				)
 		).match(
 				CrashACK.class,
-				ack ->
-					logger.log(
-							LogLevel.INFO,
-							"[NODE-" + this.nodeId + "] received crash ACK while in voting state"
-					)
-		).matchAny(msg ->
-			logger.log(
-					LogLevel.INFO,
-					"[NODE-" + this.nodeId + "] received " + msg.getClass() + " while in voting " + "state"
-			)).build();
+				ack -> logger.log(
+						LogLevel.INFO,
+						"[NODE-" + this.nodeId + "] received crash ACK while in voting state"
+				)
+		).matchAny(msg -> logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] received " + msg.getClass() + " while in voting " + "state"
+		)).build();
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN RECEIVER METHODS
@@ -389,13 +395,12 @@ public class Node extends AbstractActor {
 				this::onSynchronisation
 		).match(
 				CrashACK.class,
-				ack ->
-					logger.log(
-							LogLevel.INFO,
-							"[NODE-" + this.nodeId + "] received crash ACK from coordinator"
-					)
-		).matchAny(msg -> {})
-				.build();
+				ack -> logger.log(
+						LogLevel.INFO,
+						"[NODE-" + this.nodeId + "] received crash ACK from coordinator"
+				)
+		).matchAny(msg -> {
+		}).build();
 	}
 
 	/**
@@ -455,13 +460,14 @@ public class Node extends AbstractActor {
 			this.crash();
 			return;
 		}
-
 		this.tell(
 				this.getSender(),
-				new WriteValue(msg.newValue(), msg.nRequest()),
+				new WriteValue(
+						msg.newValue(),
+						msg.nRequest()
+				),
 				this.getSelf()
 		);
-
 		this.tell(
 				this.coordinator,
 				new WriteRequest(
@@ -473,8 +479,7 @@ public class Node extends AbstractActor {
 		this.startWriteCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + " to coordinator, new " +
-						"value proposed: " + msg.newValue()
+				"[NODE-" + this.nodeId + "] sending write request number " + numbersOfWrites + " to coordinator, new " + "value proposed: " + msg.newValue()
 		);
 		numbersOfWrites++;
 		if (this.crashType == CrashType.NODE_AFTER_WRITE_REQUEST)
@@ -491,8 +496,7 @@ public class Node extends AbstractActor {
 	private void onWriteValue(@NotNull WriteValue msg) {
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] received write ACK for write request number " + msg.nRequest() + " with " +
-						"value " + msg.value()
+				"[NODE-" + this.nodeId + "] received write ACK for write request number " + msg.nRequest() + " with " + "value " + msg.value()
 		);
 		this.timeOutManager.resetCountDown(
 				TimeOutReason.WRITE,
@@ -516,9 +520,6 @@ public class Node extends AbstractActor {
 			case HEARTBEAT:
 				this.startElection();
 				break;
-			case ELECTION:
-				this.retryElection();
-				break;
 			default:
 				break;
 		}
@@ -533,8 +534,8 @@ public class Node extends AbstractActor {
 		logger.log(
 				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
-						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " +
-						"candidate received:" + msg.bestCandidateId()
+						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " + "candidate"
+						+ " received:" + msg.bestCandidateId()
 		);
 		this.tell(
 				this.getSender(),
@@ -561,19 +562,21 @@ public class Node extends AbstractActor {
 						new StartMessage(this.group),
 						this.getSelf()
 				);
-				this.multicast(new Synchronisation(
-						new PairsHistory(this.history),
-								new Utils.EpochPair(this.history.getLatestCommitted().e(), this.history.getLatestCommitted().i())
+				this.multicast(
+						new Synchronisation(
+								new PairsHistory(this.history),
+								new Utils.EpochPair(
+										this.history.getLatestCommitted().e(),
+										this.history.getLatestCommitted().i()
+								)
 						),
 						false
 				);
 			}
-			else if (
-					msg.isGreaterThanLocalData(
-							this.nodeId,
-							nodeLatest
-					)
-			)
+			else if (msg.isGreaterThanLocalData(
+					this.nodeId,
+					nodeLatest
+			))
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
@@ -590,15 +593,14 @@ public class Node extends AbstractActor {
 		}
 		else
 		{
+			this.startGlobalElectionCountDown();
 			this.becomeVoter();
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
-			if (
-					msg.isGreaterThanLocalData(
-							this.nodeId,
-							nodeLatest
-					)
-			)
+			if (msg.isGreaterThanLocalData(
+					this.nodeId,
+					nodeLatest
+			))
 			{
 				this.forwardPreviousElectionMessage(
 						msg,
@@ -621,6 +623,7 @@ public class Node extends AbstractActor {
 	private void startElection() {
 		if (! this.isElection)
 		{
+			this.startGlobalElectionCountDown();
 			this.becomeVoter();
 			logger.log(
 					LogLevel.INFO,
@@ -650,19 +653,19 @@ public class Node extends AbstractActor {
 	 * @param msg the ElectionACK message
 	 */
 	private void onElectionAck(ElectionACK msg) {
-		boolean res = this.timeOutManager.resetCountDown(
+		this.timeOutManager.resetCountDown(
 				TimeOutReason.ELECTION,
 				0
 		);
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] received election ACK from [NODE-" + this.getSender() + "], timer " +
-						"stopped: " + res
+				"[NODE-" + this.nodeId + "] received election ACK from [NODE-" + this.getSender() + "]"
 		);
 	}
 
 	/**
 	 * Get the next node to send the election message. It is called if the previous Node did not reply in time.
+	 *
 	 * @return the next node ID to send the election message
 	 */
 	private int getNextNodeForElection() {
@@ -690,6 +693,28 @@ public class Node extends AbstractActor {
 						getSelf(),
 						new CountDown(
 								TimeOutReason.ELECTION,
+								null
+						),
+						getContext().getSystem().dispatcher(),
+						getSelf()
+				),
+				0
+		);
+	}
+
+	private void startGlobalElectionCountDown() {
+		logger.log(
+				LogLevel.DEBUG,
+				"[NODE-" + this.nodeId + "] starting global election countdown"
+		);
+		this.timeOutManager.startCountDown(
+				TimeOutReason.ELECTION_GLOBAL,
+				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
+						Duration.ZERO,
+						Duration.ofMillis(ELECTION_TIMEOUT / COUNTDOWN_REFRESH),
+						getSelf(),
+						new CountDown(
+								TimeOutReason.ELECTION_GLOBAL,
 								null
 						),
 						getContext().getSystem().dispatcher(),
@@ -806,6 +831,7 @@ public class Node extends AbstractActor {
 
 	/**
 	 * Handle the CrashRequest messages. In case it is a message for the coordinator it forwards the message.
+	 *
 	 * @param msg the CrashRequest message
 	 */
 	private void onCrashRequest(@NotNull CrashRequest msg) {
@@ -836,7 +862,6 @@ public class Node extends AbstractActor {
 				break;
 		}
 	}
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// BEGIN COORDINATOR METHODS
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -886,11 +911,9 @@ public class Node extends AbstractActor {
 				this::coordinatorOnCrashACK
 		).match(
 				Synchronisation.class,
-						msg -> System.out.println(
-								"[NODE-" + this.nodeId + "] elected as new leader"
-						)
-				).matchAny(msg -> {})
-				.build();
+				msg -> System.out.println("[NODE-" + this.nodeId + "] elected as new leader")
+		).matchAny(msg -> {
+		}).build();
 
 	}
 
@@ -938,9 +961,10 @@ public class Node extends AbstractActor {
 					e,
 					i
 			);
-			multicast(new DecisionResponse(
-					this.voters.get(e).get(i).finalDecision(),
-					new EpochPair(msg.epoch())
+			multicast(
+					new DecisionResponse(
+							this.voters.get(e).get(i).finalDecision(),
+							new EpochPair(msg.epoch())
 					),
 					this.crashType == CrashType.COORDINATOR_ON_DECISION_RESPONSE
 			);
@@ -954,12 +978,16 @@ public class Node extends AbstractActor {
 
 	/**
 	 * Coordinator handler for the WriteRequest messages. If a crash for the coordinator is set it triggers it.
+	 *
 	 * @param msg the WriteRequest message
 	 */
 	private void coordinatorOnWriteRequest(WriteRequest msg) {
 		this.tell(
 				this.getSender(),
-				new WriteValue(msg.newValue(), msg.nRequest()),
+				new WriteValue(
+						msg.newValue(),
+						msg.nRequest()
+				),
 				this.getSelf()
 		);
 		int e = this.history.isEmpty() ? 0 : this.history.size() - 1;
@@ -973,16 +1001,20 @@ public class Node extends AbstractActor {
 				LogLevel.DEBUG,
 				"[NODE-" + this.nodeId + "] [Coordinator] sending write response for write request number " + msg.nRequest() + " with value " + msg.newValue()
 		);
-		multicast(new VoteRequest(
-				msg.newValue(),
-				new EpochPair(e,
-						i)
+		multicast(
+				new VoteRequest(
+						msg.newValue(),
+						new EpochPair(
+								e,
+								i
+						)
 				),
 				this.crashType == CrashType.COORDINATOR_ON_VOTE_REQUEST
 		);
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch " + "< " + e + ", " + i + " >"
+				"[NODE-" + this.nodeId + "] [Coordinator] Sent vote request to write " + msg.newValue() + " for epoch "
+						+ "< " + e + ", " + i + " >"
 		);
 	}
 
@@ -1008,6 +1040,7 @@ public class Node extends AbstractActor {
 	 *
 	 * @param e the epoch
 	 * @param i the iteration
+	 *
 	 * @return true if the quorum is reached, false otherwise
 	 */
 	private boolean quorumReached(int e, int i) {
@@ -1030,10 +1063,7 @@ public class Node extends AbstractActor {
 			);
 			logger.log(
 					LogLevel.INFO,
-					"[NODE-" + this.nodeId + "] [Coordinator] collected enough votes, decided and broadcasting " + d +
-							" " +
-							"for epoch < " + e +
-							", " + i + " >"
+					"[NODE-" + this.nodeId + "] [Coordinator] collected enough votes, decided and broadcasting " + d + " " + "for epoch < " + e + ", " + i + " >"
 			);
 		}
 	}
@@ -1153,7 +1183,30 @@ public class Node extends AbstractActor {
 				heart.cancel();
 			}
 		}
-
 		this.crash();
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// BEGIN VOTERS METHODS
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private void voterOnTimeOut(TimeOut msg) {
+		logger.log(
+				LogLevel.INFO,
+				"[NODE-" + this.nodeId + "] timed out for reason : " + msg.reason()
+		);
+		switch (msg.reason())
+		{
+			case ELECTION:
+				this.retryElection();
+				break;
+			case ELECTION_GLOBAL:
+				this.isElection = false;
+				this.lastElectionData = null;
+				this.timeOutManager.endElectionState();
+				this.startElection();
+				break;
+			default:
+				break;
+		}
 	}
 }
