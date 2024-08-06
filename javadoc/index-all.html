@@ -179,6 +179,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Timeout for an election message.</div>
 </dd>
+<dt><a href="it/unitn/disi/ds1/qtop/Utils.TimeOutReason.html#ELECTION_GLOBAL" class="member-name-link">ELECTION_GLOBAL</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a></dt>
+<dd>
+<div class="block">Timeout to elect a leader.</div>
+</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.ElectionACK.html#%3Cinit%3E()" class="member-name-link">ElectionACK()</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.ElectionACK.html" title="class in it.unitn.disi.ds1.qtop">Utils.ElectionACK</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>ElectionACK</code> record class.</div>
@@ -210,6 +214,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.EpochPair.html#%3Cinit%3E(int,int)" class="member-name-link">EpochPair(int, int)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>EpochPair</code> record class.</div>
+</dd>
+<dt><a href="it/unitn/disi/ds1/qtop/Utils.EpochPair.html#%3Cinit%3E(it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">EpochPair(Utils.EpochPair)</a> - Constructor for record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></dt>
+<dd>
+<div class="block">Copy constructor</div>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CountDown.html" title="class in it.unitn.disi.ds1.qtop">Utils.CountDown</a></dt>
 <dd>
@@ -515,7 +523,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Node class, it represents a single node in the network.</div>
 </dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#%3Cinit%3E(akka.actor.ActorRef,int,int,int,int,int)" class="member-name-link">Node(ActorRef, int, int, int, int, int)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/Node.html#%3Cinit%3E(akka.actor.ActorRef,int,int,int,int,int,int)" class="member-name-link">Node(ActorRef, int, int, int, int, int, int)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html#NODE_AFTER_VOTE_CAST" class="member-name-link">NODE_AFTER_VOTE_CAST</a> - Enum constant in enum class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></dt>
 <dd>
@@ -577,7 +585,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="it/unitn/disi/ds1/qtop/Client.html#props(int,java.util.List,int)" class="member-name-link">props(int, List&lt;ActorRef&gt;, int)</a> - Static method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Client.html" title="class in it.unitn.disi.ds1.qtop">Client</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unitn/disi/ds1/qtop/Node.html#props(akka.actor.ActorRef,int,int,int,int,int)" class="member-name-link">props(ActorRef, int, int, int, int, int)</a> - Static method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/Node.html#props(akka.actor.ActorRef,int,int,int,int,int,int)" class="member-name-link">props(ActorRef, int, int, int, int, int, int)</a> - Static method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/Node.html" title="class in it.unitn.disi.ds1.qtop">Node</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:Q">Q</h2>
@@ -699,7 +707,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">TimeOutManager class to manage the timeouts of a Node</div>
 </dd>
-<dt><a href="it/unitn/disi/ds1/qtop/TimeOutManager.html#%3Cinit%3E(int,int,int,int,int,int)" class="member-name-link">TimeOutManager(int, int, int, int, int, int)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/TimeOutManager.html" title="class in it.unitn.disi.ds1.qtop">TimeOutManager</a></dt>
+<dt><a href="it/unitn/disi/ds1/qtop/TimeOutManager.html#%3Cinit%3E(int,int,int,int,int,int,int)" class="member-name-link">TimeOutManager(int, int, int, int, int, int, int)</a> - Constructor for class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/TimeOutManager.html" title="class in it.unitn.disi.ds1.qtop">TimeOutManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unitn/disi/ds1/qtop/PairsHistory.html#toString()" class="member-name-link">toString()</a> - Method in class it.unitn.disi.ds1.qtop.<a href="it/unitn/disi/ds1/qtop/PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a></dt>
 <dd>&nbsp;</dd>

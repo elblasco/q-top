@@ -130,10 +130,11 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,int,int,int,int,int)" class="member-name-link">TimeOutManager</a><wbr>(int&nbsp;voteTimeout,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,int,int,int,int,int,int)" class="member-name-link">TimeOutManager</a><wbr>(int&nbsp;voteTimeout,
  int&nbsp;heartbeatTimeout,
  int&nbsp;writeTimeout,
  int&nbsp;crashResponseTimeout,
+ int&nbsp;electionGlobalTimeout,
  int&nbsp;clientRequestTimeout,
  int&nbsp;refresh)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
@@ -170,7 +171,7 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Decrease the time left for a specific count-down.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int)" class="member-name-link">resetCountDown</a><wbr>(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
  int&nbsp;i)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -218,12 +219,13 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(int,int,int,int,int,int)">
+<section class="detail" id="&lt;init&gt;(int,int,int,int,int,int,int)">
 <h3>TimeOutManager</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TimeOutManager</span><wbr><span class="parameters">(int&nbsp;voteTimeout,
  int&nbsp;heartbeatTimeout,
  int&nbsp;writeTimeout,
  int&nbsp;crashResponseTimeout,
+ int&nbsp;electionGlobalTimeout,
  int&nbsp;clientRequestTimeout,
  int&nbsp;refresh)</span></div>
 </section>
@@ -284,15 +286,13 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="resetCountDown(it.unitn.disi.ds1.qtop.Utils.TimeOutReason,int)">
 <h3>resetCountDown</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">resetCountDown</span><wbr><span class="parameters">(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetCountDown</span><wbr><span class="parameters">(<a href="Utils.TimeOutReason.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.TimeOutReason</a>&nbsp;reason,
  int&nbsp;i)</span></div>
 <div class="block">Reset a specific count down.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>reason</code> - the reason for the count-down</dd>
 <dd><code>i</code> - the index of the count-down</dd>
-<dt>Returns:</dt>
-<dd>true if the count-down was successfully reset, false otherwise</dd>
 </dl>
 </section>
 </li>
