@@ -92,7 +92,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Record Components:</dt>
 <dd><code><span id="param-history">history</span></code> - the new history of transactions</dd>
-<dd><code><span id="param-newEpochPair">newEpochPair</span></code> - the new epoch pair</dd>
 </dl>
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
@@ -103,7 +102,7 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="Utils.html" title="class in it.unitn.disi.ds1.qtop">Utils</a></code></dd>
 </dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">Utils.Synchronisation</span>(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history, <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;newEpochPair)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">Utils.Synchronisation</span>(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
 implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></span></div>
 <div class="block">Message to synchronise all the node after an election.</div>
@@ -126,8 +125,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unitn.disi.ds1.qtop.PairsHistory,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">Synchronisation</a><wbr>(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history,
- <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;newEpochPair)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unitn.disi.ds1.qtop.PairsHistory)" class="member-name-link">Synchronisation</a><wbr>(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>Synchronisation</code> record class.</div>
 </div>
@@ -160,14 +158,9 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-history"><code>history</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#newEpochPair()" class="member-name-link">newEpochPair</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-newEpochPair"><code>newEpochPair</code></a> record component.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -188,15 +181,13 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unitn.disi.ds1.qtop.PairsHistory,it.unitn.disi.ds1.qtop.Utils.EpochPair)">
+<section class="detail" id="&lt;init&gt;(it.unitn.disi.ds1.qtop.PairsHistory)">
 <h3>Synchronisation</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Synchronisation</span><wbr><span class="parameters">(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history,
- <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;newEpochPair)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Synchronisation</span><wbr><span class="parameters">(<a href="PairsHistory.html" title="class in it.unitn.disi.ds1.qtop">PairsHistory</a>&nbsp;history)</span></div>
 <div class="block">Creates an instance of a <code>Synchronisation</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>history</code> - the value for the <a href="#param-history"><code>history</code></a> record component</dd>
-<dd><code>newEpochPair</code> - the value for the <a href="#param-newEpochPair"><code>newEpochPair</code></a> record component</dd>
 </dl>
 </section>
 </li>
@@ -257,17 +248,6 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the value of the <a href="#param-history"><code>history</code></a> record component</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="newEpochPair()">
-<h3>newEpochPair</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a></span>&nbsp;<span class="element-name">newEpochPair</span>()</div>
-<div class="block">Returns the value of the <a href="#param-newEpochPair"><code>newEpochPair</code></a> record component.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the value of the <a href="#param-newEpochPair"><code>newEpochPair</code></a> record component</dd>
 </dl>
 </section>
 </li>
