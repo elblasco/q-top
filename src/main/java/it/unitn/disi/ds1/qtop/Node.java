@@ -26,6 +26,7 @@ public class Node extends AbstractActor {
 	private final TimeOutManager timeOutManager;
 	private final int numberOfNodes;
 	private final int writeTimeout;
+	private final int electionGlobalTimeout;
 	private final int nodeId;
 	private Cancellable[] heartBeat;
 	private List<ActorRef> group;
@@ -40,18 +41,20 @@ public class Node extends AbstractActor {
 
 	private final Logger logger = Logger.getInstance();
 
-	public Node(ActorRef coordinator, int nodeId, int decisionTimeout, int voteTimeout, int writeTimeout,
-			int electionGlobalTimeout, int numberOfNodes) {
+	public Node(ActorRef coordinator, int nodeId, int voteTimeout, int writeTimeout, int electionGlobalTimeout,
+			int numberOfNodes) {
 		this.history = new PairsHistory();
 		this.nodeId = nodeId;
 		this.writeTimeout = writeTimeout;
+		this.electionGlobalTimeout = electionGlobalTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
+		System.out.println("The node received " + electionGlobalTimeout + " as global election timeout");
 		this.timeOutManager = new TimeOutManager(
-				decisionTimeout,
 				voteTimeout,
 				HEARTBEAT_TIMEOUT,
 				writeTimeout,
+				CRASH_TIMEOUT,
 				electionGlobalTimeout,
 				0,
 				Node.COUNTDOWN_REFRESH
@@ -62,14 +65,13 @@ public class Node extends AbstractActor {
 		}
 	}
 
-	static public Props props(ActorRef coordinator, int nodeId, int decisionTimeout, int voteTimeout, int writeTimeout,
+	static public Props props(ActorRef coordinator, int nodeId, int voteTimeout, int writeTimeout,
 			int electionGlobalTimeout, int numberOfNodes) {
 		return Props.create(
 				Node.class,
 				() -> new Node(
 						coordinator,
 						nodeId,
-						decisionTimeout,
 						voteTimeout,
 						writeTimeout,
 						electionGlobalTimeout,
@@ -339,7 +341,7 @@ public class Node extends AbstractActor {
 				)
 		).matchAny(msg -> logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received " + msg.getClass() + " while in voting " + "state"
+				"[NODE-" + this.nodeId + "] received " + msg.getClass().getSimpleName() + " while in voting " + "state"
 		)).build();
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -709,7 +711,7 @@ public class Node extends AbstractActor {
 				TimeOutReason.ELECTION_GLOBAL,
 				this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 						Duration.ZERO,
-						Duration.ofMillis(ELECTION_TIMEOUT / COUNTDOWN_REFRESH),
+						Duration.ofMillis(this.electionGlobalTimeout / COUNTDOWN_REFRESH),
 						getSelf(),
 						new CountDown(
 								TimeOutReason.ELECTION_GLOBAL,
@@ -1079,7 +1081,7 @@ public class Node extends AbstractActor {
 		{
 			heartBeat[i] = getContext().getSystem().scheduler().scheduleAtFixedRate(
 					Duration.ZERO,
-					Duration.ofMillis(HEARTBEAT_TIMEOUT / 2),
+					Duration.ofMillis(HEARTBEAT_TIMEOUT / COUNTDOWN_REFRESH),
 					this.group.get(i),
 					new HeartBeat(),
 					getContext().getSystem().dispatcher(),
@@ -1119,7 +1121,7 @@ public class Node extends AbstractActor {
 						TimeOutReason.CRASH_RESPONSE,
 						this.getContext().getSystem().scheduler().scheduleWithFixedDelay(
 								Duration.ZERO,
-								Duration.ofMillis(100),
+								Duration.ofMillis(CRASH_TIMEOUT / COUNTDOWN_REFRESH),
 								getSelf(),
 								new CountDown(
 										TimeOutReason.CRASH_RESPONSE,
