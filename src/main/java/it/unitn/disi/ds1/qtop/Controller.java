@@ -8,30 +8,28 @@ public class Controller {
 	private final Simulation simulation;
 	private final UserInterface ui;
 
-    public Controller(Simulation simulation, UserInterface ui) {
-        this.simulation = simulation;
-        this.ui = ui;
-    }
+	public Controller(Simulation simulation, UserInterface ui) {
+		this.simulation = simulation;
+		this.ui = ui;
+	}
 
 	/**
 	 * Start the simulation (network), with the given parameters.
-	 * @param numberOfNodes number of nodes
+	 *
+	 * @param numberOfNodes   number of nodes
 	 * @param numberOfClients number of clients
-	 * @param decisionTimeout decision timeout
-	 * @param voteTimeout vote timeout
-	 * @param writeTimeout write timeout
+	 * @param voteTimeout     vote timeout
+	 * @param writeTimeout    write timeout
 	 */
-	public void startSimulation(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout,
-			int writeTimeout) {
+	public void startSimulation(int numberOfNodes, int numberOfClients, int voteTimeout, int writeTimeout) {
 		simulation.start(
 				numberOfNodes,
 				numberOfClients,
-				decisionTimeout,
 				voteTimeout,
 				writeTimeout
 		);
-        clientMenu();
-    }
+		clientMenu();
+	}
 
 	/**
 	 * Make crash a Node.
@@ -40,8 +38,8 @@ public class Controller {
 	 */
 	public void crashNode(int crashType) {
 		LOGGER.log(
-                    Utils.LogLevel.INFO,
-		            "[SYSTEM] inserting crash type " + crashType
+				Utils.LogLevel.INFO,
+				"[SYSTEM] inserting crash type " + crashType
 		);
 		this.simulation.addCrashNode(crashType);
 	}
@@ -49,14 +47,14 @@ public class Controller {
 	/**
 	 * Quit.
 	 */
-    public void exitSimulation() {
-        simulation.exit();
-    }
+	public void exitSimulation() {
+		simulation.exit();
+	}
 
 	/**
 	 * Print the menu to tty.
 	 */
-    public void clientMenu() {
-        ui.clientMenu();
-    }
+	public void clientMenu() {
+		ui.clientMenu();
+	}
 }

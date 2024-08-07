@@ -27,11 +27,10 @@ public class Simulation {
 	 *
 	 * @param numberOfNodes   number of nodes
 	 * @param numberOfClients number of clients
-	 * @param decisionTimeout decision timeout
 	 * @param voteTimeout     vote timeout
 	 * @param writeTimeout    write timeout
 	 */
-	public void start(int numberOfNodes, int numberOfClients, int decisionTimeout, int voteTimeout, int writeTimeout) {
+	public void start(int numberOfNodes, int numberOfClients, int voteTimeout, int writeTimeout) {
 		// Set initial number of nodes
 		this.numberOfNodes = numberOfNodes;
 		// Create a "virtual synchrony manager"
@@ -39,7 +38,6 @@ public class Simulation {
 				Node.props(
 						null,
 						0,
-						decisionTimeout,
 						voteTimeout,
 						writeTimeout,
 						0,
@@ -55,15 +53,15 @@ public class Simulation {
 					Node.props(
 							coordinator,
 							i,
-							decisionTimeout,
 							voteTimeout,
 							writeTimeout,
-							numberOfNodes * Utils.ELECTION_TIMEOUT,
+							((numberOfNodes + 1) * Utils.ELECTION_TIMEOUT),
 							numberOfNodes
 					),
 					"node" + i
 			));
 		}
+		System.out.println("The global election timeout is: " + ((numberOfNodes + 1) * Utils.ELECTION_TIMEOUT));
 		for (int i = 0; i < numberOfClients; i++)
 		{
 			group.add(system.actorOf(
@@ -86,7 +84,7 @@ public class Simulation {
 		}
 		logger.log(
 				Utils.LogLevel.INFO,
-				"Simulation started with " + numberOfNodes + " nodes, decision timeout: " + decisionTimeout + "ms, " + "vote timeout: " + voteTimeout + "ms"
+				"Simulation started with " + numberOfNodes + " nodes, vote timeout: " + voteTimeout + "ms"
 		);
 
 	}
