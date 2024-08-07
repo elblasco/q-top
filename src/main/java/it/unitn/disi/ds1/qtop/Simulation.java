@@ -17,6 +17,9 @@ public class Simulation {
 
 	private final Logger logger = Logger.getInstance();
 
+	/**
+	 * Create a new simulation.
+	 */
 	public Simulation() {
 		group = new ArrayList<>();
 		system = ActorSystem.create("qtop");

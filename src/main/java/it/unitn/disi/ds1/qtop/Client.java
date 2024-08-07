@@ -31,6 +31,13 @@ public class Client extends AbstractActor {
 	private int timeOutCounter;
 	private int requestNumber;
 
+	/**
+	 * Constructor for the Client actor.
+	 *
+	 * @param clientId      the client id
+	 * @param group         the list of Nodes in the network
+	 * @param numberOfNodes the number of Nodes in the network
+	 */
 	public Client(int clientId, List<ActorRef> group, int numberOfNodes) {
 		super();
 		this.clientId = clientId;
@@ -49,6 +56,15 @@ public class Client extends AbstractActor {
 		);
 	}
 
+	/**
+	 * Wrapper for the Client actor.
+	 *
+	 * @param clientId      the client id
+	 * @param group         the list of Nodes in the network
+	 * @param numberOfNodes the number of Nodes in the network
+	 *
+	 * @return the Props object
+	 */
 	static public Props props(int clientId, List<ActorRef> group, int numberOfNodes) {
 		return Props.create(
 				Client.class,

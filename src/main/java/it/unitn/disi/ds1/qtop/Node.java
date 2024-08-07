@@ -41,6 +41,16 @@ public class Node extends AbstractActor {
 
 	private final Logger logger = Logger.getInstance();
 
+	/**
+	 * Constructor for the Node class.
+	 *
+	 * @param coordinator           the coordinator ActorRef
+	 * @param nodeId                the node ID
+	 * @param voteTimeout           the vote timeout
+	 * @param writeTimeout          the write timeout
+	 * @param electionGlobalTimeout the global election timeout
+	 * @param numberOfNodes         the number of nodes in the network
+	 */
 	public Node(ActorRef coordinator, int nodeId, int voteTimeout, int writeTimeout, int electionGlobalTimeout,
 			int numberOfNodes) {
 		this.history = new PairsHistory();
@@ -65,6 +75,18 @@ public class Node extends AbstractActor {
 		}
 	}
 
+	/**
+	 * Create the Props for the Node class.
+	 *
+	 * @param coordinator           the coordinator ActorRef
+	 * @param nodeId                the node ID
+	 * @param voteTimeout           the vote timeout
+	 * @param writeTimeout          the write timeout
+	 * @param electionGlobalTimeout the global election timeout
+	 * @param numberOfNodes         the number of nodes in the network
+	 *
+	 * @return the Props object
+	 */
 	static public Props props(ActorRef coordinator, int nodeId, int voteTimeout, int writeTimeout,
 			int electionGlobalTimeout, int numberOfNodes) {
 		return Props.create(
@@ -573,7 +595,7 @@ public class Node extends AbstractActor {
 						false
 				);
 			}
-			else if (msg.isGreaterThanLocalData(
+			else if (msg.isBetterThanLocalData(
 					this.nodeId,
 					nodeLatest
 			))
@@ -597,7 +619,7 @@ public class Node extends AbstractActor {
 			this.becomeVoter();
 			this.timeOutManager.startElectionState();
 			this.isElection = true;
-			if (msg.isGreaterThanLocalData(
+			if (msg.isBetterThanLocalData(
 					this.nodeId,
 					nodeLatest
 			))

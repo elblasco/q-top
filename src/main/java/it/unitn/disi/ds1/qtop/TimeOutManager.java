@@ -12,10 +12,26 @@ import java.util.Map;
  * TimeOutManager class to manage the timeouts of a Node
  */
 public class TimeOutManager extends EnumMap<Utils.TimeOutReason, ArrayList<Pair<Cancellable, Integer>>> {
-	// Phony map to associate a reason with its specific refresh ratio
+	/**
+	 * Phony map to associate a reason with its specific refresh ratio
+	 */
 	private final EnumMap<Utils.TimeOutReason, Integer> customTimeouts;
+	/**
+	 * Refresh ration of the timeouts
+	 */
 	private final int refresh;
 
+	/**
+	 * TimeOutManager constructor.
+	 *
+	 * @param voteTimeout           the timeout for the vote
+	 * @param heartbeatTimeout      the timeout for the heartbeat
+	 * @param writeTimeout          the timeout to write
+	 * @param crashResponseTimeout  the timeout for the crash response
+	 * @param electionGlobalTimeout the timeout for the global election phase
+	 * @param clientRequestTimeout  the timeout for the client request
+	 * @param refresh               the refresh ratio
+	 */
 	public TimeOutManager(int voteTimeout, int heartbeatTimeout, int writeTimeout, int crashResponseTimeout,
 			int electionGlobalTimeout, int clientRequestTimeout, int refresh) {
 		super(Utils.TimeOutReason.class);

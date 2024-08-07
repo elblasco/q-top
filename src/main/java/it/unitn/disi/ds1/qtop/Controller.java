@@ -8,6 +8,12 @@ public class Controller {
 	private final Simulation simulation;
 	private final UserInterface ui;
 
+	/**
+	 * Constructor for the Controller.
+	 *
+	 * @param simulation the simulation
+	 * @param ui         the user interface
+	 */
 	public Controller(Simulation simulation, UserInterface ui) {
 		this.simulation = simulation;
 		this.ui = ui;

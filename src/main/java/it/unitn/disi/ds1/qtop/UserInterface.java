@@ -8,6 +8,11 @@ import java.util.Scanner;
 public class UserInterface implements SimulationCallback {
 	private Controller controller;
 
+	/**
+	 * UserInterface constructor.
+	 *
+	 * @param controller the controller
+	 */
 	public UserInterface(Controller controller) {
 		this.controller = controller;
 	}

@@ -161,8 +161,15 @@ public class Utils {
 
 	/**
 	 * Start message that sends the list of participants to everyone.
+	 *
+	 * @param group the list of participants
 	 */
 	public record StartMessage(List<ActorRef> group) implements Serializable {
+		/**
+		 * Copy constructor
+		 *
+		 * @param group the list of participants
+		 */
 		public StartMessage(List<ActorRef> group) {
 			this.group = List.copyOf(group);
 		}
@@ -221,6 +228,8 @@ public class Utils {
 
 	/**
 	 * Message to ask for a crash.
+	 *
+	 * @param crashType the type of crash to trigger
 	 */
 	public record CrashRequest(CrashType crashType) implements Serializable {
 	}
@@ -294,7 +303,15 @@ public class Utils {
 	 * @param bestCandidateId  node that have that EpochPair
 	 */
 	public record Election(int highestEpoch, int highestIteration, int bestCandidateId) implements Serializable {
-		public boolean isGreaterThanLocalData(int nodeId, @NotNull EpochPair ep) {
+		/**
+		 * Check if the data received is better than the local data.
+		 *
+		 * @param nodeId the id of the node that sent the data
+		 * @param ep     the EpochPair received
+		 *
+		 * @return true if the data received is greater than the local data
+		 */
+		public boolean isBetterThanLocalData(int nodeId, @NotNull EpochPair ep) {
 			return ((this.highestEpoch() > ep.e()) || (this.highestEpoch() == ep.e() && this.highestIteration() > ep.i()) || (this.highestEpoch() == ep.e() && this.highestIteration() == ep.i() && this.bestCandidateId() < nodeId));
 		}
 	}
