@@ -137,7 +137,9 @@ loadScripts(document, 'script');</script>
  int&nbsp;electionGlobalTimeout,
  int&nbsp;clientRequestTimeout,
  int&nbsp;refresh)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">TimeOutManager constructor.</div>
+</div>
 </div>
 </section>
 </li>
@@ -228,6 +230,17 @@ loadScripts(document, 'script');</script>
  int&nbsp;electionGlobalTimeout,
  int&nbsp;clientRequestTimeout,
  int&nbsp;refresh)</span></div>
+<div class="block">TimeOutManager constructor.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>voteTimeout</code> - the timeout for the vote</dd>
+<dd><code>heartbeatTimeout</code> - the timeout for the heartbeat</dd>
+<dd><code>writeTimeout</code> - the timeout to write</dd>
+<dd><code>crashResponseTimeout</code> - the timeout for the crash response</dd>
+<dd><code>electionGlobalTimeout</code> - the timeout for the global election phase</dd>
+<dd><code>clientRequestTimeout</code> - the timeout for the client request</dd>
+<dd><code>refresh</code> - the refresh ratio</dd>
+</dl>
 </section>
 </li>
 </ul>

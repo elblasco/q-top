@@ -127,7 +127,9 @@ loadScripts(document, 'script');</script>
  int&nbsp;writeTimeout,
  int&nbsp;electionGlobalTimeout,
  int&nbsp;numberOfNodes)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructor for the Node class.</div>
+</div>
 </div>
 </section>
 </li>
@@ -154,7 +156,9 @@ loadScripts(document, 'script');</script>
  int&nbsp;writeTimeout,
  int&nbsp;electionGlobalTimeout,
  int&nbsp;numberOfNodes)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Create the Props for the Node class.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tell(akka.actor.ActorRef,java.lang.Object,akka.actor.ActorRef)" class="member-name-link">tell</a><wbr>(akka.actor.ActorRef&nbsp;dest,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;msg,
@@ -191,6 +195,16 @@ loadScripts(document, 'script');</script>
  int&nbsp;writeTimeout,
  int&nbsp;electionGlobalTimeout,
  int&nbsp;numberOfNodes)</span></div>
+<div class="block">Constructor for the Node class.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>coordinator</code> - the coordinator ActorRef</dd>
+<dd><code>nodeId</code> - the node ID</dd>
+<dd><code>voteTimeout</code> - the vote timeout</dd>
+<dd><code>writeTimeout</code> - the write timeout</dd>
+<dd><code>electionGlobalTimeout</code> - the global election timeout</dd>
+<dd><code>numberOfNodes</code> - the number of nodes in the network</dd>
+</dl>
 </section>
 </li>
 </ul>
@@ -210,6 +224,18 @@ loadScripts(document, 'script');</script>
  int&nbsp;writeTimeout,
  int&nbsp;electionGlobalTimeout,
  int&nbsp;numberOfNodes)</span></div>
+<div class="block">Create the Props for the Node class.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>coordinator</code> - the coordinator ActorRef</dd>
+<dd><code>nodeId</code> - the node ID</dd>
+<dd><code>voteTimeout</code> - the vote timeout</dd>
+<dd><code>writeTimeout</code> - the write timeout</dd>
+<dd><code>electionGlobalTimeout</code> - the global election timeout</dd>
+<dd><code>numberOfNodes</code> - the number of nodes in the network</dd>
+<dt>Returns:</dt>
+<dd>the Props object</dd>
+</dl>
 </section>
 </li>
 <li>

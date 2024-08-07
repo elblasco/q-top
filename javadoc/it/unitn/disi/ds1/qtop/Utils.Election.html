@@ -173,9 +173,11 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="block">Returns the value of the <a href="#param-highestIteration"><code>highestIteration</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isGreaterThanLocalData(int,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">isGreaterThanLocalData</a><wbr>(int&nbsp;nodeId,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBetterThanLocalData(int,it.unitn.disi.ds1.qtop.Utils.EpochPair)" class="member-name-link">isBetterThanLocalData</a><wbr>(int&nbsp;nodeId,
  @NotNull <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;ep)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Check if the data received is better than the local data.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -222,11 +224,19 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="isGreaterThanLocalData(int,it.unitn.disi.ds1.qtop.Utils.EpochPair)">
-<h3>isGreaterThanLocalData</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isGreaterThanLocalData</span><wbr><span class="parameters">(int&nbsp;nodeId,
+<section class="detail" id="isBetterThanLocalData(int,it.unitn.disi.ds1.qtop.Utils.EpochPair)">
+<h3>isBetterThanLocalData</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBetterThanLocalData</span><wbr><span class="parameters">(int&nbsp;nodeId,
  @NotNull
  @NotNull <a href="Utils.EpochPair.html" title="class in it.unitn.disi.ds1.qtop">Utils.EpochPair</a>&nbsp;ep)</span></div>
+<div class="block">Check if the data received is better than the local data.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>nodeId</code> - the id of the node that sent the data</dd>
+<dd><code>ep</code> - the EpochPair received</dd>
+<dt>Returns:</dt>
+<dd>true if the data received is greater than the local data</dd>
+</dl>
 </section>
 </li>
 <li>

@@ -90,6 +90,10 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-group">group</span></code> - the list of participants</dd>
+</dl>
+<dl class="notes">
 <dt>All Implemented Interfaces:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a></code></dd>
 </dl>
@@ -123,7 +127,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List)" class="member-name-link">StartMessage</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;akka.actor.ActorRef&gt;&nbsp;group)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Creates an instance of a <code>StartMessage</code> record class.</div>
+<div class="block">Copy constructor</div>
 </div>
 </div>
 </section>
@@ -147,7 +151,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;akka.actor.ActorRef&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#group()" class="member-name-link">group</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>group</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-group"><code>group</code></a> record component.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
@@ -180,10 +184,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="&lt;init&gt;(java.util.List)">
 <h3>StartMessage</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">StartMessage</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;akka.actor.ActorRef&gt;&nbsp;group)</span></div>
-<div class="block">Creates an instance of a <code>StartMessage</code> record class.</div>
+<div class="block">Copy constructor</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>group</code> - the value for the <code>group</code> record component</dd>
+<dd><code>group</code> - the list of participants</dd>
 </dl>
 </section>
 </li>
@@ -240,10 +244,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base
 <section class="detail" id="group()">
 <h3>group</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;akka.actor.ActorRef&gt;</span>&nbsp;<span class="element-name">group</span>()</div>
-<div class="block">Returns the value of the <code>group</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-group"><code>group</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>group</code> record component</dd>
+<dd>the value of the <a href="#param-group"><code>group</code></a> record component</dd>
 </dl>
 </section>
 </li>
