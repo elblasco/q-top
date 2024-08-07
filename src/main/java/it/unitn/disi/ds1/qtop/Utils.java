@@ -325,10 +325,9 @@ public class Utils {
 	/**
 	 * Message to synchronise all the node after an election.
 	 *
-	 * @param history      the new history of transactions
-	 * @param newEpochPair the new epoch pair
+	 * @param history the new history of transactions
 	 */
-	public record Synchronisation(PairsHistory history, EpochPair newEpochPair) implements Serializable {
+	public record Synchronisation(PairsHistory history) implements Serializable {
 	}
 
 	/**

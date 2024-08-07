@@ -290,9 +290,8 @@ public class Node extends AbstractActor {
 		this.startHeartBeatCountDown();
 		logger.log(
 				LogLevel.INFO,
-				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the new epoch is going" + " to be <" + msg.newEpochPair()
-						.e() + ", " + msg.newEpochPair()
-						.i() + ">" + "last value is now : " + this.history.readValidVariable()
+				"[NODE-" + this.nodeId + "] received synchronisation message from coordinator, the new epoch is going "
+						+ "last value is now : " + this.history.readValidVariable()
 		);
 	}
 
@@ -584,13 +583,7 @@ public class Node extends AbstractActor {
 						this.getSelf()
 				);
 				this.multicast(
-						new Synchronisation(
-								new PairsHistory(this.history),
-								new Utils.EpochPair(
-										this.history.getLatestCommitted().e(),
-										this.history.getLatestCommitted().i()
-								)
-						),
+						new Synchronisation(new PairsHistory(this.history)),
 						false
 				);
 			}
