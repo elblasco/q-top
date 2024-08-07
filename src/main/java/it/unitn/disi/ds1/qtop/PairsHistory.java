@@ -28,12 +28,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			ArrayList<Pair<Integer, Utils.Decision>> newEpoch = new ArrayList<>();
 			for (Pair<Integer, Utils.Decision> iteration : epoch)
 			{
-				newEpoch.add(
-						new Pair<>(
-								iteration.first(),
-								iteration.second()
-						)
-				);
+				newEpoch.add(new Pair<>(
+						iteration.first(),
+						iteration.second()
+				));
 			}
 			this.add(newEpoch);
 		}
@@ -47,7 +45,8 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	 * @param finalState final state to set
 	 */
 	public void setState(int e, int i, Utils.Decision finalState) {
-		this.get(e).set(i,
+		this.get(e).set(
+				i,
 				new Pair<>(
 						this.get(e).get(i).first(),
 						finalState
@@ -127,7 +126,10 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 					latestIteration
 			);
 		}
-		return new Utils.EpochPair(-1, -1);
+		return new Utils.EpochPair(
+				- 1,
+				- 1
+		);
 	}
 
 	/**
@@ -136,7 +138,7 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 	 *
 	 * @return the latest epoch and iteration committed
 	 */
-	public Utils.EpochPair getLatestCommitted(){
+	public Utils.EpochPair getLatestCommitted() {
 		if (! this.isEmpty())
 		{
 			for (int i = this.size() - 1; i >= 0; i--)
@@ -157,9 +159,12 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 				}
 			}
 		}
-		return new Utils.EpochPair(-1, -1);
+		return new Utils.EpochPair(
+				- 1,
+				- 1
+		);
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -170,10 +175,18 @@ public class PairsHistory extends ArrayList<ArrayList<Pair<Integer, Utils.Decisi
 			{
 				sb.append(iteration.first()).append(" ").append(iteration.second()).append(", ");
 			}
-			sb.replace(sb.length() - 2, sb.length(), "");
+			sb.replace(
+					sb.length() - 2,
+					sb.length(),
+					""
+			);
 			sb.append(" ]\n");
 		}
-		sb.replace(sb.length() - 1, sb.length(), "");
+		sb.replace(
+				sb.length() - 1,
+				sb.length(),
+				""
+		);
 		return sb.toString();
 	}
 }

@@ -61,7 +61,8 @@ public class VotersMap extends ArrayList<ArrayList<Utils.VotePair>> {
 	 * @param i the index
 	 */
 	public void setDecision(Utils.Decision d, int e, int i) {
-		this.get(e).set(i,
+		this.get(e).set(
+				i,
 				new Utils.VotePair(
 						this.get(e).get(i).votes(),
 						d
