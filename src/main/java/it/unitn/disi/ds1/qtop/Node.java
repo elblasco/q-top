@@ -59,7 +59,6 @@ public class Node extends AbstractActor {
 		this.electionGlobalTimeout = electionGlobalTimeout;
 		this.numberOfNodes = numberOfNodes;
 		this.coordinator = coordinator;
-		System.out.println("The node received " + electionGlobalTimeout + " as global election timeout");
 		this.timeOutManager = new TimeOutManager(
 				voteTimeout,
 				HEARTBEAT_TIMEOUT,
