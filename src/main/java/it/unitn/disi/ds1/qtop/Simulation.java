@@ -58,13 +58,12 @@ public class Simulation {
 							i,
 							voteTimeout,
 							writeTimeout,
-							((numberOfNodes + 1) * Utils.ELECTION_TIMEOUT),
+							numberOfNodes * Utils.ELECTION_TIMEOUT * 2,
 							numberOfNodes
 					),
 					"node" + i
 			));
 		}
-		System.out.println("The global election timeout is: " + ((numberOfNodes + 1) * Utils.ELECTION_TIMEOUT));
 		for (int i = 0; i < numberOfClients; i++)
 		{
 			group.add(system.actorOf(

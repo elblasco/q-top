@@ -24,13 +24,13 @@ public class UserInterface implements SimulationCallback {
 		//default values
 		int numberOfNodes = 10;
 		int numberOfClients = 3;
-		int voteTimeout = 1000;
-		int writeTimeout = 2000;
+		int voteTimeout = 500;
+		int writeTimeout = 500;
 		System.out.println("Qtop - DS Project 2023/2024 - Blascovich Alessio, Cereser Lorenzo \n");
 		System.out.println("""
-				This is a simulation of 2PC + token ring leader election for the\s
-				distributed system course, the system is composed by a number of\s
-				nodes that can be set by the user. Virtual crashes can be inserted
+				This is a simulation of quorum-based commit + token ring leader election\s
+				for the distributed system course, the system is composed by a number of\s
+				nodes that can be set by the user. Virtual crashes can be inserted\s
 				at user discretion but only in one place at a time. Timeouts can\s
 				also be set. All of the node logs will be displayed in the specific\s
 				file.""");
