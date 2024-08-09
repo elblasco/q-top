@@ -150,6 +150,15 @@ public class Utils {
 		 */
 		NODE_AFTER_VOTE_CAST,
 		/**
+		 * Receiver crash when a node receives an election message.
+		 * Does NOT reply with an ACK
+		 */
+		NODE_BEFORE_ELECTION_ACK,
+		/**
+		 * Receiver crash after a node sends an Election message.
+		 */
+		NODE_AFTER_ELECTION_MESSAGE,
+		/**
 		 * Probabilistic crash during a vote request multicast.
 		 */
 		COORDINATOR_ON_VOTE_REQUEST,

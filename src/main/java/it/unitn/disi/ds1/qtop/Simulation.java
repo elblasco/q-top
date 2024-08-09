@@ -104,8 +104,10 @@ public class Simulation {
 			case 2 -> Utils.CrashType.NODE_AFTER_WRITE_REQUEST;
 			case 3 -> Utils.CrashType.NODE_AFTER_VOTE_REQUEST;
 			case 4 -> Utils.CrashType.NODE_AFTER_VOTE_CAST;
-			case 5 -> Utils.CrashType.COORDINATOR_ON_VOTE_REQUEST;
-			case 6 -> Utils.CrashType.COORDINATOR_ON_DECISION_RESPONSE;
+			case 5 -> Utils.CrashType.NODE_BEFORE_ELECTION_ACK;
+			case 6 -> Utils.CrashType.NODE_AFTER_ELECTION_MESSAGE;
+			case 7 -> Utils.CrashType.COORDINATOR_ON_VOTE_REQUEST;
+			case 8 -> Utils.CrashType.COORDINATOR_ON_DECISION_RESPONSE;
 			default -> Utils.CrashType.NO_CRASH;
 		};
 		// Crash messages are instantaneous

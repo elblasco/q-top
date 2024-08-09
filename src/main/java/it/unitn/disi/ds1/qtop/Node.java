@@ -557,6 +557,11 @@ public class Node extends AbstractActor {
 						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " + "candidate"
 						+ " received:" + msg.bestCandidateId()
 		);
+		if (this.crashType == CrashType.NODE_BEFORE_ELECTION_ACK)
+		{
+			this.crash();
+			return;
+		}
 		this.tell(
 				this.getSender(),
 				new ElectionACK(),
@@ -629,6 +634,10 @@ public class Node extends AbstractActor {
 				);
 			}
 		}
+		if (this.crashType == CrashType.NODE_AFTER_ELECTION_MESSAGE)
+		{
+			this.crash();
+		}
 	}
 
 	/**
@@ -658,6 +667,10 @@ public class Node extends AbstractActor {
 					latest,
 					idDest
 			);
+			if (this.crashType == CrashType.NODE_AFTER_ELECTION_MESSAGE)
+			{
+				this.crash();
+			}
 		}
 	}
 
@@ -859,6 +872,8 @@ public class Node extends AbstractActor {
 			case NODE_AFTER_WRITE_REQUEST:
 			case NODE_AFTER_VOTE_REQUEST:
 			case NODE_AFTER_VOTE_CAST:
+			case NODE_BEFORE_ELECTION_ACK:
+			case NODE_AFTER_ELECTION_MESSAGE:
 				this.crashType = msg.crashType();
 				logger.log(
 						LogLevel.INFO,
