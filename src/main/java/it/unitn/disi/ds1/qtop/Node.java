@@ -553,9 +553,8 @@ public class Node extends AbstractActor {
 	private void onElection(@NotNull Election msg) {
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] received election message from [NODE-" + this.getSender() + "] with " +
-						"params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " + "candidate"
-						+ " received:" + msg.bestCandidateId()
+				"[NODE-" + this.nodeId + "] received election message from " + Utils.matchNodeID(this.getSender()) +
+						" with " + "params < e:" + msg.highestEpoch() + ", i:" + msg.highestIteration() + ">, best " + "candidate" + " received:" + msg.bestCandidateId()
 		);
 		if (this.crashType == CrashType.NODE_BEFORE_ELECTION_ACK)
 		{
@@ -606,7 +605,7 @@ public class Node extends AbstractActor {
 			{
 				logger.log(
 						LogLevel.DEBUG,
-						"[NODE-" + this.nodeId + "] is not going to forward election message from " + this.getSender()
+						"[NODE-" + this.nodeId + "] is not going to forward election message from " + Utils.matchNodeID(this.getSender())
 				);
 			}
 		}
@@ -686,7 +685,7 @@ public class Node extends AbstractActor {
 		);
 		logger.log(
 				LogLevel.DEBUG,
-				"[NODE-" + this.nodeId + "] received election ACK from [NODE-" + this.getSender() + "]"
+				"[NODE-" + this.nodeId + "] received election ACK from " + Utils.matchNodeID(this.getSender())
 		);
 	}
 
