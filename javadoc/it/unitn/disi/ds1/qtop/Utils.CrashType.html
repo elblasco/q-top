@@ -133,17 +133,25 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">No crash.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_VOTE_CAST" class="member-name-link">NODE_AFTER_VOTE_CAST</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_ELECTION_MESSAGE" class="member-name-link">NODE_AFTER_ELECTION_MESSAGE</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Receiver crash after a node sends an Election message.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#NODE_AFTER_VOTE_CAST" class="member-name-link">NODE_AFTER_VOTE_CAST</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Receiver crash after casting a vote.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#NODE_AFTER_VOTE_REQUEST" class="member-name-link">NODE_AFTER_VOTE_REQUEST</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_VOTE_REQUEST" class="member-name-link">NODE_AFTER_VOTE_REQUEST</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Receiver crash after receiving a vote request.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#NODE_AFTER_WRITE_REQUEST" class="member-name-link">NODE_AFTER_WRITE_REQUEST</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#NODE_AFTER_WRITE_REQUEST" class="member-name-link">NODE_AFTER_WRITE_REQUEST</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Receiver crash after propagating a write request.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#NODE_BEFORE_ELECTION_ACK" class="member-name-link">NODE_BEFORE_ELECTION_ACK</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Receiver crash when a node receives an election message.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#NODE_BEFORE_WRITE_REQUEST" class="member-name-link">NODE_BEFORE_WRITE_REQUEST</a></code></div>
 <div class="col-last even-row-color">
@@ -227,6 +235,21 @@ the order they are declared.</div>
 <h3>NODE_AFTER_VOTE_CAST</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">NODE_AFTER_VOTE_CAST</span></div>
 <div class="block">Receiver crash after casting a vote.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="NODE_BEFORE_ELECTION_ACK">
+<h3>NODE_BEFORE_ELECTION_ACK</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">NODE_BEFORE_ELECTION_ACK</span></div>
+<div class="block">Receiver crash when a node receives an election message.
+ Does NOT reply with an ACK</div>
+</section>
+</li>
+<li>
+<section class="detail" id="NODE_AFTER_ELECTION_MESSAGE">
+<h3>NODE_AFTER_ELECTION_MESSAGE</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="Utils.CrashType.html" title="enum class in it.unitn.disi.ds1.qtop">Utils.CrashType</a></span>&nbsp;<span class="element-name">NODE_AFTER_ELECTION_MESSAGE</span></div>
+<div class="block">Receiver crash after a node sends an Election message.</div>
 </section>
 </li>
 <li>
