@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class that contains all the utility classes and messages used by the actors.
@@ -150,6 +152,15 @@ public class Utils {
 		 */
 		NODE_AFTER_VOTE_CAST,
 		/**
+		 * Receiver crash when a node receives an election message.
+		 * Does NOT reply with an ACK
+		 */
+		NODE_BEFORE_ELECTION_ACK,
+		/**
+		 * Receiver crash after a node sends an Election message.
+		 */
+		NODE_AFTER_ELECTION_MESSAGE,
+		/**
 		 * Probabilistic crash during a vote request multicast.
 		 */
 		COORDINATOR_ON_VOTE_REQUEST,
@@ -157,6 +168,31 @@ public class Utils {
 		 * Probabilistic crash during a decision multicast.
 		 */
 		COORDINATOR_ON_DECISION_RESPONSE,
+	}
+
+	/**
+	 * Method to match the ID of a node and build a fancy string out of it.
+	 * There are two cases:
+	 * <ul>
+	 *  <li> if the actor reference is a node, it will return [NODE-xyz]
+	 *  <li> if the actor reference is the coordinator, it will return [COORDINATOR]
+	 * </ul>
+	 *
+	 * @param actorRefToMatch the actor reference to match
+	 *
+	 * @return the fancy String.
+	 */
+	public static String matchNodeID(ActorRef actorRefToMatch) {
+		Pattern pattern = Pattern.compile(".*node(\\d+)#.*");
+		Matcher m = pattern.matcher("" + actorRefToMatch);
+		if (m.matches())
+		{
+			return "[NODE-" + m.group(1) + "]";
+		}
+		else
+		{
+			return "[COORDINATOR]";
+		}
 	}
 
 	/**

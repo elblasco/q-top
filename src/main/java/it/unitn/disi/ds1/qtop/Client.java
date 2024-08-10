@@ -232,8 +232,7 @@ public class Client extends AbstractActor {
 		);
 		LOGGER.log(
 				LogLevel.INFO,
-				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from node " + getSender() + " of " +
-						"value " + value + ", local operation id: " + msg.nRequest()
+				"[CLIENT-" + (this.clientId - this.numberOfNodes) + "] read done from " + Utils.matchNodeID(this.getSender()) + " of " + "value " + value + ", local operation id: " + msg.nRequest()
 		);
 	}
 
