@@ -1,0 +1,29 @@
+\section{Runtime engine}
+
+Mimicking a classical modular application structure (MVC Java Architectural Pattern), our runtime engine is divided into three main classes and one interface :
+\subsection{User interface}
+\texttt{it.unitn.disi.ds1.qtop.UserInterface.java}
+
+The User interface class handles the menus that are shown to the user, one menu for the setting of the various runtime parameters (e.g., various timeouts, number of nodes, number of clients, etc.), and another one for handling events while the nodes are running.
+
+The class inherits from the Simulation callback interface to allow the class to communicate with the Simulation class.
+
+\subsection{Simulation}
+\texttt{it.unitn.disi.ds1.qtop.Simulation.java}
+
+The simulation class is responsible for interacting with the program while it runs, it provides initialization functionalities for the whole Actors group (including clients), as well as managing crash insertions.
+
+
+\subsection{Simulation callback}
+\texttt{it.unitn.disi.ds1.qtop.SimulationCallback.java}
+
+The simulation callback interface represents a convenient way of managing communication between various classes at runtime while ensuring encapsulation and reliability of classes. 
+
+
+\subsection{Controller}
+\texttt{it.unitn.disi.ds1.qtop.Controller.java}
+
+The Controller class orchestrates communication between Simulation and User interface; both of those components in fact do not communicate between each other to encourage encapsulation, ease up the location and functionalities, as well as helping in keeping the code tidy during development.
+
+
+

@@ -1,0 +1,37 @@
+\section{Auxiliary data structures}
+
+%Description of these two data structures. Particular emphasis on the timeout system.
+
+\subsection{Pairs History}\label{subsec:pairshostory}
+
+\texttt{it.unitn.disi.ds1.qtop.PairsHistory.java}
+
+To maintain a certain degree of consistency, the nodes had to keep track of the various updates proposed by the coordinator.
+
+We decided to use a matrix to represent the history of updates. The epoch and sequence are used as indices to access and update the matrix. Every matrix's cell contains a tuple with the value proposed and the commitment state.
+
+The commitment state can be either ``PENDING'', ``WRITEOK'' or ``ABORT''. The latter two flags an update as already decided by the coordinator, respectively, committed or discarded. The former indicates that an update is idle, waiting for a decision from the coordinator.
+
+The use of a matrix has been motivated, by the intuitive use of the update pair elements as indices of the structure. We could have used a map, however, it seemed an over-abstracted and over-complicated data structure compared to a matrix.
+
+\subsection{Timeuots manager}
+
+\texttt{it.unitn.disi.ds1.qtop.TimeOutManager.java}
+
+To manage many \textit{ACK}s and to detect a coordinator failure the various nodes have to use a series of countdowns and timeouts. 
+
+We utilised a map optimised for the use of \textit{enum} values as keys. Every value of the map is a tuples array, every tuple contains a \textit{Cancellable} and a natural number.
+
+The \textit{Cancellable} is a scheduled message that a node sends to itself to mimic a countdown and decrease the natural number. The natural number has as its initial value the number set by the user before starting the simulation, once it reaches zero it is considered to be expired, hence, its respective countdown is cancelled and the node self sends a \textit{TimeOut} message.
+
+The timeouts manager is used for many \textit{ACK}s, these messages invalidate the respective countdowns upon reception. The \textit{HeartBeat}s countdown has a different behaviour, once an \textit{HeartBeat} is received the countdown is reset to its initial value and starts again.
+
+\subsection{Voters map}
+
+\texttt{it.unitn.disi.ds1.qtop.VotersMap.java}
+
+To make a final decision, the coordinator had to keep track of all the votes cast for every update proposed.
+
+This structure is similar to the one used in~\ref{subsec:pairshostory}. Except this time the matrix holds, for every cell, a tuple containing a map with all the voters and the final decision imposed by the coordinator.
+
+Here too the epoch and the sequence are used as indices. In every cell beside the map, there is the final decision cast by the coordinator or a phoney value in case the node is still waiting for the decision to be cast. As in~\ref{subsec:pairshostory} the value of the decision can be either ``PENDING'', ``WRITEOK'' or ``ABORT''.

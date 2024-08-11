@@ -1,0 +1,30 @@
+\section{Crash system}
+
+Crashes can be induced at run-time, through the user interface, at specific points to observe how the system reacts and to ensure that it can recover or continue to operate despite failures. 
+
+The types of crashes that can be simulated include both node and coordinator crashes during different operational stages:
+\begin{itemize}
+    \item Normal node - Before receiving a new write request from a client
+    \item Normal node - After forwarding a new write request to a coordinator
+    \item Normal node - After receiving a vote request from the coordinator
+    \item Normal node - After casting the vote for a request
+    \item Normal node - Before the acknowledgement of an election message
+    \item  Normal node - After an election message is sent or forwarded
+    \item Coordinator node - During the multicast of a vote request
+    \item Coordinator node During the multicast of a decision response
+\end{itemize}
+
+
+To mimic a real crush, this system picks a client which will send the designated crush request to a random node. Then, if the node does not match the recipient it will forward the message to a compatible node. 
+\begin{center}
+    \begin{tabular}{|p{0.9\textwidth}|}
+        \hline
+        \textbf{E.g.}\\
+        If the user inserts a crush of type ``normal node'', and the client sends it to the coordinator, then the coordinator will forward it to a random node within the network.\\
+        \hline
+    \end{tabular} 
+\end{center}
+
+The node (or coordinator) that receives the crash message does not crash. Instead, it enters a virtual crash state where every message received is simply ignored; as by specification, a crashed node does not recover from its crashed state.
+
+The last two crush types are peculiar, they are probabilistic crushes. To create more realistic scenarios, and generate inconsistency among the nodes, the coordinator can crush only during the multicast of some messages. Every message that it sends during a multicast has a 20\% chance to make the coordinator crush.

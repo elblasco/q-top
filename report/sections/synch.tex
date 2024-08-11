@@ -1,0 +1,4 @@
+\section{Synchronisation}
+Once the new coordinator is chosen and therefore elected, a new Synchronisation message is multicasted; the message contains the coordinator's pairs history (which is the most updated node in the whole network).
+
+When a synchronisation message is received by a Node, the Node sets the reference to the new coordinator, it overwrites its history with the coordinator's history, and ends its election state. At the end of the synchronisation phase, the network undergoes a fresh restart that renews all the previous actor behaviours such as heartbeats, write requests, etc.

@@ -1,0 +1,31 @@
+\section{Election process}
+%Description of the election process. what messages are shared? How do we ensure it does not block or end in a loophole?
+
+\subsection{A node starts the election process}
+
+When certain events happen the nodes enter the state ``election state''. During this state, they handle only a subset of messages, in particular, the \textit{Election} and the \textit{ElectionAKC} messages. The election state can be triggered by a heartbeat or write timeout. Multiple nodes can enter the election state at the same time, in this scenario nothing unpredictable happens because the nodes always check if they are already in an election state via a boolean variable.
+
+\subsection{A node receives an election message}
+
+If a node enters the election state by a timeout, it means it has not yet received any \textit{Election}. The node crafts a new \textit{Election} message and sends it to the next node. The next node is computed by sequentially scanning the nodes within the group.
+
+If a node receives an \textit{Election} message while it is in a non-election state the flow is more complex:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{election.png}
+    \caption{Election flow}
+    \label{fig:election}
+\end{figure}
+
+In the case, a node does not receive, in time, an \textit{ElectionACK} it re-sends the \textit{Election} message to the following node. More in general a node sends the \textit{Election} message to the node with index:
+\begin{equation*}
+    \text{index} = (\text{nodeId} + x) \mod |\text{nodes}|
+\end{equation*}
+With \textit{x} the number of tries to send a specific \textit{Election} message.
+
+\subsection{Global Timeout}
+
+Once a node enters into the election state, it starts a countdown called ``global election countdown'', Every node has an instance of this countdown and serves as a safeguard in case, during the election process, multiple consecutive nodes crush. Once this countdown terminates, it self-fires a timeout to make every node restart the election process.
+
+In the worst-case scenario in every election round, this timeout is triggered. However, by restarting the election process we ensure an eventual election.
