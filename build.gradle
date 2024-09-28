@@ -1,17 +1,21 @@
-apply plugin: 'java'
-apply plugin: 'application'
+plugins {
+	id 'java'
+	id 'application'
+}
 
 group = 'it.unitn.disi.ds1.qtop'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
     mavenLocal()
 }
 
-def versions = [
+ext {
+    versions = [
         ScalaBinary: "2.13"
-]
+    ]
+}
 
 dependencies {
     implementation platform("com.typesafe.akka:akka-bom_${versions.ScalaBinary}:2.6.13")
@@ -20,11 +24,13 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.0.0'
 }
 
-compileJava {
+tasks.withType(JavaCompile) {
     options.compilerArgs += ["-Xlint:deprecation"]
 }
 
-mainClassName = "it.unitn.disi.ds1.qtop.QTop"
+application {
+	mainClassName = "it.unitn.disi.ds1.qtop.QTop"
+}
 
 run {
     standardInput = System.in
